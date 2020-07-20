@@ -1,4 +1,6 @@
-setwd("~/Box Sync/heatwaves/")
+ifelse(dir.exists("~/Box Sync/heatwave_covid"),
+       setwd("~/Box Sync/heatwave_covid"),
+       setwd("/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid"))
 
 library(ncdf4)
 library(dplyr)
@@ -11,10 +13,10 @@ library(lubridate)
 
 
 #get list of all precip data files
-gridMET_files <- list.files("gridMET", pattern = "*.nc", full.names = T)
+gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*.nc", full.names = T)
 
 #load in counties
-counties <- st_read("shapefiles/tl_2017_us_county.shp")
+counties <- st_read("../heatwaves_manual/shapefiles/tl_2017_us_county.shp")
 
 # Run through temperature brick and extract over the buffers
 all_data <- c()
@@ -22,8 +24,9 @@ all_data <- c()
 for(i in gridMET_files) {
   print(i)
   file <- brick(i)
+  crs(file) <- "+init=EPSG:4326"
   
-  
+   
   for(j in 1:length(names(file))) {
     temp <- c()
     nms <- as.numeric(substring(as.character(names(file[[j]])),2))
@@ -46,4 +49,10 @@ for(i in gridMET_files) {
 }
 
 #save this out to make my life easier
-saveRDS(all_data, paste0(getwd(), "calculated/temperature_data.rds"))
+saveRDS(all_data, paste0("./heatwaves_manual/first_temperature_data.rds"))
+
+## little extra work
+first <- readRDS("./heatwaves_manual/first_temperature_data.rds")
+second <- readRDS("./heatwaves_manual/temperature_data.rds")
+comb <- bind_rows(first, second)
+saveRDS(comb, paste0("./heatwaves_manual/all_temperature_data.rds"))
