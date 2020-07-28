@@ -37,7 +37,6 @@ pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 ## Quick function that takes data and plots all the variations we'd want
 plot_data <- function(data, plot_title) {
   
-  print(plot_title)
   par(mfcol = c(3,2))
   boots <- bootstrap_data(data, short=T, level=1)
   plot_regs(data, boots, plot_title, level = 1)
@@ -107,10 +106,10 @@ data <- na.omit(data)
 plot_title <- "Deaths per 10K + Zscore of Num Days w/high above 90th Percentile"
 plot_data(data, plot_title)
 
-## Per Capita Deaths, summer months, z score of num days where avg low  temp in county is above 90th percentile
+## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 90th percentile
 t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
   summarize(num_90 = sum(p_low >= 0.9)) %>%
-  mutate(z_score_low = (num_90 - mean(num_90)) / sd(num_90)) %>% 
+  mutate(z_score_high = (num_90 - mean(num_90)) / sd(num_90)) %>% 
   ungroup 
 
 data <- left_join(m, t_low, by = c("fips", "month", "year"))
