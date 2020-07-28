@@ -16,6 +16,11 @@ library(reshape2)
 t <- read_rds("./heatwaves_manual/all_temperature_data_clean.rds")
 m <- read_rds("./calculated/all_mortality.rds")
 
+#get the 300 counties with the highest populations
+m_pops <- m %>% group_by(fips) %>% summarise(population = mean(as.numeric(population_est))) %>% arrange(desc(population))
+m_pops <- m_pops[1:300,]
+m <- m %>% dplyr::filter(fips %in% m_pops$fips)
+
 ## Recalculate z-scores for just the summer months and add in percentile value
 t_zs <- t %>% group_by(fips, month) %>%
   dplyr::filter(between(month, 5, 9)) %>%
