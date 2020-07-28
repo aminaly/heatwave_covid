@@ -71,7 +71,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Num Days w/high above 90th Percentile"
+plot_title <- "Deaths per 100K + #Days high >90P"
 plot_data(data, plot_title)
 
 ## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
@@ -86,7 +86,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Num Days w/low above 90th Percentile"
+plot_title <- "Deaths per 100K + #Days low >90P"
 plot_data(data, plot_title)
 
 ## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 90th percentile
@@ -104,7 +104,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Zscore of Num Days w/high above 90th Percentile"
+plot_title <- "Deaths per 100K + Zscore #Days high >90P"
 plot_data(data, plot_title)
 
 ## Per Capita Deaths, summer months, z score of num days where avg low  temp in county is above 90th percentile
@@ -122,7 +122,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Zscore of Num days w/low above 90th Percentile"
+plot_title <- "Deaths per 100K + Zscore #Days low >90P"
 plot_data(data, plot_title)
 
 ### Same as above, but 95th percentile
@@ -138,7 +138,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Num Days w/high above 95th Percentile"
+plot_title <- "Deaths per 100K + #Days high >95P"
 plot_data(data, plot_title)
 
 ## Per Capita Deaths, summer months, num days where avg high temp in county is above 95th percentile
@@ -153,7 +153,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Num Days w/low above 95th Percentile"
+plot_title <- "Deaths per 100K + #Days low >95P"
 plot_data(data, plot_title)
 
 ## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 95th percentile
@@ -171,7 +171,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Zscore of Num Days w/high above 95th Percentile"
+plot_title <- "Deaths per 100K + Zscore #Days high >95P"
 plot_data(data, plot_title)
 
 ## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 95th percentile
@@ -189,7 +189,7 @@ data <- data %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-plot_title <- "Deaths per 10K + Zscore of Num Days w/Low above 95th Percentile"
+plot_title <- "Deaths per 100K + Zscore #Days low >95P"
 plot_data(data, plot_title)
 
 
