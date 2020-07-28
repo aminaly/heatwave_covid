@@ -34,10 +34,31 @@ pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 
 ####################
+## Quick function that takes data and plots all the variations we'd want
+plot_data <- function(data, plot_title) {
+  
+  par(mfcol = c(3,2))
+  boots <- bootstrap_data(data, short=T, level=1)
+  plot_regs(data, boots, plot_title, level = 1)
+  boots <- bootstrap_data(data, short=T, level=2)
+  plot_regs(data, boots, plot_title, level = 2)
+  boots <- bootstrap_data(data, short=T, level=3)
+  plot_regs(data, boots, plot_title, level = 3)
+  
+  data$deaths <- log(data$deaths)
+  boots <- bootstrap_data(data, short=T, level=1)
+  plot_regs(data, boots, plot_title, level = 1, ylabel = "Log Mortality")
+  boots <- bootstrap_data(data, short=T, level=2)
+  plot_regs(data, boots, plot_title, level = 2, ylabel = "Log Mortality")
+  boots <- bootstrap_data(data, short=T, level=3)
+  plot_regs(data, boots, plot_title, level = 3, ylabel = "Log Mortality")
+}
+
+####################
 ##For this set of regressions, we're going to do per capita deaths, regular and log mortality,
 ## and only summmer months
 
-## Per Capita Deaths, summer months, avg high temp in county, max high temp in month
+## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
 t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
   summarize(num_90 = sum(p_high >= 0.9))
   
@@ -46,26 +67,13 @@ data <- data %>%
   group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>% 
-  mutate(deaths = (deaths/as.numeric(population_est))*10000)
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-par(mfcol = c(3,2))
-boots <- bootstrap_data(data, short=T, level=1, name = "total_high_linear")
-plot_regs(data, boots, "Deaths per 10K + Num Days above 90th Percentile", level = 1)
-boots <- bootstrap_data(data, short=T, level=2, name = "total_high_quad")
-plot_regs(data, boots, "Deaths per 10K + Num Days above 90th Percentile", level = 2)
-boots <- bootstrap_data(data, short=T, level=3, name = "total_high_cub")
-plot_regs(data, boots, "Deaths per 10K + Num Days above 90th Percentile", level = 3)
+plot_title <- "Deaths per 10K + Num Days w/high above 90th Percentile"
+plot_data(data, plot_title)
 
-data$deaths <- log(data$deaths)
-boots <- bootstrap_data(data, short=T, level=1, name = "total_high_linear")
-plot_regs(data, boots, "Deaths per 10K + Num Days above 90th Percentile", level = 1, ylabel = "Log Mortality")
-boots <- bootstrap_data(data, short=T, level=2, name = "total_high_quad")
-plot_regs(data, boots, "Deaths per 10K + Num Days above 90th Percentile", level = 2, ylabel = "Log Mortality")
-boots <- bootstrap_data(data, short=T, level=3, name = "total_high_cub")
-plot_regs(data, boots, "Deaths per 10K + Num Days above 90th Percentile", level = 3, ylabel = "Log Mortality")
-
-## Per Capita Deaths, summer months, avg low temp in county, max high temp in month
+## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
 t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
   summarize(num_90 = sum(p_low >= 0.9))
 
@@ -74,31 +82,112 @@ data <- data %>%
   group_by(fips, measure = maximum_low_temp_in_month - 273.15, monthyear, county = county.x, income_group, population_est) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>%
-  mutate(deaths = (deaths/as.numeric(population_est))*10000)
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
 
-par(mfcol = c(3,2))
-boots <- bootstrap_data(data, short=T, level=1, name = "total_low_linear")
-plot_regs(data, boots, "Deaths per 10K + Max low in Month", level = 1)
-boots <- bootstrap_data(data, short=T, level=2, name = "total_low_quad")
-plot_regs(data, boots, "Deaths per 10K + Max low in Month", level = 2)
-boots <- bootstrap_data(data, short=T, level=3, name = "total_low_cub")
-plot_regs(data, boots, "Deaths per 10K + Max low in Month", level = 3)
+plot_title <- "Deaths per 10K + Num Days w/low above 90th Percentile"
+plot_data(data, plot_title)
 
-data$deaths <- log(data$deaths)
-boots <- bootstrap_data(data, short=T, level=1, name = "total_low_linear")
-plot_regs(data, boots, "Deaths per 10K + Max low in Month", level = 1, ylabel = "Log Mortality")
-boots <- bootstrap_data(data, short=T, level=2, name = "total_low_quad")
-plot_regs(data, boots, "Deaths per 10K + Max low in Month", level = 2, ylabel = "Log Mortality")
-boots <- bootstrap_data(data, short=T, level=3, name = "total_low_cub")
-plot_regs(data, boots, "Deaths per 10K + Max low in Month", level = 3, ylabel = "Log Mortality")
+## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 90th percentile
+t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
+  summarize(num_90 = sum(p_high >= 0.9)) %>%
+  group_by(fips, month) %>%
+  mutate(z_score_high = (num_90 - mean(num_90)) / sd(num_90)) %>% 
+  ungroup 
 
+data <- left_join(m, t_high, by = c("fips", "month", "year"))
+data <- data %>% 
+  group_by(fips, measure = z_score_high, monthyear, county = county.x, income_group, population_est) %>% 
+  summarise(deaths = sum(deaths, na.rm = T)) %>%
+  dplyr::filter(is.finite(measure)) %>% 
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
+data <- na.omit(data)
 
+plot_title <- "Deaths per 10K + Zscore of Num Days w/high above 90th Percentile"
+plot_data(data, plot_title)
 
+## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 90th percentile
+t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
+  summarize(num_90 = sum(p_low >= 0.9)) %>%
+  mutate(z_score_high = (num_90 - mean(num_90)) / sd(num_90)) %>% 
+  ungroup 
 
+data <- left_join(m, t_low, by = c("fips", "month", "year"))
+data <- data %>% 
+  group_by(fips, measure = z_score_low, monthyear, county = county.x, income_group, population_est) %>% 
+  summarise(deaths = sum(deaths, na.rm = T)) %>%
+  dplyr::filter(is.finite(measure)) %>%
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
+data <- na.omit(data)
 
+plot_title <- "Deaths per 10K + Zscore of Num days w/low above 90th Percentile"
+plot_data(data, plot_title)
 
+### Same as above, but 95th percentile
+## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
+t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
+  summarize(num_95 = sum(p_high >= 0.95))
 
+data <- left_join(m, t_high, by = c("fips", "month", "year"))
+data <- data %>% 
+  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est) %>% 
+  summarise(deaths = sum(deaths, na.rm = T)) %>%
+  dplyr::filter(is.finite(measure)) %>% 
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
+data <- na.omit(data)
+
+plot_title <- "Deaths per 10K + Num Days w/high above 95th Percentile"
+plot_data(data, plot_title)
+
+## Per Capita Deaths, summer months, num days where avg high temp in county is above 95th percentile
+t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
+  summarize(num_95 = sum(p_low >= 0.95))
+
+data <- left_join(m, t_low, by = c("fips", "month", "year"))
+data <- data %>% 
+  group_by(fips, measure = maximum_low_temp_in_month - 273.15, monthyear, county = county.x, income_group, population_est) %>% 
+  summarise(deaths = sum(deaths, na.rm = T)) %>%
+  dplyr::filter(is.finite(measure)) %>%
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
+data <- na.omit(data)
+
+plot_title <- "Deaths per 10K + Num Days w/low above 95th Percentile"
+plot_data(data, plot_title)
+
+## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 95th percentile
+t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
+  summarize(num_95 = sum(p_high >= 0.95)) %>%
+  group_by(fips, month) %>%
+  mutate(z_score_high = (num_95 - mean(num_95)) / sd(num_95)) %>% 
+  ungroup 
+
+data <- left_join(m, t_high, by = c("fips", "month", "year"))
+data <- data %>% 
+  group_by(fips, measure = z_score_high, monthyear, county = county.x, income_group, population_est) %>% 
+  summarise(deaths = sum(deaths, na.rm = T)) %>%
+  dplyr::filter(is.finite(measure)) %>% 
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
+data <- na.omit(data)
+
+plot_title <- "Deaths per 10K + Zscore of Num Days w/high above 95th Percentile"
+plot_data(data, plot_title)
+
+## Per Capita Deaths, summer months, z score of num days where avg high temp in county is above 95th percentile
+t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
+  summarize(num_95 = sum(p_low >= 0.9)) %>%
+  mutate(z_score_high = (num_95 - mean(num_95)) / sd(num_95)) %>% 
+  ungroup 
+
+data <- left_join(m, t_low, by = c("fips", "month", "year"))
+data <- data %>% 
+  group_by(fips, measure = z_score_low, monthyear, county = county.x, income_group, population_est) %>% 
+  summarise(deaths = sum(deaths, na.rm = T)) %>%
+  dplyr::filter(is.finite(measure)) %>%
+  mutate(deaths = (deaths/as.numeric(population_est))*100000)
+data <- na.omit(data)
+
+plot_title <- "Deaths per 10K + Zscore of Num Days w/Low above 95th Percentile"
+plot_data(data, plot_title)
 
 
 
