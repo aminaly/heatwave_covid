@@ -13,8 +13,8 @@ library(lubridate)
 library(reshape2)
 
 ##Read in datasets
-t <- read_rds("./heatwaves_manual/all_temperature_data_clean.rds")
-m <- read_rds("./calculated/all_mortality.rds")
+t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean.rds"))
+m <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
 
 #get the 300 counties with the highest populations
 m_pops <- m %>% group_by(fips) %>% summarise(population = mean(as.numeric(population_est))) %>% arrange(desc(population))
@@ -30,7 +30,7 @@ t_zs <- t %>% group_by(fips, month) %>%
   mutate(p_low = pnorm(z_score_low)) %>%
   ungroup
 
-pdf(paste0("visuals/regressions", Sys.Date(), ".pdf"))
+pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 
 ####################
