@@ -69,7 +69,6 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
   
   #save it out for the next run if name was provided
   returnlist <- list(coef)
-  if(name != "") {saveRDS(returnlist, paste0("./bootstraps/", name))}
   return(returnlist)
   
 }
