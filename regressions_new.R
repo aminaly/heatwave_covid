@@ -111,7 +111,7 @@ plot_data(data, plot_title)
 t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
   summarize(num_90 = sum(p_low >= 0.9)) %>%
   group_by(fips, month) %>%
-  mutate(z_score_high = (num_90 - mean(num_90)) / sd(num_90)) %>% 
+  mutate(z_score_low = (num_90 - mean(num_90)) / sd(num_90)) %>% 
   ungroup 
 
 data <- left_join(m, t_low, by = c("fips", "month", "year"))
