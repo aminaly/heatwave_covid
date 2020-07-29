@@ -22,7 +22,7 @@ m_pops <- m_pops[1:300,]
 m <- m %>% dplyr::filter(fips %in% m_pops$fips)
 
 ## Recalculate z-scores for just the summer months and add in percentile value
-t_zs <- t %>% group_by(fips, month) %>%
+t_zs <- t %>% group_by(fips, month, day) %>%
   dplyr::filter(between(month, 5, 9)) %>%
   mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
   mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
