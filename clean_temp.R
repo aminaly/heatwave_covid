@@ -25,13 +25,4 @@ t <- t %>% dplyr::select(date, county = county.x, fips,
 
 t$monthyear <- paste0(t$month, t$year)
 
-#Calculate a z-score based on avg high for each month
-t_zs <- t %>% group_by(fips, month) %>%
-  mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
-  mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
-  ungroup %>%
-  mutate(p_high = pnorm(z_score_high)) %>%
-  mutate(p_low = pnorm(z_score_low))
-
-
-saveRDS(t_zs, "./heatwaves_manual/all_temperature_data_clean.rds")
+saveRDS(t, "./heatwaves_manual/all_temperature_data_clean.rds")
