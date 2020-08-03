@@ -20,17 +20,17 @@ rep <- as.numeric(args[1])
 gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*.nc", full.names = T)
 
 #load in counties
-counties <- st_read("../heatwaves_manual/shapefiles/tl_2017_us_county.shp")
+counties <- st_read("heatwaves_manual/shapefiles/tl_2017_us_county.shp")
 
 # Run through temperature brick and extract over the buffers
 all_data <- c()
 
-i <- gridmet_files[rep]
+i <- gridMET_files[rep]
 
-print(1)
-file <- brick(i)
-crs(file) <- "+init=EPSG:4326"
-
+print(i)
+file <- stack(i)
+crs(file) <- CRS("+init=epsg:4326")
+print("I got here")
  
 for(j in 1:length(names(file))) {
   temp <- c()
@@ -39,7 +39,7 @@ for(j in 1:length(names(file))) {
   temp <- as.data.frame(temp)
   temp$county <- counties$NAME
   temp$fips <- counties$GEOID
-  temp$measure <- rep(substring(i, 9, 12), nrow(counties))
+  temp$measure <- rep(substring(i, 26, 29), nrow(counties))
   
   velox_obj <- velox(file[[j]])
   temp_measure <- velox_obj$extract(sp = counties$geometry, small = T)
@@ -53,5 +53,5 @@ for(j in 1:length(names(file))) {
   
 
 #save this out to make my life easier
-saveRDS(all_data, paste0("./heatwaves_manual/temps/", rep, "temperature_data.rds"))
+saveRDS(all_data, paste0("./heatwaves_manual/temps/", rep, "_temperature_data.rds"))
 

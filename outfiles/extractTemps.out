@@ -1,0 +1,10 @@
+[1] "/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid"
+Reading layer `tl_2017_us_county' from data source `/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/heatwaves_manual/shapefiles/tl_2017_us_county.shp' using driver `ESRI Shapefile'
+Simple feature collection with 3233 features and 17 fields
+geometry type:  MULTIPOLYGON
+dimension:      XY
+bbox:           xmin: -179.2311 ymin: -14.60181 xmax: 179.8597 ymax: 71.43979
+epsg (SRID):    4269
+proj4string:    +proj=longlat +datum=NAD83 +no_defs
+[1] "heatwaves_manual/gridMET/tmmx_2020.nc"
+[1] "I got here"
