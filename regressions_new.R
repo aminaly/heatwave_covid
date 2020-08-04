@@ -35,17 +35,18 @@ pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 
 ####################
 ## Quick function that takes data and plots all the variations we'd want
-par(mfcol = c(2,2))
-
 plot_data <- function(data, plot_title) {
   
+  par(mfcol = c(2,2))
   print(plot_title)
+  model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
-  plot_regs(data, boots, plot_title, level = 2, xlabel = "#Days @ or Above percentile")
+  plot_regs(data, boots, plot_title, level = 2, xlabel = "#Days @ or Above percentile", model=model)
   
   data$deaths <- log(data$deaths)
+  model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
-  plot_regs(data, boots, plot_title, level = 2,xlabel = "#Days @ or Above percentile", ylabel = "Log Mortality")
+  plot_regs(data, boots, plot_title, level = 2,xlabel = "#Days @ or Above percentile", ylabel = "Log Mortality", model = model)
 }
 
 ####################

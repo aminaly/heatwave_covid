@@ -75,7 +75,7 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
 
 
 #Function to output a plot with the regression and 95% confidence interval
-plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", ylabel = "Mortality") {
+plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", ylabel = "Mortality", model) {
   
   coefs <- coefs[[1]]
   max_val <- max(data$measure, na.rm = T)
@@ -109,9 +109,23 @@ plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", yla
   
   
   #plot median estimate among the bootstraps
-  plot(x, confint[2,], type = "l", las=1,xlab=xlabel,ylab=ylabel, col="navy", main=paste(title))   
+  plot(x, confint[2,], type = "l", las=1,xlab=xlabel,ylab=ylabel,
+       ylim = c(min(confint[1,]), max(confint[3,])), col="navy", main=title)   
   #plot confidence intervals
   polygon(c(x,rev(x)),c(confint[1,],rev(confint[3,])),col=adjustcolor("navy", alpha=.3),border = NA)
   rug(data$measure, side = 1, col=adjustcolor("black", alpha = 0.05))
+  
+  #Get the R^2, p-val, and AIC value
+  r <- summary(model)$r.squared
+  pval <- summary(model)$coefficients[,4]
+  aic <- AIC(model)
+  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
+       main = title)
+  text(x = 0.5, y = 0.5, paste(title, 
+                               "\n R^2 =", round(r, 3), 
+                               "\n pvals =", round(pval[1],3), 
+                               ",", round(pval[2],3),
+                               "\n AIC =", round(aic,3)), 
+       cex = 1.6, col = "black")
   
 }
