@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=extractTemps
 #SBATCH --nodes=1
-#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/combine_temp.err
-#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/combine_temp.out
+#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/combine_temp.err
+#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/combine_temp.out
 #SBATCH --time=10:00:00
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=64GB

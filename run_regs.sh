@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=runRegs
-#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/runRegs.err
-#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/runRegs.out
+#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runRegs.err
+#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runRegs.out
 #SBATCH --nodes=1
 #SBATCH --time=23:00:00
 #SBATCH --ntasks-per-node=1

@@ -2,8 +2,8 @@
 #SBATCH --job-name=extractTemps
 #SBATCH --nodes=1
 #SBATCH --array=1-84
-#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/extractTemps.err
-#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/extractTemps.out
+#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/extractTemps.err
+#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/extractTemps.out
 #SBATCH --time=48:00:00
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=90GB
