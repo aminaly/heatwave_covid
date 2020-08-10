@@ -126,6 +126,6 @@ plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", yla
                                "\n pvals =", round(pval[1],3), 
                                ",", round(pval[2],3),
                                "\n AIC =", round(aic,3)), 
-       cex = 1.6, col = "black")
+       cex = .75, col = "black")
   
 }
