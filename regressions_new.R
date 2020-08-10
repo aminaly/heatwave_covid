@@ -20,6 +20,7 @@ m <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
 m_pops <- m %>% group_by(fips) %>% summarise(population = mean(as.numeric(population_est))) %>% arrange(desc(population))
 m_pops <- m_pops[1:300,]
 m <- m %>% dplyr::filter(fips %in% m_pops$fips)
+m$state <- str_sub(m$county, -2)
 
 pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
@@ -27,6 +28,10 @@ pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 ####################
 ## Quick function that takes data and plots all the variations we'd want
 plot_data <- function(data, plot_title) {
+  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
+       main = title)
+  text(x = 0.5, y = 0.5, paste(timestamp()), 
+       cex = 1.5, col = "black")
   
   par(mfcol = c(2,2))
   print(plot_title)
@@ -44,7 +49,7 @@ plot_data <- function(data, plot_title) {
 ##For this set of regressions, we're going to do per capita deaths, regular and log mortality,
 ## and only summmer months
 ## Recalculate z-scores for just the summer months and add in percentile value
-t_zs <- t %>% group_by(fips, month) %>%
+t_zs <- t %>% group_by(fips, year) %>%
   mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
   mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
   mutate(p_high = pnorm(z_score_high)) %>%
@@ -117,7 +122,7 @@ plot_data(data, plot_title)
 ## and only summmer months
 
 ## Recalculate z-scores for just the summer months and add in percentile value
-t_zs <- t %>% group_by(fips, month) %>%
+t_zs <- t %>% group_by(fips, year) %>%
   dplyr::filter(between(month, 5, 9)) %>%
   mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
   mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 

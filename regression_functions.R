@@ -31,7 +31,8 @@ fe_model <- function(dta, level, interact=F) {
     } else if (level == "log") {
       mod <- felm(deaths ~ log(measure) | fips + monthyear, data=dta )
     } else if (level > 1) {
-      mod <- felm(deaths ~ poly(measure,level,raw=T) | fips + monthyear, data=dta)
+      mod <- felm(deaths ~ poly(measure,level,raw=T) + 
+                    as.factor(state)*year | fips + monthyear | 0 | fips + stateyear, data=dta)
     }
   #}
   
