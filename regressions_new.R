@@ -11,6 +11,7 @@ library(dotwhisker)
 library(tidyverse)
 library(lubridate)
 library(reshape2)
+library(stringr)
 
 ##Read in datasets
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean.rds"))
@@ -62,7 +63,7 @@ t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
 
 data <- left_join(m, t_high, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>% 
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
@@ -77,7 +78,7 @@ t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
 
 data <- left_join(m, t_low, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
@@ -93,7 +94,7 @@ t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
 
 data <- left_join(m, t_high, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>% 
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
@@ -108,7 +109,7 @@ t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
 
 data <- left_join(m, t_low, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
@@ -136,7 +137,7 @@ t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
   
 data <- left_join(m, t_high, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>% 
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
@@ -151,7 +152,7 @@ t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
 
 data <- left_join(m, t_low, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_90, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
@@ -167,7 +168,7 @@ t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
 
 data <- left_join(m, t_high, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>% 
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
@@ -182,7 +183,7 @@ t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
 
 data <- left_join(m, t_low, by = c("fips", "month", "year"))
 data <- data %>% 
-  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est) %>% 
+  group_by(fips, measure = num_95, monthyear, county = county.x, income_group, population_est, state, year) %>% 
   summarise(deaths = sum(deaths, na.rm = T)) %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
