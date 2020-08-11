@@ -84,7 +84,7 @@ data <- data %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
-dta$stateyear <- paste0(dta$state, dta$year)
+data$stateyear <- paste0(data$state, data$year)
 
 plot_title <- "Deaths per 100K + #Days low >90P"
 plot_data(data, plot_title)
@@ -101,7 +101,7 @@ data <- data %>%
   dplyr::filter(is.finite(measure)) %>% 
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
-dta$stateyear <- paste0(dta$state, dta$year)
+data$stateyear <- paste0(data$state, data$year)
 
 plot_title <- "Deaths per 100K + #Days high >95P"
 plot_data(data, plot_title)
@@ -117,7 +117,7 @@ data <- data %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
-dta$stateyear <- paste0(dta$state, dta$year)
+data$stateyear <- paste0(data$state, data$year)
 
 plot_title <- "Deaths per 100K + #Days low >95P"
 plot_data(data, plot_title)
@@ -146,7 +146,7 @@ data <- data %>%
   dplyr::filter(is.finite(measure)) %>% 
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
-dta$stateyear <- paste0(dta$state, dta$year)
+data$stateyear <- paste0(data$state, data$year)
 
 plot_title <- "Deaths per 100K + #Days high >90P 05-09"
 plot_data(data, plot_title)
@@ -162,7 +162,7 @@ data <- data %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
-dta$stateyear <- paste0(dta$state, dta$year)
+data$stateyear <- paste0(data$state, data$year)
 
 plot_title <- "Deaths per 100K + #Days low >90P 05-09"
 plot_data(data, plot_title)
@@ -179,7 +179,7 @@ data <- data %>%
   dplyr::filter(is.finite(measure)) %>% 
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
-dta$stateyear <- paste0(dta$state, dta$year)
+data$stateyear <- paste0(data$state, data$year)
 
 plot_title <- "Deaths per 100K + #Days high >95P 05-09"
 plot_data(data, plot_title)
@@ -195,7 +195,7 @@ data <- data %>%
   dplyr::filter(is.finite(measure)) %>%
   mutate(deaths = (deaths/as.numeric(population_est))*100000)
 data <- na.omit(data)
-dta$stateyear <- paste0(dta$state, dta$year)
+data$stateyear <- paste0(data$state, data$year)
 
 plot_title <- "Deaths per 100K + #Days low >95P 05-09"
 plot_data(data, plot_title)
