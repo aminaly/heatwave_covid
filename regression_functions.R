@@ -16,7 +16,6 @@ library(reshape2)
 fe_model <- function(dta, level, interact=F) {
   
   dta <- na.omit(dta, cols=c("measure", "deaths"))
-  dta$stateyear <- paste0(dta$state, dta$year)
   # if(interact) {
   #   if (level == 1) {
   #     mod <- felm(deaths ~ measure + measure:income_group | fips + monthyear, data=dta)
