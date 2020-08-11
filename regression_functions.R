@@ -62,7 +62,7 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
     #estimate our regression y = b1*T + err
     model <- fe_model(newdata, level, interact)
     #extract the coefficient estimates of b1 and b2 and store them in the matrix we made above
-    coef[i,] <- coef(model) 
+    if(level == "log") {coef[i,] <- coef(model)[1]} else {coef[i,] <- coef(model)[1:level]}
     print(i)  #print this out so you can watch progress 
     i <- i+1
   }
