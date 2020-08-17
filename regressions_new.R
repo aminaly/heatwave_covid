@@ -25,14 +25,14 @@ m$state <- str_sub(m$county, -2)
 
 pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
+plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
+       main = title)
+  text(x = 0.5, y = 0.5, paste(timestamp()),
+       cex = 1.5, col = "black")
 
 ####################
 ## Quick function that takes data and plots all the variations we'd want
 plot_data <- function(data, plot_title) {
-  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
-       main = title)
-  text(x = 0.5, y = 0.5, paste(timestamp()), 
-       cex = 1.5, col = "black")
   
   par(mfcol = c(2,2))
   print(plot_title)

@@ -1,4 +1,4 @@
-/var/spool/slurmd/job5624725/slurm_script: line 13: rasters_ml: command not found
+/var/spool/slurmd/job5647368/slurm_script: line 13: rasters_ml: command not found
 
 Attaching package: ‘dplyr’
 
@@ -38,16 +38,25 @@ The following object is masked from ‘package:tidyr’:
 `summarise()` ungrouping output (override with `.groups` argument)
 `summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
 `summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
-Error in coef[i, ] <- coef(model) : 
-  number of items to replace is not a multiple of replacement length
-Calls: plot_data -> bootstrap_data
-In addition: Warning messages:
-1: In chol.default(mat, pivot = TRUE, tol = tol) :
-  the matrix is either rank-deficient or indefinite
-2: In newols(mm, nostats = nostats[1], exactDOF = exactDOF, onlyse = onlyse,  :
-  Negative eigenvalues set to zero in multiway clustered variance matrix. See felm(...,psdef=FALSE)
-3: In chol.default(mat, pivot = TRUE, tol = tol) :
-  the matrix is either rank-deficient or indefinite
-4: In newols(mm, nostats = nostats[1], exactDOF = exactDOF, onlyse = onlyse,  :
-  Negative eigenvalues set to zero in multiway clustered variance matrix. See felm(...,psdef=FALSE)
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
+`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
+`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
+`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
+`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
+`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
+`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
+`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'population_est', 'state' (override with `.groups` argument)
+There were 50 or more warnings (use warnings() to see the first 50)
