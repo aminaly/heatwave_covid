@@ -81,6 +81,11 @@ for(region in unique(m_master$region)) {
   plot_title <- paste0("Deaths per 100K + #Days high >90P", region)
   plot_data(data, plot_title)
   
+}
+
+for(region in unique(m_master$region)) {
+  
+  m <- m_master %>% dplyr::filter(region == region)
   ## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
   t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
     summarize(num_90 = sum(p_low >= 0.9))
@@ -96,8 +101,12 @@ for(region in unique(m_master$region)) {
   
   plot_title <- paste0("Deaths per 100K + #Days low >90P", region)
   plot_data(data, plot_title)
-  
+}
+
   ### Same as above, but 95th percentile
+for(region in unique(m_master$region)) {
+  
+  m <- m_master %>% dplyr::filter(region == region)
   ## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
   t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
     summarize(num_95 = sum(p_high >= 0.95))
@@ -113,7 +122,11 @@ for(region in unique(m_master$region)) {
   
   plot_title <- paste0("Deaths per 100K + #Days high >95P", region)
   plot_data(data, plot_title)
+}
+
+for(region in unique(m_master$region)) {
   
+  m <- m_master %>% dplyr::filter(region == region)
   ## Per Capita Deaths, summer months, num days where avg high temp in county is above 95th percentile
   t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
     summarize(num_95 = sum(p_low >= 0.95))
@@ -129,11 +142,13 @@ for(region in unique(m_master$region)) {
   
   plot_title <- paste0("Deaths per 100K + #Days low >95P", region)
   plot_data(data, plot_title)
-  
+}
   ####################
   ##For this set of regressions, we're going to do per capita deaths, regular and log mortality,
   ## and only summmer months
+for(region in unique(m_master$region)) {
   
+  m <- m_master %>% dplyr::filter(region == region)  
   ## Recalculate z-scores for just the summer months and add in percentile value
   t_zs <- t %>% group_by(fips, year) %>%
     dplyr::filter(between(month, 5, 9)) %>%
@@ -158,7 +173,11 @@ for(region in unique(m_master$region)) {
   
   plot_title <- paste0("Deaths per 100K + #Days high >90P 05-09", region)
   plot_data(data, plot_title)
+}
+
+for(region in unique(m_master$region)) {
   
+  m <- m_master %>% dplyr::filter(region == region)
   ## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
   t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
     summarize(num_90 = sum(p_low >= 0.9))
@@ -174,9 +193,12 @@ for(region in unique(m_master$region)) {
   
   plot_title <- paste0("Deaths per 100K + #Days low >90P 05-09", region)
   plot_data(data, plot_title)
-  
+}
   ### Same as above, but 95th percentile
   ## Per Capita Deaths, summer months, num days where avg high temp in county is above 90th percentile
+for(region in unique(m_master$region)) {
+  
+  m <- m_master %>% dplyr::filter(region == region)
   t_high <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
     summarize(num_95 = sum(p_high >= 0.95))
   
@@ -191,8 +213,12 @@ for(region in unique(m_master$region)) {
   
   plot_title <- paste0("Deaths per 100K + #Days high >95P 05-09", region)
   plot_data(data, plot_title)
-  
+}
+
   ## Per Capita Deaths, summer months, num days where avg high temp in county is above 95th percentile
+for(region in unique(m_master$region)) {
+  
+  m <- m_master %>% dplyr::filter(region == region) 
   t_low <- t_zs %>% group_by(county, fips, month, year, monthyear) %>%
     summarize(num_95 = sum(p_low >= 0.95))
   
