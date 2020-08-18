@@ -24,6 +24,7 @@ m_pops <- m_pops[1:300,]
 m_master <- m_master %>% dplyr::filter(fips %in% m_pops$fips)
 m_master$state <- str_sub(m_master$county, -2)
 m_master <- left_join(m_master, r, by= "state")
+m_master <- m_master %>% filter(!is.na(region))
 
 pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
