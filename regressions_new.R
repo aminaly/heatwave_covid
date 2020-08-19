@@ -79,7 +79,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days high >90P \n ", region)
+  plot_title <- paste0("Deaths per 100K + #Days high >90P \n ", r)
   plot_data(data, plot_title)
   
 }
@@ -100,7 +100,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days low >90P \n ", region)
+  plot_title <- paste0("Deaths per 100K + #Days low >90P \n ", r)
   plot_data(data, plot_title)
 }
 
@@ -121,7 +121,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days high >95P \n ", region)
+  plot_title <- paste0("Deaths per 100K + #Days high >95P \n ", r)
   plot_data(data, plot_title)
 }
 
@@ -141,7 +141,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days low >95P \n ", region)
+  plot_title <- paste0("Deaths per 100K + #Days low >95P \n ", r)
   plot_data(data, plot_title)
 }
   ####################
@@ -172,7 +172,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days high >90P \n 05-09 ", region)
+  plot_title <- paste0("Deaths per 100K + #Days high >90P \n 05-09 ", r)
   plot_data(data, plot_title)
 }
 
@@ -192,7 +192,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days low >90P \n 05-09 ", region)
+  plot_title <- paste0("Deaths per 100K + #Days low >90P \n 05-09 ", r)
   plot_data(data, plot_title)
 }
   ### Same as above, but 95th percentile
@@ -212,7 +212,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days high >95P \n 05-09 ", region)
+  plot_title <- paste0("Deaths per 100K + #Days high >95P \n 05-09 ", r)
   plot_data(data, plot_title)
 }
 
@@ -232,7 +232,7 @@ for(r in unique(m_master$region)) {
   data <- na.omit(data)
   data$stateyear <- paste0(data$state, data$year)
   
-  plot_title <- paste0("Deaths per 100K + #Days low >95P \n 05-09 ", region)
+  plot_title <- paste0("Deaths per 100K + #Days low >95P \n 05-09 ", r)
   plot_data(data, plot_title)
   
 }
