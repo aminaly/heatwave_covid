@@ -16,14 +16,14 @@ library(stringr)
 ##Read in datasets
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean.rds"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
-r <- read_csv(paste0(getwd(), "/us census/climate_regions.csv"))
+r_master <- read_csv(paste0(getwd(), "/us census/climate_regions.csv"))
 
 #get the 300 counties with the highest populations
 m_pops <- m_master %>% group_by(fips) %>% summarise(population = mean(as.numeric(population_est))) %>% arrange(desc(population))
-m_pops <- m_pops[1:300,]
-m_master <- m_master %>% dplyr::filter(fips %in% m_pops$fips)
+#m_pops <- m_pops[1:300,]
+#m_master <- m_master %>% dplyr::filter(fips %in% m_pops$fips)
 m_master$state <- str_sub(m_master$county, -2)
-m_master <- left_join(m_master, r, by= "state")
+m_master <- left_join(m_master, r_master, by= "state")
 m_master <- m_master %>% filter(!is.na(region))
 
 pdf(paste0("heatwaves_manual/visuals/regressions", Sys.Date(), ".pdf"))
