@@ -1,49 +1,49 @@
-region,state,region_num
-Central,IL,1
-Central,IN,1
-Central,KY,1
-Central,MO,1
-Central,OH,1
-Central,TN,1
-Central,WV,1
-East North Central,IA,2
-East North Central,MI,2
-East North Central,MN,2
-East North Central,WI,2
-Northeast,CT,3
-Northeast,DE,3
-Northeast,ME,3
-Northeast,MD,3
-Northeast,MA,3
-Northeast,NH,3
-Northeast,NJ,3
-Northeast,NY,3
-Northeast,PA,3
-Northeast,RI,3
-Northeast,VT,3
-Northwest,ID,4
-Northwest,OR,4
-Northwest,WA,4
-South,AR,5
-South,KS,5
-South,LA,5
-South,MS,5
-South,OK,5
-South,TX,5
-Southeast,AL,6
-Southeast,FL,6
-Southeast,GA,6
-Southeast,NC,6
-Southeast,SC,6
-Southeast,VA,6
-West,CA,7
-West,NV,7
-West North Central,MT,8
-West North Central,NE,8
-West North Central,ND,8
-West North Central,SD,8
-West North Central,WY,8
-Southwest,AZ,9
-Southwest,CO,9
-Southwest,NM,9
-Southwest,UT,9
+region,state,region_num,region_s,region_s_num
+Central,IL,1,Central,1
+Central,IN,1,Central,1
+Central,KY,1,Central,1
+Central,MO,1,Central,1
+Central,OH,1,Central,1
+Central,TN,1,Central,1
+Central,WV,1,Central,1
+East North Central,IA,2,Central,1
+East North Central,MI,2,Central,1
+East North Central,MN,2,Central,1
+East North Central,WI,2,Central,1
+Northeast,CT,3,Northeast,2
+Northeast,DE,3,Northeast,2
+Northeast,ME,3,Northeast,2
+Northeast,MD,3,Northeast,2
+Northeast,MA,3,Northeast,2
+Northeast,NH,3,Northeast,2
+Northeast,NJ,3,Northeast,2
+Northeast,NY,3,Northeast,2
+Northeast,PA,3,Northeast,2
+Northeast,RI,3,Northeast,2
+Northeast,VT,3,Northeast,2
+Northwest,ID,4,Northwest,3
+Northwest,OR,4,Northwest,3
+Northwest,WA,4,Northwest,3
+South,AR,5,South,4
+South,KS,5,South,4
+South,LA,5,South,4
+South,MS,5,South,4
+South,OK,5,South,4
+South,TX,5,South,4
+Southeast,AL,6,South,4
+Southeast,FL,6,South,4
+Southeast,GA,6,South,4
+Southeast,NC,6,South,4
+Southeast,SC,6,South,4
+Southeast,VA,6,South,4
+West,CA,7,West,5
+West,NV,7,West,5
+West North Central,MT,8,Northwest,3
+West North Central,NE,8,Northwest,3
+West North Central,ND,8,Northwest,3
+West North Central,SD,8,Northwest,3
+West North Central,WY,8,Northwest,3
+Southwest,AZ,9,West,5
+Southwest,CO,9,West,5
+Southwest,NM,9,West,5
+Southwest,UT,9,West,5

@@ -9,6 +9,9 @@ library(dotwhisker)
 library(tidyverse)
 library(lubridate)
 library(reshape2)
+library(sjPlot)
+library(sjmisc)
+library(ggplot2)
 
 ####Functions####
 # Dta is the data
@@ -26,12 +29,12 @@ fe_model <- function(dta, level, interact=F) {
   #   }
   # } else {
     if (level == 1) {
-      mod <- felm(deaths ~ measure | fips + monthyear, data=dta)
+      mod <- felm(deaths ~ measure:as.factor(region) | fips + monthyear, data=dta)
     } else if (level == "log") {
       mod <- felm(deaths ~ log(measure) | fips + monthyear, data=dta )
     } else if (level > 1) {
       mod <- felm(deaths ~ poly(measure,level,raw=T) + 
-                    as.factor(state)*year + measure * region | fips + monthyear | 0 | fips + stateyear, data=dta)
+                    as.factor(state)*year | fips + monthyear | 0 | fips + stateyear, data=dta)
     }
   #}
   
@@ -114,6 +117,65 @@ plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", yla
   #plot confidence intervals
   polygon(c(x,rev(x)),c(confint[1,],rev(confint[3,])),col=adjustcolor("navy", alpha=.3),border = NA)
   rug(data$measure, side = 1, col=adjustcolor("black", alpha = 0.05))
+  
+  #Get the R^2, p-val, and AIC value
+  r <- summary(model)$r.squared
+  pval <- summary(model)$coefficients[,4]
+  aic <- AIC(model)
+  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
+       main = title)
+  text(x = 0.5, y = 0.5, paste(title, 
+                               "\n R^2 =", round(r, 3), 
+                               "\n pvals =", round(pval[1],3), 
+                               ",", round(pval[2],3),
+                               "\n AIC =", round(aic,3)), 
+       cex = .75, col = "black")
+  
+}
+
+plot_regional <- function(data, coefs, title, level, xlabel = "Temperature (C)", ylabel = "Mortality", model) {
+  
+  
+  #Plot with interaction using plot_model 
+  cols <- c("coral2", "cornsilk4", "darkolivegreen", "deepskyblue3", "brown2")
+  regions <- unique(data$region)
+  region_coefs <- model$coefficients[91:94]
+  
+  coefs <- coefs[[1]]
+  max_val <- max(data$measure, na.rm = T)
+  min_val <- min(data$measure, na.rm = T)
+  x = min_val:max_val 
+  y_max <- 0
+  
+  ##go through and plot for each region
+  for(r_coef in region_coefs) {
+    bts <- matrix(nrow=100,ncol=length(x))
+    
+    #get all my y values
+    for (j in 1:100) {
+      yy <- x*coefs[j,1] + x^2*coefs[j,2] + x*r_coef  
+      yy <- yy - yy[x=1]
+      bts[j,] <- yy 
+     }
+      
+    #figure out the 95 and 5 percentiles of the bootstraps
+    confint <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
+    
+    #plot median estimate among the bootstraps
+    if(r_coef == region_coefs[1]) {
+      plot(x, confint[2,], type = "l", las=1,xlab=xlabel,ylab=ylabel,
+           ylim = c(min(confint[1,]), max(confint[3,])), col="navy", main=title)
+      y_max <- max(confint[3,])
+    } else {
+      lines(x, confint[2,], type = "l", las=1,xlab=xlabel,ylab=ylabel,
+           ylim = c(min(confint[1,]), max(confint[3,])), col="navy", main=title)  
+      y_max <- max(confint[3,])
+    }
+    #plot confidence intervals
+    polygon(c(x,rev(x)),c(confint[1,],rev(confint[3,])),col=adjustcolor("navy", alpha=.3),border = NA)
+  }
+  
+  legend(1, y_max, legend = c("Northeast", "Northwest", "South", "West"), col = cols, cex = .5)
   
   #Get the R^2, p-val, and AIC value
   r <- summary(model)$r.squared
