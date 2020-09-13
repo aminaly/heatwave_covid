@@ -9,9 +9,6 @@ library(dotwhisker)
 library(tidyverse)
 library(lubridate)
 library(reshape2)
-library(sjPlot)
-library(sjmisc)
-library(ggplot2)
 
 ####Functions####
 # Dta is the data
