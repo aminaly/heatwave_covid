@@ -19,7 +19,7 @@ m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
 r_master <- read_csv(paste0(getwd(), "/us census/climate_regions.csv"))
 
 #filter for states with heatwaves in 2020
-heat_states <- c("OR", "CA", "NV", "AZ", "NM")
+heat_states <- c("OR", "CA", "NV", "AZ", "NM", "UT", "TX", "CO")
 m_master$state <- str_sub(m_master$county, -2)
 m_master <- left_join(m_master, r_master, by= "state")
 m_master <- m_master %>% dplyr::filter(state %in% heat_states) 
