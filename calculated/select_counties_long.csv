@@ -1,0 +1,29 @@
+County ,Year,Mortality,Source
+San Diego County,2020,2260,Non_COVID
+Santa Clara County,2020,1067,Non_COVID
+LA County,2020,7264,Non_COVID
+Washoe,2020,464,Non_COVID
+Clark,2020,2294,Non_COVID
+Maricopa,2020,4668,Non_COVID
+Pima,2020,1240,Non_COVID
+San Diego County,2020,172,COVID
+Santa Clara County,2020,64,COVID
+LA County,2020,1180,COVID
+Washoe,2020,38,COVID
+Clark,2020,450,COVID
+Maricopa,2020,970,COVID
+Pima,2020,158,COVID
+San Diego County,2001-18,1607.222,Non_COVID
+Santa Clara County,2001-18,709.111,Non_COVID
+LA County,2001-18,4732.166,Non_COVID
+Washoe,2001-18,257.444,Non_COVID
+Clark,2001-18,1098.111,Non_COVID
+Maricopa,2001-18,2114.777,Non_COVID
+Pima,2001-18,651.111,Non_COVID
+San Diego County,2018,1703,Non_COVID
+Santa Clara County,2018,817,Non_COVID
+LA County,2018,4936,Non_COVID
+Washoe,2018,276,Non_COVID
+Clark,2018,1407,Non_COVID
+Maricopa,2018,2600,Non_COVID
+Pima,2018,773,Non_COVID

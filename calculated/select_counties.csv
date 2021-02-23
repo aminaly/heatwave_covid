@@ -1,0 +1,8 @@
+County ,Major City,FIPS,Deaths Covid 8-2,All Deaths 8-2,Deaths Covid 9-5,All Deaths 9-5,aug_deaths,non_covid_deaths,avg_deaths_aug,covid_deaths,2018_deaths
+San Diego County,San Diego,6073,667,12305,839,14565,2260,2088,1607.222,172,1703
+Santa Clara County,Santa Clara,6085,178,5811,242,6878,1067,1003,709.111,64,817
+Los Angeles County,Los Angeles,6037,3989,38112,5169,45376,7264,6084,4732.166,1180,4936
+Washoe,Reno,32031,109,2491,147,2955,464,426,257.444,38,276
+Clark,Las Vegas,32003,595,9818,1045,12112,2294,1844,1098.111,450,1407
+Maricopa,Phoenix,4013,2112,21943,3082,26611,4668,3698,2114.777,970,2600
+Pima,Tucson,4019,533,6468,691,7708,1240,1082,651.111,158,773

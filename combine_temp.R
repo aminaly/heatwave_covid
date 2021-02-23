@@ -10,4 +10,4 @@ for(file in all_files) {
 
 }
 
-saveRDS(combined, "heatwaves_manual/all_temp_data_long.RDS")
+saveRDS(combined, "heatwaves_manual/all_temp_data_long_Feb_2021.RDS")

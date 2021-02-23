@@ -2,3 +2,6 @@
 heatwaves_manual
 .RData
 .RDataTmp
+.RDataTmp1
+.RDataTmp2
+.Rhistory
