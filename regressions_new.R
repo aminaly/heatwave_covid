@@ -29,19 +29,19 @@ regions <- "West"
 
 #get counties with over 50,000 people 
 m_pops <- m_master %>% group_by(fips) %>% summarise(population = mean(as.numeric(population_est))) %>% arrange(desc(population))
-m_pops <- m_pops %>% dplyr::filter(population >= 50000)
+m_pops <- m_pops %>% dplyr::filter(population >= 20000)
 m_master <- m_master %>% dplyr::filter(fips %in% m_pops$fips)
 m_master <- m_master %>% filter(!is.na(region_s))
 # we want to subtract a month to all of these so that when the data are combined, there is a 1 month mortality lag
 m_master <- m_master %>% mutate(month = month - 1) %>% mutate(year = ifelse(month == 0, year - 1, year)) %>% 
   mutate(month = ifelse(month == 0,12, month)) %>%
-  dplyr::filter(poverty_group >= 9)
+#  dplyr::filter(poverty_group >= 9)
 
 pdf(paste0("./visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
        main = title)
-  text(x = 0.5, y = 0.5, paste(timestamp(), "Lowest 20% Income"),
+  text(x = 0.5, y = 0.5, paste(timestamp(), "West Coast Only - No Income"),
        cex = 1.5, col = "black")
 
 ####################
