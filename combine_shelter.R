@@ -19,6 +19,7 @@ for(file in all_files) {
   
 }
 
+combined$fips <- str_sub(combined$origin_census_block_group, 1,5)
 sheltering <- combined %>% group_by(fips, date_range_start) %>% 
   summarise(home_device = sum(completely_home_device_count, na.rm = T), 
             all_devices = sum(device_count, na.rm = T))

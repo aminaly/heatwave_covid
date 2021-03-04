@@ -63,10 +63,11 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
     model <- fe_model(newdata, level, interact)
     #extract the coefficient estimates of b1 and b2 and store them in the matrix we made above
     if(level == "log") {coef[i,] <- coef(model)[1]} else {coef[i,] <- coef(model)[1:level]}
-    print(i)  #print this out so you can watch progress 
+    #print(i)  #print this out so you can watch progress 
     i <- i+1
   }
-  
+  #bootstrapped
+  print("bootstrapped")
   #save it out for the next run if name was provided
   returnlist <- list(coef)
   return(returnlist)
@@ -135,7 +136,7 @@ plot_regional <- function(data, coefs, title, level, xlabel = "Temperature (C)",
   
   #Plot with interaction using plot_model 
   cols <- c("coral2", "cornsilk4", "darkolivegreen", "deepskyblue3", "brown2")
-  regions <- unique(data$region)
+  regions <- unique(data$region_s)
   region_coefs <- model$coefficients[91:94]
   
   coefs <- coefs[[1]]
