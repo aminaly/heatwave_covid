@@ -1,4 +1,4 @@
-/var/spool/slurmd/job19386034/slurm_script: line 13: rasters_ml: command not found
+/var/spool/slurmd/job19558522/slurm_script: line 13: rasters_ml: command not found
 
 Attaching package: ‘dplyr’
 
@@ -44,27 +44,11 @@ cols(
   region_s_num = col_double()
 )
 `summarise()` ungrouping output (override with `.groups` argument)
+Warning message:
+‘mode(width)’ differs between new and previous
+	 ==> NOT changing ‘width’ 
 `summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
-`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
-`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
-`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
-`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
-`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
-`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
-`summarise()` regrouping output by 'county', 'fips', 'month', 'year' (override with `.groups` argument)
-`summarise()` regrouping output by 'fips', 'measure', 'monthyear', 'county', 'income_group', 'poverty_group', 'population_est', 'state', 'year' (override with `.groups` argument)
-There were 50 or more warnings (use warnings() to see the first 50)
+Error in UseMethod("left_join") : 
+  no applicable method for 'left_join' applied to an object of class "NULL"
+Calls: left_join
+Execution halted

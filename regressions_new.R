@@ -16,7 +16,7 @@ library(stringr)
 ##Read in datasets
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
-r_master <- read_csv(paste0(getwd(), "/us census/climate_regions.csv"))
+r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 
 #filter for states with heatwaves in 2020
 #heat_states <- c("OR", "CA", "NV", "AZ", "NM", "UT", "TX", "CO")
