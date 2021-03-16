@@ -13,7 +13,14 @@ combined <- data.frame()
 
 for(file in all_files) {
   
-  f <- read_csv(file)
+  print(file)
+  possibleError <- tryCatch(
+    read_csv(file), 
+    error = function(e) e
+  )
+  
+  if(inherits(possibleError, "error")) next
+  
   f <- f %>% select(origin_census_block_group, date_range_start, date_range_end, completely_home_device_count, device_count)
   combined <- bind_rows(combined, f)
   
