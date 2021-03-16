@@ -15,7 +15,7 @@ for(file in all_files) {
   
   print(file)
   possibleError <- tryCatch(
-    read_csv(file), 
+    f <- read_csv(file), 
     error = function(e) e
   )
   
