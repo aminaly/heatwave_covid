@@ -8,7 +8,7 @@ library(tidyverse)
 library(lubridate)
 library(reshape2)
 
-all_files <- list.files("heatwaves_manual/safegraph/", full.names = T, recursive = T)
+all_files <- list.files("heatwaves_manual/safegraph/social_distancing_metrics/", full.names = T, recursive = T)
 combined <- data.frame()
 
 for(file in all_files) {
