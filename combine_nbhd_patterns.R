@@ -8,7 +8,7 @@ library(tidyverse)
 library(lubridate)
 library(reshape2)
 
-all_files <- list.files("heatwaves_manual/safegraph/social_distancing_metrics/", full.names = T, recursive = T)
+all_files <- list.files("heatwaves_manual/safegraph/patterns/2020/12/17", full.names = T, recursive = T, pattern = "*.csv.gz")
 combined <- data.frame()
 
 for(file in all_files) {
@@ -34,5 +34,5 @@ sheltering <- combined %>% group_by(fips, date_range_start) %>%
 sheltering$shelter_index <- (sheltering$home_device / sheltering$all_devices)*100
 saveRDS(sheltering, "heatwaves_manual/all_sheltering_raw_blockgroup.rds")
 
-sheltering <- sheltering %>% group_by(fips, date = date_range_start, home_device, all_devices) %>% summarise(shelter_index = mean(shelter_index))
+sheltering <- sheltering %>% group_by(fips) %>% summarise(shelter_index = mean(shelter_index))
 saveRDS(sheltering, "heatwaves_manual/all_sheltering_raw_fips.rds")
