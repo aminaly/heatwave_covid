@@ -57,9 +57,11 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   print(plot_title)
   model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
+  print("made it past bootstrap")
+  print(paste(boots[[1]]))
   plot_regs(data, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
   
-  data$deaths <- log(data$deaths)
+  data$yvar <- log(data$yvar)
   model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
   plot_regs(data, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)

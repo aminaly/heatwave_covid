@@ -76,7 +76,7 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
 
 
 #Function to output a plot with the regression and 95% confidence interval
-plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", ylabel = "Mortality", model) {
+plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", ylabel, model) {
   
   coefs <- coefs[[1]]
   max_val <- max(data$measure, na.rm = T)
