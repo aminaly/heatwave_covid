@@ -14,4 +14,4 @@ rasters_ml
 module load R/3.6.1
 
 cd $OAK/group_members/aminaly/heatwave_covid
-Rscript ./regressions_new.R
+Rscript ./regressions_sheltering.R
