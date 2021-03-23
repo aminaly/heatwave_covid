@@ -45,7 +45,7 @@ pdf(paste0("./visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
-text(x = 0.5, y = 0.5, paste(timestamp(), "West Coast Only - No Income"),
+text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering Jan 2018 - Feb 2020"),
      cex = 1.5, col = "black")
 
 ####################
@@ -57,8 +57,6 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   print(plot_title)
   model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
-  print("made it past bootstrap")
-  print(paste(boots[[1]]))
   plot_regs(data, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
   
   data$yvar <- log(data$yvar)
@@ -78,9 +76,12 @@ data <- left_join(shelter, t, by = c("fips", "date"))
 data <- rename(data, measure = mean_high)
 data <- rename(data, yvar = shelter_index)
 
+# take out dates after sheltering began
+data <- data %>% filter(date <= "2020-02-29")
+
 for(region in regions) {
   print(region)
-  plot_title <- paste0("Shelter Index v Avg High in County /n", region)
+  plot_title <- paste0("Shelter Index v Avg High in County \n", region)
   data_reg <- data %>% dplyr::filter(region_s == region)
   plot_data(data_reg, plot_title)
 }
@@ -90,7 +91,7 @@ data <- data %>% dplyr::filter(between(month, 5, 9))
 
 for(region in regions) {
   print(region)
-  plot_title <- paste0("Shelter Index v Avg High in County /n Summer Only", region)
+  plot_title <- paste0("Shelter Index v Avg High in County \n Summer Only", region)
   data_reg <- data %>% dplyr::filter(region_s == region)
   plot_data(data_reg, plot_title)
 }
