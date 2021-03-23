@@ -8,7 +8,7 @@ library(tidyverse)
 library(lubridate)
 library(reshape2)
 
-all_files <- list.files("heatwaves_manual/safegraph/social_distancing_metrics/", full.names = T, recursive = T)
+all_files <- list.files("heatwaves_manual/safegraph/neighborhood_home_panel_summary/2020/12/17", full.names = T, recursive = T, pattern = "*.csv")
 combined <- data.frame()
 
 for(file in all_files) {
@@ -20,6 +20,8 @@ for(file in all_files) {
   )
   
   if(inherits(possibleError, "error")) next
+  
+  saveRDS(f[1:10000,], "heatwaves_manual/neighborhood_short.rds")
   
   f <- f %>% select(origin_census_block_group, date_range_start, date_range_end, completely_home_device_count, device_count)
   combined <- bind_rows(combined, f)
