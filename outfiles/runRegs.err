@@ -1,4 +1,4 @@
-/var/spool/slurmd/job20513361/slurm_script: line 13: rasters_ml: command not found
+/var/spool/slurmd/job20927879/slurm_script: line 13: rasters_ml: command not found
 
 Attaching package: ‘dplyr’
 
@@ -43,7 +43,5 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-Error in log(data$deaths) : non-numeric argument to mathematical function
-Calls: plot_data
-In addition: There were 50 or more warnings (use warnings() to see the first 50)
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
