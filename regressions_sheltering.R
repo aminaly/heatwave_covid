@@ -52,7 +52,7 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering Jan 2018 - Feb 2020"),
 ## Quick function that takes data and plots all the variations we'd want
 plot_data <- function(data, plot_title, lows=FALSE) {
   
-  xlab <- ifelse(lows, "High Temp in County", "Low Temp in County")
+  xlab <- "High Temp in County"
   par(mfcol = c(2,2))
   print(plot_title)
   model <- fe_model(data, level = 2)
@@ -71,9 +71,10 @@ regions <- unique(r_master$region_s)
 
 ## Combined temperature and sheltering by fips 
 data <- left_join(shelter, t, by = c("fips", "date"))
+data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
 
 ## run regression for sheltering index as a function of average high temp in county
-data <- rename(data, measure = mean_high)
+data <- rename(data, measure = mean_high_c)
 data <- rename(data, yvar = shelter_index)
 
 # take out dates after sheltering began
