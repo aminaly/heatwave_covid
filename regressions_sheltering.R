@@ -12,6 +12,7 @@ library(tidyverse)
 library(lubridate)
 library(reshape2)
 library(stringr)
+library(broom)
 
 ##Read in datasets
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
@@ -45,7 +46,7 @@ pdf(paste0("./visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
-text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering Jan 2018 - Feb 2020"),
+text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering Jan 201 - Feb 2020"),
      cex = 1.5, col = "black")
 
 ####################
@@ -59,10 +60,20 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   boots <- bootstrap_data(data, short=T, level=2)
   plot_regs(data, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
   
+  #table of coefs
+  mo <- tidy(model)
+  reps <- nrow(mo)
+  model_output <- rbind(model_output, cbind(tidy(model), rep(plot_title, reps), rep("shelter", reps)))
+  
   data$yvar <- log(data$yvar)
   model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
   plot_regs(data, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
+  
+  #table of coefs
+  mo <- tidy(model)
+  reps <- nrow(mo)
+  model_output <- rbind(model_output, cbind(tidy(model), rep(plot_title, reps), rep("log_shelter", reps)))
 }
 
 ####################
@@ -76,6 +87,9 @@ data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-27
 ## run regression for sheltering index as a function of average high temp in county
 data <- rename(data, measure = mean_high_c)
 data <- rename(data, yvar = shelter_index)
+
+# lets start an empty df for all coefficients 
+model_output <- c()
 
 # take out dates after sheltering began
 data <- data %>% filter(date <= "2020-02-29")
@@ -96,4 +110,6 @@ for(region in regions) {
   data_reg <- data %>% dplyr::filter(region_s == region)
   plot_data(data_reg, plot_title)
 }
+
+saveRDS(model_output, "calculated/pre_covid_model_output.rds")
 
