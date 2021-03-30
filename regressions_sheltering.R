@@ -63,7 +63,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   #table of coefs
   mo <- tidy(model)
   reps <- nrow(mo)
-  model_output <- rbind(model_output, cbind(tidy(model), rep(plot_title, reps), rep("shelter", reps)))
+  model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("shelter", reps)))
   
   data$yvar <- log(data$yvar)
   model <- fe_model(data, level = 2)
@@ -73,7 +73,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   #table of coefs
   mo <- tidy(model)
   reps <- nrow(mo)
-  model_output <- rbind(model_output, cbind(tidy(model), rep(plot_title, reps), rep("log_shelter", reps)))
+  model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("log_shelter", reps)))
 }
 
 ####################
