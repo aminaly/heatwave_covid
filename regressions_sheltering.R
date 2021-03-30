@@ -59,21 +59,21 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
   plot_regs(data, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
-  
-  #table of coefs
-  mo <- tidy(model)
-  reps <- nrow(mo)
-  model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("shelter", reps)))
+  # 
+  # #table of coefs
+  # mo <- tidy(model)
+  # reps <- nrow(mo)
+  # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("shelter", reps)))
   
   data$yvar <- log(data$yvar)
   model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=2)
   plot_regs(data, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
   
-  #table of coefs
-  mo <- tidy(model)
-  reps <- nrow(mo)
-  model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("log_shelter", reps)))
+  # #table of coefs
+  # mo <- tidy(model)
+  # reps <- nrow(mo)
+  # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("log_shelter", reps)))
 }
 
 ####################
@@ -92,7 +92,7 @@ data <- rename(data, yvar = shelter_index)
 model_output <- c()
 
 # take out dates after sheltering began
-data <- data %>% filter(date <= "2020-02-29")
+data <- data %>% filter(date > "2020-04-01")
 
 for(region in regions) {
   print(region)
