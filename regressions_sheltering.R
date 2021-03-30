@@ -46,7 +46,7 @@ pdf(paste0("./visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
-text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering Jan 201 - Feb 2020"),
+text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering April 2020 - Dec 2020"),
      cex = 1.5, col = "black")
 
 ####################
