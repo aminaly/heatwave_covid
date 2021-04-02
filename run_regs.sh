@@ -10,7 +10,7 @@
 #SBATCH --mail-user=aminaly@stanford.edu
 #SBATCH -p diffenbaugh
 
-rasters_ml
+ml physics gdal udunits/2.2.26 netcdf/4.4.1.1 R/3.6.1 proj geos;
 module load R/3.6.1
 
 cd $OAK/group_members/aminaly/heatwave_covid

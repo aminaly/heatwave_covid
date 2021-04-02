@@ -13,6 +13,7 @@ library(lubridate)
 library(reshape2)
 library(stringr)
 library(broom)
+library(gridExtra)
 
 ##Read in datasets
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
@@ -60,16 +61,14 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   ## do 2019
   data2019 <- data %>% filter(date >= "2019-04-01" & date <= "2019-11-07")
   plot_title1 <- paste(plot_title, "2019")
-  par(mfcol = c(2,2))
+  par(mfcol = c(3,3))
   print(plot_title)
   model <- fe_model(data2019, level = 2)
   boots <- bootstrap_data(data2019, short=T, level=2)
   plot_regs(data2019, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
   
   # #table of coefs
-  # mo <- tidy(model)
-  # reps <- nrow(mo)
-  # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("shelter", reps)))
+  grid.table(tidy(model))
   
   ## do 2020
   plot_title1 <- paste(plot_title, "2020")
@@ -79,9 +78,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   plot_regs(data2020, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
   
   # #table of coefs
-  # mo <- tidy(model)
-  # reps <- nrow(mo)
-  # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("log_shelter", reps)))
+  grid.table(tidy(model))
 }
 
 ####################
