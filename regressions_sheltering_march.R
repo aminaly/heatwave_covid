@@ -46,37 +46,29 @@ pdf(paste0("./visuals/regressions", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
-text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering April - Dec"),
+text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering April 2020 - Dec 2020"),
      cex = 1.5, col = "black")
 
 ####################
 ## Quick function that takes data and plots all the variations we'd want
 plot_data <- function(data, plot_title, lows=FALSE) {
   
-  #global vars
-  data$yvar <- log(data$yvar)
   xlab <- "High Temp in County"
-  
-  ## do 2019
-  data2019 <- data %>% filter(date >= "2019-04-01" & date <= "2019-11-07")
-  plot_title1 <- paste(plot_title, "2019")
   par(mfcol = c(2,2))
   print(plot_title)
-  model <- fe_model(data2019, level = 2)
-  boots <- bootstrap_data(data2019, short=T, level=2)
-  plot_regs(data2019, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
-  
+  model <- fe_model(data, level = 2)
+  boots <- bootstrap_data(data, short=T, level=2)
+  plot_regs(data, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
+  # 
   # #table of coefs
   # mo <- tidy(model)
   # reps <- nrow(mo)
   # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("shelter", reps)))
   
-  ## do 2020
-  plot_title1 <- paste(plot_title, "2020")
-  data2020 <- data %>% filter(date >= "2020-04-01")
-  model <- fe_model(data2020, level = 2)
-  boots <- bootstrap_data(data2020, short=T, level=2)
-  plot_regs(data2020, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
+  data$yvar <- log(data$yvar)
+  model <- fe_model(data, level = 2)
+  boots <- bootstrap_data(data, short=T, level=2)
+  plot_regs(data, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
   
   # #table of coefs
   # mo <- tidy(model)
@@ -100,6 +92,8 @@ data <- rename(data, yvar = shelter_index)
 model_output <- c()
 
 # take out dates after sheltering began
+data <- data %>% filter(date > "2020-04-01")
+
 for(region in regions) {
   print(region)
   plot_title <- paste0("Shelter Index v Avg High in County \n", region)
