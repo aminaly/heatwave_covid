@@ -16,7 +16,7 @@ library(broom)
 library(gridExtra)
 
 ##Read in datasets
-t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
+t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021s.rds"))
 r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
 s <- read_rds(paste0(getwd(), "/heatwaves_manual/all_sheltering_raw_fips.rds"))
@@ -54,6 +54,8 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Sheltering April - Dec"),
 ## Quick function that takes data and plots all the variations we'd want
 plot_data <- function(data, plot_title, lows=FALSE) {
   
+  
+  mytheme <- gridExtra::ttheme_default(base_size = 5)
   #global vars
   data$yvar <- log(data$yvar)
   xlab <- "High Temp in County"
@@ -68,7 +70,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   plot_regs(data2019, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
   
   # #table of coefs
-  grid.table(tidy(model))
+  grid.table(tidy(model)[1:2,], theme = mytheme)
   
   ## do 2020
   plot_title1 <- paste(plot_title, "2020")
@@ -78,7 +80,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   plot_regs(data2020, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
   
   # #table of coefs
-  grid.table(tidy(model))
+  grid.table(tidy(model)[1:2,], theme = mytheme)
 }
 
 ####################

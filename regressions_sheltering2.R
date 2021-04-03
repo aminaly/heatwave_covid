@@ -18,8 +18,8 @@ library(broom)
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
 s <- read_rds(paste0(getwd(), "/heatwaves_manual/all_sheltering_raw_fips.rds"))
 
-t <- t[1:100000,]
+t <- t %>% dplyr::filter(year %in% c(2018, 2019, 2020))
 s <- s[1:100000,]
 
-saveRDS(t, "/heatwaves_manual/all_temperature_data_clean_2021s.rds")
-saveRDS(s, "/heatwaves_manual/all_sheltering_raw_fipss.rds")
+saveRDS(t, (paste0(getwd(),"/heatwaves_manual/all_temperature_data_clean_2021s.rds")))
+saveRDS(s, (paste0(getwd(),"/heatwaves_manual/all_sheltering_raw_fipss.rds")))
