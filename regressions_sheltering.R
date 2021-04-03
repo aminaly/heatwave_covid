@@ -64,23 +64,23 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   data2019 <- data %>% filter(date >= "2019-04-01" & date <= "2019-11-07")
   plot_title1 <- paste(plot_title, "2019")
   par(mfcol = c(3,2))
-  print(plot_title)
+  print(plot_title1)
   model <- fe_model(data2019, level = 2)
   boots <- bootstrap_data(data2019, short=T, level=2)
-  plot_regs(data2019, boots, plot_title, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
+  plot_regs(data2019, boots, plot_title1, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
   
   # #table of coefs
-  grid.table(tidy(model)[1:2,], theme = mytheme)
+  mod_data <- rbind(mod_data, cbind(tidy(model)[1:2,], title = rep(plot_title1, 2)))
   
   ## do 2020
   plot_title1 <- paste(plot_title, "2020")
   data2020 <- data %>% filter(date >= "2020-04-01")
   model <- fe_model(data2020, level = 2)
   boots <- bootstrap_data(data2020, short=T, level=2)
-  plot_regs(data2020, boots, plot_title, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
+  plot_regs(data2020, boots, plot_title1, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
   
   # #table of coefs
-  grid.table(tidy(model)[1:2,], theme = mytheme)
+  mod_data <- rbind(mod_data, cbind(tidy(model)[1:2,], title = rep(plot_title1, 2)))
 }
 
 ####################
@@ -96,7 +96,7 @@ data <- rename(data, measure = mean_high_c)
 data <- rename(data, yvar = shelter_index)
 
 # lets start an empty df for all coefficients 
-model_output <- c()
+mod_data <- c()
 
 # take out dates after sheltering began
 for(region in regions) {
@@ -116,5 +116,5 @@ for(region in regions) {
   plot_data(data_reg, plot_title)
 }
 
-saveRDS(model_output, "calculated/pre_covid_model_output.rds")
+saveRDS(model_output, "calculated/mod_data.rds")
 
