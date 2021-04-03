@@ -63,7 +63,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   ## do 2019
   data2019 <- data %>% filter(date >= "2019-04-01" & date <= "2019-11-07")
   plot_title1 <- paste(plot_title, "2019")
-  par(mfcol = c(3,2))
+  par(mfcol = c(2,2))
   print(plot_title1)
   model <- fe_model(data2019, level = 2)
   boots <- bootstrap_data(data2019, short=T, level=2)
