@@ -130,3 +130,43 @@ plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", yla
        cex = .75, col = "black")
   
 }
+
+#Function to output plot with binned regressions 
+plot_regs_binned <- function(data, coefs, title, level, model, plt) {
+  
+  coefs <- coefs[[1]]
+  max_val <- max(data$measure, na.rm = T)
+  min_val <- min(data$measure, na.rm = T)
+  x = min_val:max_val ###this should be the max SWE we see 
+  bts <- matrix(nrow=100,ncol=length(x))
+  
+  #get all my y values
+  if (level == 1) {
+    for (j in 1:100) {
+      yy <- x*coefs[j]
+      yy <- yy - yy[x=1] ## this x value should be the average swe. Otherwise we can just set it to the first yy value
+      bts[j,] <- yy
+    }  
+  } else if (level == 2) {
+    for (j in 1:100) {
+      yy <- x*coefs[j,1] + x^2*coefs[j,2]  
+      yy <- yy - yy[x=1]
+      bts[j,] <- yy 
+    }
+  } else if (level == 3) {
+    for (j in 1:100) {
+      yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
+      yy <- yy - yy[x=1]
+      bts[j,] <- yy 
+    }
+  }
+  
+  #figure out the 95 and 5 percentiles of the bootstraps
+  confint <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
+  
+  
+  plt <- plt + geom_line(x, confint[2,])
+  plt <- plt + geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1)
+  
+  
+}

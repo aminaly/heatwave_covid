@@ -16,7 +16,7 @@ library(broom)
 library(gridExtra)
 
 ##Read in datasets
-t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021s.rds"))
+t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
 r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
 s <- read_rds(paste0(getwd(), "/heatwaves_manual/all_sheltering_raw_fips.rds"))
@@ -60,48 +60,27 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   data$yvar <- log(data$yvar)
   xlab <- "High Temp in County"
   
-  ## do 2019. Filter for April - Nov
+  ## do 2019
   data2019 <- data %>% filter(date >= "2019-04-01" & date <= "2019-11-07")
   plot_title1 <- paste(plot_title, "2019")
   par(mfcol = c(2,2))
   print(plot_title1)
+  model <- fe_model(data2019, level = 2)
+  boots <- bootstrap_data(data2019, short=T, level=2)
+  plot_regs(data2019, boots, plot_title1, level = 2, xlabel = xlab, ylabel = "Shelter Index", model=model)
   
-  ## bin the data by temperature 
-  data2019 <- data2019 %>% mutate(temp_group = ntile(measure, 10))
-  
-  #start the plot
-  plt <- ggplot() + xlim(-Inf, Inf) + ylim(-Inf, Inf)
-  
-  #run through each bin
-  for(i in 1:10) {
-    #filter the subset of 2019 data we want
-    data2019_grp <- data2019 %>% filter(temp_group == i)
-    
-    #run the usual
-    model <- fe_model(data2019_grp, level = 1)
-    boots <- bootstrap_data(data2019_grp, short=T, level=1)
-    plot_regs_binned(data2019_grp, boots, plot_title1, level = 1, xlabel = xlab, ylabel = "Shelter Index", model=model, plt = plt)
-  }
-
+  # #table of coefs
+  mod_data <- rbind(mod_data, cbind(tidy(model)[1:2,], title = rep(plot_title1, 2)))
   
   ## do 2020
   plot_title1 <- paste(plot_title, "2020")
   data2020 <- data %>% filter(date >= "2020-04-01")
+  model <- fe_model(data2020, level = 2)
+  boots <- bootstrap_data(data2020, short=T, level=2)
+  plot_regs(data2020, boots, plot_title1, level = 2,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
   
-  ## bin the data by temperature
-  data2020 <- data2020 %>% mutate(temp_group = ntile(measure, 10))
-  
-  #start the plot
-  plt <- ggplot() + xlim(-Inf, Inf) + ylim(-Inf, Inf)
-  
-  for(i in 1:10) {
-    #filter the subset of 2019 data we want
-    data2020_grp <- data2020 %>% filter(temp_group == i)
-    
-    model <- fe_model(data2020_grp, level = 1)
-    boots <- bootstrap_data(data2020_grp, short=T, level=1)
-    plot_regs_binned(data2020_grp, boots, plot_title1, level = 1,xlabel = xlab, ylabel = "Log Shelter Index", model = model, plt = plt)
-  }
+  # #table of coefs
+  mod_data <- rbind(mod_data, cbind(tidy(model)[1:2,], title = rep(plot_title1, 2)))
 }
 
 ####################
@@ -137,5 +116,5 @@ for(region in regions) {
   plot_data(data_reg, plot_title)
 }
 
-saveRDS(model_output, "calculated/mod_data.rds")
+saveRDS(model_output, paste0(getwd(), "calculated/mod_data.rds"))
 
