@@ -51,6 +51,6 @@ cols(
 )
 There were 50 or more warnings (use warnings() to see the first 50)
 There were 50 or more warnings (use warnings() to see the first 50)
-Error in saveRDS(model_output, "calculated/mod_data.rds") : 
+Error in saveRDS(model_output, paste0(getwd(), "calculated/mod_data.rds")) : 
   object 'model_output' not found
 Execution halted
