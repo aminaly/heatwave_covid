@@ -57,6 +57,7 @@ data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-27
 ## renaming columns for easy access to main x and y values 
 data <- rename(data, measure = mean_high_c)
 data <- rename(data, yvar = shelter_index)
+data <- na.omit(data)
 
 ## cutting up the data so that we only get the "covid" timeline
 data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07")
@@ -72,16 +73,16 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
      cex = 1.5, col = "black")
 
 # line plot of mobility over time separated by income group
-ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
-  geom_line(aes(colour=as.factor(income_group))) + 
-  #geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
-  ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year, scales = "free") + 
-  scale_x_date() +
-  theme(text = element_text(size = 15)) + 
-  labs(colour="Income Grp (5 High)") +
-  theme_bw()
+# ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
+#   geom_line(aes(colour=as.factor(income_group))) + 
+#   #geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
+#   ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
+#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+#   facet_wrap( ~ year, scales = "free") + 
+#   scale_x_date() +
+#   theme(text = element_text(size = 15)) + 
+#   labs(colour="Income Grp (5 High)") +
+#   theme_bw()
 
 # line plot of mobility over time separated by income group but with loess 
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
@@ -89,7 +90,7 @@ ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
   ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year, scales = "free") + 
+  facet_wrap( ~ year + region_s, scales = "free") + 
   scale_x_date() +
   theme(text = element_text(size = 15)) + 
   labs(colour="Income Grp (5 High)") +
@@ -111,16 +112,16 @@ i_m_short %>%
   theme(text = element_text(size = 20))
 
 # line plot showing how normal temps were by region
-ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
-  geom_line(aes(colour=as.factor(region_s))) + 
-  ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year, scales = "free") + 
-  scale_x_date() +
-  geom_hline(yintercept = 0) +
-  theme(text = element_text(size = 15)) + 
-  labs(colour="Region") +
-  theme_bw()
+# ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
+#   geom_line(aes(colour=as.factor(region_s))) + 
+#   ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
+#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+#   facet_wrap( ~ year, scales = "free") + 
+#   scale_x_date() +
+#   geom_hline(yintercept = 0) +
+#   theme(text = element_text(size = 15)) + 
+#   labs(colour="Region") +
+#   theme_bw()
 
 ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
   geom_smooth(aes(group=region_s, color=as.factor(region_s))) +
