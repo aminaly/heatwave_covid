@@ -8,7 +8,7 @@ library(lubridate)
 library(reshape2)
 
 
-temps <- read_rds("./heatwaves_manual/all_temp_data_long.rds")
+temps <- read_rds("./heatwaves_manual/all_temp_data_long_blockgroup_Apr2021.RDS")
 
 #reshape by with min and max next to each other
 tm <- temps %>% dplyr::filter(measure == "tmmn")
@@ -25,6 +25,6 @@ t <- t %>% dplyr::select(date, county = county.x, fips,
 
 t$monthyear <- paste0(t$month, t$year)
 
-saveRDS(t, "./heatwaves_manual/all_temperature_data_clean_nov.rds")
+saveRDS(t, "./heatwaves_manual/all_temperature_data_clean_blockgroup.rds")
 
 

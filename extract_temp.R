@@ -19,8 +19,11 @@ rep <- as.numeric(args[1])
 #get list of all precip data files
 gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*.nc", full.names = T)
 
-#load in counties
-counties <- st_read("heatwaves_manual/shapefiles/tl_2017_us_county.shp")
+#load in cencus tracts & select only those we want
+block_group <- st_read("heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp")
+income <- read.csv(paste0(getwd(), "/us_census/income_county.csv"), stringsAsFactors = F, header = T)
+block_group$fips <- paste0(block_group$STATEFP, block_group$COUNTYFP)
+block_group <- block_group %>% filter(fips %in% income$fips)
 
 # Run through temperature brick and extract over the buffers
 all_data <- c()
@@ -35,14 +38,14 @@ print("I got here")
 for(j in 1:length(names(file))) {
   temp <- c()
   nms <- as.numeric(substring(as.character(names(file[[j]])),2))
-  temp$date <- rep(as.Date(nms, origin= "1900-01-01"), nrow(counties))
+  temp$date <- rep(as.Date(nms, origin= "1900-01-01"), nrow(block_group))
   temp <- as.data.frame(temp)
-  temp$county <- counties$NAME
-  temp$fips <- counties$GEOID
-  temp$measure <- rep(substring(i, 26, 29), nrow(counties))
+  temp$county <- block_group$NAME
+  temp$fips <- block_group$GEOID
+  temp$measure <- rep(substring(i, 26, 29), nrow(block_group))
   
   velox_obj <- velox(file[[j]])
-  temp_measure <- velox_obj$extract(sp = counties$geometry, small = T)
+  temp_measure <- velox_obj$extract(sp = block_group$geometry, small = T)
   
   temp$mean_measure <- lapply(temp_measure, function(x){mean(as.numeric(x), na.rm = T)}) %>% unlist()  
   temp$max_measure <- lapply(temp_measure, function(x){max(as.numeric(x), na.rm = T)}) %>% unlist()
@@ -53,5 +56,5 @@ for(j in 1:length(names(file))) {
   
 
 #save this out to make my life easier
-saveRDS(all_data, paste0("./heatwaves_manual/temps/", rep, "_temperature_data.rds"))
+saveRDS(all_data, paste0("./heatwaves_manual/temps/bg/", rep, "_temperature_data.rds"))
 
