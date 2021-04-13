@@ -31,7 +31,7 @@ fe_model <- function(dta, level, interact=F) {
     mod <- felm(yvar ~ log(measure) | fips + monthyear, data=dta )
   } else if (level > 1) {
     mod <- felm(yvar ~ poly(measure,level,raw=T) + 
-                  as.factor(state)*year | fips + monthyear + week | 0 | fips + stateyear, data=dta)
+                  as.factor(state)*year | fips + monthweek | 0 | fips + stateyear, data=dta)
   }
   #}
   

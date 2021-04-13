@@ -90,7 +90,8 @@ regions <- unique(r_master$region_s)
 ## Combined temperature and sheltering by fips 
 data <- left_join(shelter, t, by = c("fips", "date"))
 data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
-data$week <- lubridate$week(data$date)
+data$week <- lubridate::week(data$date)
+data$monthweek <- paste0(data$month, data$week)
 
 ## run regression for sheltering index as a function of average high temp in county
 data <- rename(data, measure = mean_high_c)
