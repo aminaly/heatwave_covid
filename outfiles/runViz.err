@@ -49,11 +49,5 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-Warning message:
-Removed 41706 row(s) containing missing values (geom_path). 
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-Warning message:
-Removed 209106 row(s) containing missing values (geom_path). 
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-Warning message:
-Removed 79354 rows containing non-finite values (stat_smooth). 
