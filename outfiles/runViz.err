@@ -51,3 +51,4 @@ cols(
 )
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
