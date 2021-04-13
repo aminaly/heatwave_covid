@@ -74,8 +74,7 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
 
 # line plot of mobility over time separated by income group
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
-  geom_point(aes(colour=as.factor(income_group))) +
-  #geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
+  geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
   ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
   facet_wrap( ~ year, scales = "free", nrow = 2) +
@@ -111,17 +110,17 @@ i_m_short %>%
   #scale_x_continuous(expand = c(0, 0), limits = c(0, NA)) +
   theme(text = element_text(size = 20))
 
-# line plot showing how normal temps were by region
-ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
-  geom_point(aes(colour=as.factor(region_s))) +
-  ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year, scales = "free") +
-  scale_x_date() +
-  geom_hline(yintercept = 0) +
-  theme(text = element_text(size = 15)) +
-  labs(colour="Region") +
-  theme_bw()
+# # line plot showing how normal temps were by region
+# ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
+#   geom_point(aes(colour=as.factor(region_s))) +
+#   ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
+#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+#   facet_wrap( ~ year, scales = "free") +
+#   scale_x_date() +
+#   geom_hline(yintercept = 0) +
+#   theme(text = element_text(size = 15)) +
+#   labs(colour="Region") +
+#   theme_bw()
 
 ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
   geom_smooth(aes(group=region_s, color=as.factor(region_s))) +
