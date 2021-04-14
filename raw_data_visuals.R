@@ -60,9 +60,9 @@ data <- rename(data, yvar = shelter_index)
 data <- na.omit(data)
 
 ## cutting up the data so that we only get the "covid" timeline
-data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07")
-data2020 <- data %>% filter(date >= "2020-03-01")
-data_mar_dec <- rbind(data2019, data2020)
+# data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07")
+# data2020 <- data %>% filter(date >= "2020-03-01")
+# data_mar_dec <- rbind(data2019, data2020)
 
 ## lets do some plots
 pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
@@ -73,7 +73,7 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
      cex = 1.5, col = "black")
 
 # line plot of mobility over time separated by income group
-ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
+ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
   ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
@@ -84,7 +84,7 @@ ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   theme_bw()
 
 # line plot of mobility over time separated by income group but with loess 
-ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
+ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
   #geom_line(aes(colour=income_group)) + 
   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
   ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
