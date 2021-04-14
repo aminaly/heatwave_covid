@@ -41,7 +41,8 @@ for(j in 1:length(names(file))) {
   temp$date <- rep(as.Date(nms, origin= "1900-01-01"), nrow(block_group))
   temp <- as.data.frame(temp)
   temp$county <- block_group$NAME
-  temp$fips <- block_group$GEOID
+  temp$blockgroup <- block_group$GEOID
+  temp$fips <- block_group$fips
   temp$measure <- rep(substring(i, 26, 29), nrow(block_group))
   
   velox_obj <- velox(file[[j]])
