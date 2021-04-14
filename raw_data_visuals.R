@@ -60,9 +60,9 @@ data <- rename(data, yvar = shelter_index)
 data <- na.omit(data)
 
 ## cutting up the data so that we only get the "covid" timeline
-# data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07")
-# data2020 <- data %>% filter(date >= "2020-03-01")
-# data_mar_dec <- rbind(data2019, data2020)
+data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mutate(day = day(date))
+data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
+data_mar_dec <- rbind(data2019, data2020)
 
 ## lets do some plots
 pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
@@ -73,9 +73,9 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
      cex = 1.5, col = "black")
 
 # line plot of mobility over time separated by income group
-ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
+ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
-  ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
+  ggtitle("Mobility Throughout Year") + ylab("% Sheltering") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
   facet_wrap( ~ year, scales = "free", nrow = 2) +
   scale_x_date() +
@@ -84,10 +84,10 @@ ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
   theme_bw()
 
 # line plot of mobility over time separated by income group but with loess 
-ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
+ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   #geom_line(aes(colour=income_group)) + 
   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
-  ggtitle("Mobility Throughout Year") + ylab("Mobility") + xlab("Date") +
+  ggtitle("Mobility Throughout Year") + ylab("% Sheltering") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
   facet_wrap( ~ year + region_s, scales = "free", nrow = 2) + 
   scale_x_date() +
@@ -104,7 +104,7 @@ i_m_short %>%
   geom_bar(data=i_m_short, aes(x=income_group, y = n),
            stat="identity",
            position='dodge') +
-  theme_bw() + 
+  theme_bw() + ylab("Count")
   facet_wrap( ~ region_s, scales = "free") + 
   #scale_y_continuous(expand = c(0, 2), limits = c(0, NA)) +
   #scale_x_continuous(expand = c(0, 0), limits = c(0, NA)) +
@@ -122,6 +122,7 @@ i_m_short %>%
 #   labs(colour="Region") +
 #   theme_bw()
 
+# loess plot showing how normal temps were by region
 ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
   geom_smooth(aes(group=region_s, color=as.factor(region_s))) +
   ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
@@ -132,8 +133,22 @@ ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
   theme(text = element_text(size = 15)) + 
   labs(colour="Region") +
   theme_bw()
-  
 
+# loess difference of 2020 - 2019 mobility
+data_sub <- left_join(data2019, data2020, by = c("fips", "month", "day"))
+data_sub <- data_sub %>% mutate(yvar = yvar.y - yvar.x) %>% rename(income_group = income_group.x) %>%
+  rename(date = date.x) %>% rename(region_s = region_s.x)
+
+  
+ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
+  geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
+  ggtitle("Mobility Change 2020 - 2019") + ylab("% Sheltering") + xlab("Date") +
+  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+  facet_wrap( ~ region_s, scales = "free", nrow = 2) +
+  scale_x_date() +
+  theme(text = element_text(size = 15)) +
+  labs(colour="Income Grp (5 High)") +
+  theme_bw()
 
 
   
