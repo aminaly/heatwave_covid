@@ -5,5 +5,5 @@ geometry type:  MULTIPOLYGON
 dimension:      XY
 bbox:           xmin: -179.1489 ymin: -14.5487 xmax: 179.7785 ymax: 71.36516
 CRS:            4269
-[1] "heatwaves_manual/gridMET/tmmn_1988.nc"
+[1] "heatwaves_manual/gridMET/tmmn_1994.nc"
 [1] "I got here"
