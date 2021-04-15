@@ -144,7 +144,7 @@ ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
   ggtitle("Mobility Change 2020 - 2019") + ylab("% Sheltering") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ region_s, scales = "free", nrow = 2) +
+ # facet_wrap( ~ region_s, scales = "free", nrow = 2) +
   scale_x_date() +
   theme(text = element_text(size = 15)) +
   labs(colour="Income Grp (5 High)") +

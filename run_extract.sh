@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=extractTemps
 #SBATCH --nodes=1
-#SBATCH --array=1-86
+#SBATCH --array=1-10
 #SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/extractTemps.err
 #SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/extractTemps.out
 #SBATCH --time=48:00:00
 #SBATCH --ntasks-per-node=1
-#SBATCH --mem-per-cpu=90GB
+#SBATCH --mem-per-cpu=100GB
 #SBATCH --mail-type=END,FAIL 
 #SBATCH --mail-user=aminaly@stanford.edu
 #SBATCH -p diffenbaugh

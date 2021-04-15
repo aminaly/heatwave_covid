@@ -51,4 +51,8 @@ cols(
 )
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+Error: Cannot add ggproto objects together. Did you forget to add this object to a ggplot object?
+Backtrace:
+    █
+ 1. └─ggplot2:::`+.gg`(facet_wrap(~region_s, scales = "free"), theme(text = element_text(size = 20)))
+Execution halted
