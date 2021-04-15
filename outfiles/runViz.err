@@ -55,3 +55,6 @@ cols(
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 Warning message:
 Removed 43936 rows containing non-finite values (stat_smooth). 
+`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+Warning message:
+Removed 43936 rows containing non-finite values (stat_smooth). 
