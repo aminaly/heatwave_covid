@@ -139,6 +139,14 @@ data_sub <- left_join(data2019, data2020, by = c("fips", "month", "day"))
 data_sub <- data_sub %>% mutate(yvar = yvar.y - yvar.x) %>% rename(income_group = income_group.x) %>%
   rename(date = date.x) %>% rename(region_s = region_s.x)
 
+ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
+  geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
+  ggtitle("Mobility Change 2020 - 2019") + ylab("% Sheltering") + xlab("Date") +
+  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+  scale_x_date() +
+  theme(text = element_text(size = 15)) +
+  labs(colour="Income Grp (5 High)") +
+  theme_bw()
   
 ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
@@ -149,6 +157,8 @@ ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
   theme(text = element_text(size = 15)) +
   labs(colour="Income Grp (5 High)") +
   theme_bw()
+
+
 
 
   
