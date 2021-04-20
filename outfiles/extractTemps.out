@@ -1,31 +1,9 @@
-Simple feature collection with 220414 features and 10 fields
-geometry type:  MULTIPOLYGON
-dimension:      XY
-bbox:           xmin: -179.1489 ymin: -14.5487 xmax: 179.7785 ymax: 71.36516
-CRS:            4269
-Reading layer `[1]cb_2019_us_bg_500k "/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid"' from data source `
-/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp' using driver `ESRI Shapefile'
-[1] "heatwaves_manual/gridMET/tmmx_1990.nc"
-[1] "I got here"
-Simple feature collection with 220414 features and 10 fields
-geometry type:  MULTIPOLYGON
-dimension:      XY
-bbox:           xmin: -179.1489 ymin: -14.5487 xmax: 179.7785 ymax: 71.36516
-CRS:            4269
-[1] "heatwaves_manual/gridMET/tmmx_1991.nc"
+[1] "/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid"
 Reading layer `cb_2019_us_bg_500k' from data source `/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp' using driver `ESRI Shapefile'
-[1] "I got here"
 Simple feature collection with 220414 features and 10 fields
 geometry type:  MULTIPOLYGON
 dimension:      XY
 bbox:           xmin: -179.1489 ymin: -14.5487 xmax: 179.7785 ymax: 71.36516
 CRS:            4269
-[1] "heatwaves_manual/gridMET/tmmx_1992.nc"
-[1] "I got here"
-Simple feature collection with 220414 features and 10 fields
-geometry type:  MULTIPOLYGON
-dimension:      XY
-bbox:           xmin: -179.1489 ymin: -14.5487 xmax: 179.7785 ymax: 71.36516
-CRS:            4269
-[1] "heatwaves_manual/gridMET/tmmx_1993.nc"
+[1] "heatwaves_manual/gridMET/tmmx_2021.nc"
 [1] "I got here"

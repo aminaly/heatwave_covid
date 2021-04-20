@@ -5,7 +5,7 @@
 #SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/combine_temp.out
 #SBATCH --time=10:00:00
 #SBATCH --ntasks-per-node=1
-#SBATCH --mem-per-cpu=64GB
+#SBATCH --mem-per-cpu=150GB
 #SBATCH --mail-type=END,FAIL 
 #SBATCH --mail-user=aminaly@stanford.edu
 #SBATCH -p diffenbaugh

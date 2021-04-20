@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=extractTemps
 #SBATCH --nodes=1
-#SBATCH --array=51-60
+#SBATCH --array=71-86
 #SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/extractTemps.err
 #SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/extractTemps.out
 #SBATCH --time=48:00:00
