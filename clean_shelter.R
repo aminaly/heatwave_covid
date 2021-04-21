@@ -16,7 +16,7 @@ p <- readRDS(paste0(getwd(), "/heatwaves_manual/patterns_raw_blockgroup.rds"))
 d <- expand_cat_json(p, "device_home_areas", index = "origin_census_block_group",  by = c("census_block_group", "date", "state", "fips"), fun = sum)
 
 #rename for clarity
-d <- d %>% rename(census_block_group = visited_block_group) %>%
+d <- d %>% rename(visited_block_group = census_block_group) %>%
   dplyr:filter(origin_census_block_group != visited_block_group) %>%
   rename(origin_census_block_group = census_block_group) %>%
   group_by(census_block_group, date, state, fips) %>%
