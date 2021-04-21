@@ -30,10 +30,6 @@ for(file in all_files) {
 combined$fips <- str_sub(combined$census_block_group, 1,5)
 saveRDS(combined, "heatwaves_manual/patterns_raw_blockgroup.rds")
 
-#waiting until I figure out how to translate their python dicts to R 
-#sheltering <- sheltering %>% group_by(fips, date = date_range_start, home_device, all_devices) %>% summarise(shelter_index = mean(shelter_index))
-#saveRDS(sheltering, "heatwaves_manual/patterns_raw_fips.rds")
-
 #####################
 #### now lets combine the actual neighborhood devices residing patterns by day
 all_files <- list.files("heatwaves_manual/safegraph/neighborhood_home_panel_summary/2020/12/17", full.names = T, recursive = T, pattern = "*.csv")
