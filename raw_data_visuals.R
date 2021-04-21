@@ -19,11 +19,10 @@ library(wesanderson)
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
 r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
-s <- read_rds(paste0(getwd(), "/heatwaves_manual/all_sheltering_raw_fips.rds"))
+s <- read_rds(paste0(getwd(), "/heatwaves_manual/patterns_clean_santaclara.rds"))
 
 #get income and population data
-income <- read.csv(paste0(getwd(), "/us_census/income_county.csv"), stringsAsFactors = F, header = T)
-population <- read_rds(paste0(getwd(), "/calculated/fips_population.rds"))
+income <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b19.csv"), stringsAsFactors = F, header = T)
 
 # get state and regional information
 m_master$state <- str_sub(m_master$county, -2)
@@ -32,14 +31,14 @@ m_master <- unique(m_master %>% select(fips, state, region, region_s))
 s <- left_join(s, m_master, by = "fips")
 
 #set up mortality & add in median income
-income$fips <- as.character(income$fips)
+income <- na.omit(income %>% dplyr::select(census_block_group, 	median_income = B19013e1))
+income$fips <- substr(income$census_block_group, 1, 5)
 income <- income %>% mutate(income_group = ntile(median_income, 5))
 i <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips), fips)) %>% 
-  dplyr::select(fips, median_income, poverty_percent, income_group)
-i <- i[-1,]
+  dplyr::select(fips, median_income, income_group, census_block_group)
 
 #combine shelter with icncome, and select region if we want it
-shelter <- left_join(s, i, by = c("fips"))
+shelter <- left_join(s, i, by = c("census_block_group"))
 shelter <- shelter %>% ungroup(date) %>% mutate(date = as.Date(date))
 shelter$stateyear <- paste0(shelter$state, year(shelter$date))
 
@@ -59,11 +58,6 @@ data <- rename(data, measure = mean_high_c)
 data <- rename(data, yvar = shelter_index)
 data <- na.omit(data)
 
-## cutting up the data so that we only get the "covid" timeline
-data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mutate(day = day(date))
-data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
-data_mar_dec <- rbind(data2019, data2020)
-
 ## lets do some plots
 pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
@@ -71,6 +65,11 @@ plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
 text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
      cex = 1.5, col = "black")
+
+## cutting up the data so that we only get the "covid" timeline
+data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mutate(day = day(date))
+data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
+data_mar_dec <- rbind(data2019, data2020)
 
 # line plot of mobility over time separated by income group
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
@@ -83,13 +82,13 @@ ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   labs(colour="Income Grp (5 High)") +
   theme_bw()
 
-# line plot of mobility over time separated by income group but with loess 
-ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
+# line plot of mobility over time separated by income group & by region but with loess 
+ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
   #geom_line(aes(colour=income_group)) + 
   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
-  ggtitle("Mobility Throughout Year") + ylab("% Sheltering") + xlab("Date") +
+  ggtitle("Mobility Full Timeline") + ylab("% Sheltering") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year + region_s, scales = "free", nrow = 2) + 
+  facet_wrap( ~ year, scales = "free", nrow = 2) + 
   scale_x_date() +
   theme(text = element_text(size = 15)) + 
   labs(colour="Income Grp (5 High)") +
@@ -105,33 +104,21 @@ i_m_short %>%
            stat="identity",
            position='dodge') +
   theme_bw() + ylab("Count") +
-  facet_wrap( ~ region_s, scales = "free") + 
+  #facet_wrap( ~ region_s, scales = "free") + 
   #scale_y_continuous(expand = c(0, 2), limits = c(0, NA)) +
   #scale_x_continuous(expand = c(0, 0), limits = c(0, NA)) +
   theme(text = element_text(size = 20))
 
-# # line plot showing how normal temps were by region
-# ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
-#   geom_point(aes(colour=as.factor(region_s))) +
-#   ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
-#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-#   facet_wrap( ~ year, scales = "free") +
-#   scale_x_date() +
-#   geom_hline(yintercept = 0) +
-#   theme(text = element_text(size = 15)) +
-#   labs(colour="Region") +
-#   theme_bw()
-
-# loess plot showing how normal temps were by region
-ggplot(data=data, aes(x=date, y=z_score_high, group=region_s)) +
-  geom_smooth(aes(group=region_s, color=as.factor(region_s))) +
+# loess plot showing how normal temps were each year
+ggplot(data=data, aes(x=date, y=z_score_high, group=year)) +
+  geom_smooth(aes(group=year, color=as.factor(year))) +
   ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year, scales = "free") + 
+  #facet_wrap( ~ year, scales = "free") + 
   scale_x_date() +
   geom_hline(yintercept = 0) +
   theme(text = element_text(size = 15)) + 
-  labs(colour="Region") +
+  labs(colour="Year") +
   theme_bw()
 
 # loess difference of 2020 - 2019 mobility
@@ -147,16 +134,7 @@ ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
   theme(text = element_text(size = 15)) +
   labs(colour="Income Grp (5 High)") +
   theme_bw()
-  
-ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
-  geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
-  ggtitle("Mobility Change 2020 - 2019") + ylab("% Sheltering") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ region_s, scales = "free", nrow = 2) +
-  scale_x_date() +
-  theme(text = element_text(size = 15)) +
-  labs(colour="Income Grp (5 High)") +
-  theme_bw()
+
 
 
 
