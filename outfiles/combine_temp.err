@@ -9,5 +9,5 @@ The following objects are masked from ‘package:base’:
 
     intersect, setdiff, setequal, union
 
-/var/spool/slurmd/job22537903/slurm_script: line 17: 418852 Killed                  Rscript ./combine_temp.R
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=22537903.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
+/var/spool/slurmd/job22546419/slurm_script: line 17: 430908 Killed                  Rscript ./combine_temp.R
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=22546419.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
