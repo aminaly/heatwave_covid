@@ -10,19 +10,14 @@ library(reshape2)
 library(SafeGraphR) 
 
 #read in raw sheltering by cbg
-p <- readRDS(paste0(getwd(), "/heatwaves_manual/patterns_raw_blockgroup.rds"))
-
-#get just santa clara county
-p <- p %>% filter(fips == "06085")
+p <- readRDS(paste0(getwd(), "/heatwaves_manual/patterns_santaclara.rds"))
 
 #expand out sheltering 
-d <- expand_integer_json(p, "stops_by_day",  by = c("census_block_group", "date", "state", "fips"), fun = sum)
+d <- expand_integer_json(p, "stops_by_day", index = "day",  by = c("census_block_group", "date", "state", "fips"), fun = sum)
 
 #rename for clarity
-d <- d %>% rename(visited_block_group = census_block_group) %>%
-  dplyr:filter(origin_census_block_group != visited_block_group) %>%
-  rename(origin_census_block_group = census_block_group) %>%
-  group_by(census_block_group, date, state, fips) %>%
+d$date <- d$date + days(d$day - 1) 
+d <- d %>% group_by(census_block_group, date, state, fips) %>%
   summarise(total_devices_moving = sum(device_home_areas)) %>% mutate(month = month(date)) %>% mutate(year = year(date))
 
 # join with the primary residence table so we know how many live there
