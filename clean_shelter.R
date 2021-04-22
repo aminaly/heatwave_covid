@@ -17,11 +17,14 @@ d <- expand_integer_json(p, "stops_by_day", index = "day",  by = c("census_block
 
 #rename for clarity
 d$date <- d$date + days(d$day - 1) 
-d <- d %>% group_by(census_block_group, date, state, fips) %>%
-  summarise(total_devices_moving = sum(device_home_areas)) %>% mutate(month = month(date)) %>% mutate(year = year(date))
 
 # join with the primary residence table so we know how many live there
-r <- readRDS("all_residing_raw_blockgroup.rds")
+r <- readRDS(paste0(getwd(), "/heatwaves_manual/all_residing_raw_blockgroup.rds"))
 
-patterns_clean_blockgroup <- left_join(d, r, by = c("census_block_group", "month", "year"))
-saveRDS(patterns_clean_blockgroup, paste0(getwd(),"/heatwaves_manual/patterns_clean_blockgroup.rds"))
+patterns_clean_blockgroup <- left_join(d, r, by = c("census_block_group", "month", "year", "state"))
+
+patterns_clean_blockgroup$visitors = patterns_clean_blockgroup$stops_by_day - patterns_clean_blockgroup$number_devices_residing
+patterns_clean_blockgroup$visitors_percap = patterns_clean_blockgroup$visitors / patterns_clean_blockgroup$number_devices_residing
+
+
+saveRDS(patterns_clean_blockgroup, paste0(getwd(),"/heatwaves_manual/patterns_clean_santaclara.rds"))

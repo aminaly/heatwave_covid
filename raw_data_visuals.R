@@ -40,9 +40,9 @@ i <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips), fips
 #combine shelter with icncome, and select region if we want it
 shelter <- left_join(s, i, by = c("census_block_group"))
 shelter <- shelter %>% ungroup(date) %>% mutate(date = as.Date(date))
-shelter$stateyear <- paste0(shelter$state, year(shelter$date))
 
 ## Combined temperature and sheltering by fips 
+t <- t %>% filter(fips %in% unique(s$fips))
 t_zs <- t %>% group_by(fips, year) %>%
   mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
   mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
@@ -55,7 +55,7 @@ data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-27
 
 ## renaming columns for easy access to main x and y values 
 data <- rename(data, measure = mean_high_c)
-data <- rename(data, yvar = shelter_index)
+data <- rename(data, yvar = visitors_percap)
 data <- na.omit(data)
 
 ## lets do some plots
@@ -71,30 +71,29 @@ data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mut
 data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
 data_mar_dec <- rbind(data2019, data2020)
 
-# line plot of mobility over time separated by income group
+# line plot of outside visitors over time separated by income group, just covid timeline
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
-  ggtitle("Mobility Throughout Year") + ylab("% Sheltering") + xlab("Date") +
+  ggtitle("Mobility Throughout Year - COVID TL") + ylab("# Visitors / Home Devices") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
   facet_wrap( ~ year, scales = "free", nrow = 2) +
   scale_x_date() +
   theme(text = element_text(size = 15)) +
-  labs(colour="Income Grp (5 High)") +
+  labs(colour="$$ Grp (5 High)") +
   theme_bw()
 
-# line plot of mobility over time separated by income group but with loess 
+# line plot of outside visitors over time separated by income group, all time
 ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
-  #geom_line(aes(colour=income_group)) + 
   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
-  ggtitle("Mobility Full Timeline") + ylab("% Sheltering") + xlab("Date") +
+  ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
   facet_wrap( ~ year, scales = "free", nrow = 2) + 
   scale_x_date() +
   theme(text = element_text(size = 15)) + 
-  labs(colour="Income Grp (5 High)") +
+  labs(colour="$$ Grp (5 High)") +
   theme_bw()
   
-# bar plot showing with num of each income group broken down by region
+# bar plot showing with num of each income group in santa clara
 i_m <- na.omit(left_join(m_master, i, by = "fips"))
 i_m_short <- i_m %>% group_by(region_s, income_group) %>% count(income_group)
 
@@ -110,7 +109,7 @@ i_m_short %>%
   theme(text = element_text(size = 20))
 
 # loess plot showing how normal temps were each year
-ggplot(data=data, aes(x=date, y=z_score_high, group=year)) +
+ggplot(data=data, aes(x=date, y=p_high, group=year)) +
   geom_smooth(aes(group=year, color=as.factor(year))) +
   ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
