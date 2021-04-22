@@ -21,7 +21,7 @@ for(file in all_files) {
   )
   
   if(inherits(possibleError, "error")) next
-  f$fips <- str_sub(f$census_block_group, 1,5)
+  f$fips <- str_sub(f$area, 1,5)
   f <- f %>% filter(fips == "06085") %>%
     select(census_block_group = area, date = date_range_start, raw_device_counts, distance_from_home,
                     distance_from_primary_daytime_location, median_dwell, state = region, device_home_areas, fips, stops_by_day)
