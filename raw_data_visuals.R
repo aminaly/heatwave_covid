@@ -82,7 +82,7 @@ ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   labs(colour="Income Grp (5 High)") +
   theme_bw()
 
-# line plot of mobility over time separated by income group & by region but with loess 
+# line plot of mobility over time separated by income group but with loess 
 ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
   #geom_line(aes(colour=income_group)) + 
   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +

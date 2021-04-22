@@ -15,8 +15,8 @@ library(stringr)
 library(broom)
 
 ##Read in datasets
-all_files <- list.files("heatwaves_manual/temps/bg/", full.names = T)
-f <- readRDS(all_files[1])
-f <- f[1:20000,]
+p <- readRDS("heatwaves_manual/patterns_raw_blockgroup.rds")
+p <- p[1:2000]
 
-saveRDS(f, (paste0(getwd(),"/heatwaves_manual/example_blockgroup.rds")))
+
+saveRDS(f, (paste0(getwd(),"/heatwaves_manual/short_patterns.rds")))
