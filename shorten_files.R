@@ -16,7 +16,7 @@ library(broom)
 
 ##Read in datasets
 p <- readRDS("heatwaves_manual/patterns_raw_blockgroup.rds")
-p <- p[1:2000]
+p <- p %>% filter(fips == "06085")
 
 
-saveRDS(f, (paste0(getwd(),"/heatwaves_manual/short_patterns.rds")))
+saveRDS(f, (paste0(getwd(),"/heatwaves_manual/patterns_santaclara.rds")))
