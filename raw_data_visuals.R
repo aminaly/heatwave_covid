@@ -44,7 +44,7 @@ i$census_block_group <- as.character(i$census_block_group)
 
 #combine shelter with icncome, and select region if we want it
 shelter <- left_join(s, i, by = c("census_block_group", "fips"))
-shelter <- shelter %>% ungroup(date) %>% mutate(date = as.Date(date))
+shelter <- shelter %>% mutate(date = as.Date(date))
 
 ## Combined temperature and sheltering by fips 
 t <- t %>% filter(fips %in% unique(s$fips))
@@ -75,10 +75,7 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
 data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mutate(day = day(date))
 data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
 data_mar_dec <- rbind(data2019, data2020)
-data_mar_dec <- data_mar_dec %>% select(census_block_group, date, state = state.x, fips, stops_by_day,
-                                        day, month = month.x, year, number_devices_residing, visitors,
-                                        yvar, region_s, median_income, income_group, county, mean_low,
-                                        mean_high, monthyear, p_high, measure)
+
 
 # line plot of outside visitors over time separated by income group, just covid timeline
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
@@ -130,7 +127,7 @@ ggplot(data=data, aes(x=date, y=p_high, group=year)) +
   theme_bw()
 
 # loess difference of 2020 - 2019 mobility
-data_sub <- left_join(data2019, data2020, by = c("fips", "month", "day"))
+data_sub <- left_join(data2019, data2020, by = c("fips", "month.x", "day"))
 data_sub <- data_sub %>% mutate(yvar = yvar.y - yvar.x) %>% rename(income_group = income_group.x) %>%
   rename(date = date.x) %>% rename(region_s = region_s.x)
 
