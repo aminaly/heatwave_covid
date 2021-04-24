@@ -32,6 +32,8 @@ s <- left_join(s, m_master, by = "fips")
 
 #set up mortality & add in median income
 income <- na.omit(income %>% dplyr::select(census_block_group, 	median_income = B19013e1))
+income <- income %>% mutate("census_block_group" = ifelse(nchar(census_block_group) == 11, 
+                                                paste0("0", census_block_group), census_block_group))
 income$fips <- substr(income$census_block_group, 1, 5)
 income <- income %>% mutate(income_group = ntile(median_income, 5))
 i <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips), fips)) %>% 
@@ -39,9 +41,10 @@ i <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips), fips
 
 i$census_block_group <- as.character(i$census_block_group)
 
+
 #combine shelter with icncome, and select region if we want it
-shelter <- left_join(s, i, by = c("census_block_group"))
-#shelter <- shelter %>% ungroup(date) %>% mutate(date = as.Date(date))
+shelter <- left_join(s, i, by = c("census_block_group", "fips"))
+shelter <- shelter %>% ungroup(date) %>% mutate(date = as.Date(date))
 
 ## Combined temperature and sheltering by fips 
 t <- t %>% filter(fips %in% unique(s$fips))
@@ -52,7 +55,7 @@ t_zs <- t %>% group_by(fips, year) %>%
   mutate(p_low = 100* pnorm(z_score_low)) %>%
   ungroup
 
-data <- left_join(shelter, t_zs, by = c("fips", "date"))
+data <- left_join(shelter, t_zs, by = c("fips", "date", "year"))
 data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
 
 ## renaming columns for easy access to main x and y values 
@@ -72,6 +75,10 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
 data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mutate(day = day(date))
 data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
 data_mar_dec <- rbind(data2019, data2020)
+data_mar_dec <- data_mar_dec %>% select(census_block_group, date, state = state.x, fips, stops_by_day,
+                                        day, month = month.x, year, number_devices_residing, visitors,
+                                        yvar, region_s, median_income, income_group, county, mean_low,
+                                        mean_high, monthyear, p_high, measure)
 
 # line plot of outside visitors over time separated by income group, just covid timeline
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
