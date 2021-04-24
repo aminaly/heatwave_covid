@@ -52,6 +52,3 @@ cols(
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-/var/spool/slurmd/job22829052/slurm_script: line 17: 103161 Killed                  Rscript ./raw_data_visuals.R
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=22829052.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
