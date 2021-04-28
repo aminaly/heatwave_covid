@@ -117,7 +117,7 @@ i_m_short %>%
 # loess plot showing how normal temps were each year
 ggplot(data=data, aes(x=date, y=p_high, group=year)) +
   geom_smooth(aes(group=year, color=as.factor(year))) +
-  ggtitle("Temp Z Score") + ylab("Z Score") + xlab("Date") +
+  ggtitle("Temp Percentile") + ylab("Temp Percentile") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
   #facet_wrap( ~ year, scales = "free") + 
   scale_x_date() +

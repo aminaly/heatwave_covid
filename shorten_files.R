@@ -14,9 +14,19 @@ library(reshape2)
 library(stringr)
 library(broom)
 
+# Which FIPS codes do we want? 
+# bay area this time
+included_fips <- c("06081", "06085", "06001", "06013","06075") #bay area not including Sonoma, Napa, Marin, and Solano
+ 
 ##Read in datasets
 p <- readRDS("heatwaves_manual/patterns_raw_blockgroup.rds")
-p <- p %>% filter(fips == "06085")
+p <- p %>% filter(fips %in% included_fips)
 
 
-saveRDS(f, (paste0(getwd(),"/heatwaves_manual/patterns_santaclara.rds")))
+saveRDS(p, (paste0(getwd(),"/heatwaves_manual/patterns_bayarea.rds")))
+
+t <- readRDS(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
+t <- t %>% filter(fips %in% included_fips)
+
+saveRDS(t, (paste0(getwd(),"/heatwaves_manual/bayarea_temp_data_clean_2021.rds")))
+
