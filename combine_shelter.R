@@ -22,14 +22,13 @@ for(file in all_files) {
   
   if(inherits(possibleError, "error")) next
   f$fips <- str_sub(f$area, 1,5)
-  f <- f %>% filter(fips == "06085") %>%
-    select(census_block_group = area, date = date_range_start, raw_device_counts, distance_from_home,
+  f <- f %>% select(census_block_group = area, date = date_range_start, raw_device_counts, distance_from_home,
                     distance_from_primary_daytime_location, median_dwell, state = region, device_home_areas, fips, stops_by_day)
   combined <- bind_rows(combined, f)
   
 }
 
-saveRDS(combined, "heatwaves_manual/patterns_santaclara.rds")
+saveRDS(combined, "heatwaves_manual/patterns_raw_blockgroup.rds")
 
 # #####################
 # #### now lets combine the actual neighborhood devices residing patterns by day
