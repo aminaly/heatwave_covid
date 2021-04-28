@@ -16,10 +16,11 @@ library(wesanderson)
 
 
 ##Read in datasets
-t <- read_rds(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
+t <- read_rds(paste0(getwd(), "/heatwaves_manual/bayarea_temp_data_clean_2021.rds"))
 r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
-s <- read_rds(paste0(getwd(), "/heatwaves_manual/patterns_clean_santaclara.rds"))
+s <- read_rds(paste0(getwd(), "/heatwaves_manual/patterns_bayarea.rds"))
+metadata <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/metadata/cbg_field_descriptions.csv"), stringsAsFactors = F, header = T)
 
 #get income and population data
 income <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b19.csv"), stringsAsFactors = F, header = T)
@@ -68,7 +69,7 @@ pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
-text(x = 0.5, y = 0.5, paste(timestamp(), "\n Data Overview"),
+text(x = 0.5, y = 0.5, paste(timestamp(), "\n Santa Clara Data Overview"),
      cex = 1.5, col = "black")
 
 ## cutting up the data so that we only get the "covid" timeline
@@ -98,6 +99,15 @@ ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
   theme(text = element_text(size = 15)) + 
   labs(colour="$$ Grp (5 High)") +
   theme_bw()
+
+ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
+  geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
+  ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
+  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+  scale_x_date() +
+  theme(text = element_text(size = 15)) + 
+  labs(colour="$$ Grp (5 High)") +
+  theme_bw()
   
 # bar plot showing with num of each income group in santa clara
 i_m <- na.omit(left_join(m_master, i, by = "fips"))
@@ -115,7 +125,9 @@ i_m_short %>%
   theme(text = element_text(size = 20))
 
 # loess plot showing how normal temps were each year
-ggplot(data=data, aes(x=date, y=p_high, group=year)) +
+t_recent <- t_zs %>% filter(between(year, 2018, 2020))
+ggplot(data=t_recent, aes(x=date, y=p_high)) +
+  geom_line(aes(group=year, color=as.factor(year))) +
   geom_smooth(aes(group=year, color=as.factor(year))) +
   ggtitle("Temp Percentile") + ylab("Temp Percentile") + xlab("Date") +
   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
@@ -126,19 +138,7 @@ ggplot(data=data, aes(x=date, y=p_high, group=year)) +
   labs(colour="Year") +
   theme_bw()
 
-# loess difference of 2020 - 2019 mobility
-# data_sub <- left_join(data2019, data2020, by = c("census_block_group", "month.x", "day"))
-# data_sub <- data_sub %>% mutate(yvar = yvar.y - yvar.x) %>% rename(income_group = income_group.x) %>%
-#   rename(date = date.x) %>% rename(region_s = region_s.x)
-# 
-# ggplot(data=data_sub, aes(x=date, y=yvar, group=income_group)) +
-#   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
-#   ggtitle("Mobility Change 2020 - 2019") + ylab("% Sheltering") + xlab("Date") +
-#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-#   scale_x_date() +
-#   theme(text = element_text(size = 15)) +
-#   labs(colour="Income Grp (5 High)") +
-#   theme_bw()
+#### Regressions
 
 
 

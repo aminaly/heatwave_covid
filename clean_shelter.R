@@ -10,7 +10,7 @@ library(reshape2)
 library(SafeGraphR) 
 
 #read in raw sheltering by cbg
-p <- readRDS(paste0(getwd(), "/heatwaves_manual/patterns_santaclara.rds"))
+p <- readRDS(paste0(getwd(), "/heatwaves_manual/patterns_bayarea.rds"))
 
 #expand out sheltering 
 d <- expand_integer_json(p, "stops_by_day", index = "day",  by = c("census_block_group", "date", "state", "fips"), fun = sum)
@@ -30,4 +30,4 @@ patterns_clean_blockgroup$visitors = patterns_clean_blockgroup$stops_by_day - pa
 patterns_clean_blockgroup$visitors_percap = patterns_clean_blockgroup$visitors / patterns_clean_blockgroup$number_devices_residing
 
 
-saveRDS(patterns_clean_blockgroup, paste0(getwd(),"/heatwaves_manual/patterns_clean_santaclara.rds"))
+saveRDS(patterns_clean_blockgroup, paste0(getwd(),"/heatwaves_manual/patterns_clean_bayarea.rds"))
