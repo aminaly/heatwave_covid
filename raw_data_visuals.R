@@ -2,6 +2,8 @@ ifelse(dir.exists("~/Box Sync/heatwave_covid"),
        setwd("~/Box Sync/heatwave_covid"),
        setwd("/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid"))
 
+source("./regression_functions_shelter.R")
+
 library(dplyr)
 library(lfe)
 library(ggplot2)
@@ -19,7 +21,7 @@ library(wesanderson)
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/bayarea_temp_data_clean_2021.rds"))
 r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
-s <- read_rds(paste0(getwd(), "/heatwaves_manual/patterns_bayarea.rds"))
+s <- read_rds(paste0(getwd(), "/heatwaves_manual/patterns_clean_bayarea.rds"))
 metadata <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/metadata/cbg_field_descriptions.csv"), stringsAsFactors = F, header = T)
 
 #get income and population data
@@ -76,7 +78,6 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Santa Clara Data Overview"),
 data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mutate(day = day(date))
 data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
 data_mar_dec <- rbind(data2019, data2020)
-
 
 # line plot of outside visitors over time separated by income group, just covid timeline
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
@@ -139,9 +140,40 @@ ggplot(data=t_recent, aes(x=date, y=p_high)) +
   theme_bw()
 
 #### Regressions
+## Quick function that takes data and plots all the variations we'd want
+plot_data <- function(data, plot_title, lows=FALSE) {
+  
+  xlab <- "High Temp in County"
+  par(mfcol = c(2,2))
+  print(plot_title)
+  model <- fe_model(data, level = 1)
+  boots <- bootstrap_data(data, short=T, level=1)
+  plot_regs(data, boots, plot_title, level = 1, xlabel = xlab, ylabel = "Shelter Index", model=model)
+  # 
+  # #table of coefs
+  # mo <- tidy(model)
+  # reps <- nrow(mo)
+  # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("shelter", reps)))
+  
+  data$yvar <- log(data$yvar)
+  model <- fe_model(data, level = 1)
+  boots <- bootstrap_data(data, short=T, level=1)
+  plot_regs(data, boots, plot_title, level = 1,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
+  
+  # #table of coefs
+  # mo <- tidy(model)
+  # reps <- nrow(mo)
+  # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("log_shelter", reps)))
+}
 
-
-
-
+# # run regression for pre-covid
+# data_reg <- data %>% filter(year %in% c(2018,2019))
+# plot_title <- paste0("Mobility Index v Avg High 2018-2019")
+# plot_data(data_reg, plot_title)
+# 
+# # run and plot regression post-covid
+# data_reg <- data %>% filter(date > "2020-04-01")
+# plot_title <- paste0("Mobility Index v Avg High after 04/01/2020")
+# plot_data(data_reg, plot_title)
 
   
