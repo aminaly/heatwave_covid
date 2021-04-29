@@ -167,9 +167,26 @@ plot_data <- function(data, plot_title, lows=FALSE) {
 }
 
 ## add monthweek and countyyear for the regression
+data$countyyear <- paste0(data$fips, data$year)
+data$monthweek <- paste0(month(data$date, label = T), week(data$date))
 
-plot_title <- paste0("Mobility Index v Avg High 2018-2019")
+plot_title <- paste0("Mobility Index v Avg High")
 plot_data(data, plot_title)
+
+## just summer months 
+data_summer <- data %>% filter(between(month, 5, 9))
+plot_title <- paste0("Mobility Index v Avg High Summer")
+plot_data(data_summer, plot_title)
+
+## just 2020 
+data_2020 <- data %>% filter(year == 2020)
+plot_title <- paste0("Mobility Index v Avg High 2020")
+plot_data(data_2020, plot_title)
+
+## just 2020 summer
+data_2020_summer <- data_2020 %>% filter(between(month, 5, 9))
+plot_title <- paste0("Mobility Index v /n Avg High 2020 Summer")
+plot_data(data_2020_summer, plot_title)
 # 
 # # run and plot regression post-covid
 # data_reg <- data %>% filter(date > "2020-04-01")
