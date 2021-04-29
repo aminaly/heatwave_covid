@@ -31,5 +31,3 @@ The following object is masked from ‘package:tidyr’:
 
     smiths
 
-/var/spool/slurmd/job22628865/slurm_script: line 17: 200464 Killed                  Rscript ./clean_shelter.R
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=22628865.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.

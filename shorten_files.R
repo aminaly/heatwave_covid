@@ -16,7 +16,7 @@ library(broom)
 
 # Which FIPS codes do we want? 
 # bay area this time
-included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area not including Sonoma, Napa, Marin, and Solano
+included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
  
 ##Read in datasets
 p <- readRDS("heatwaves_manual/patterns_raw_blockgroup.rds")
