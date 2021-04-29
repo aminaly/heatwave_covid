@@ -22,7 +22,7 @@ t <- read_rds(paste0(getwd(), "/heatwaves_manual/bayarea_temp_data_clean_2021.rd
 r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
 s <- read_rds(paste0(getwd(), "/heatwaves_manual/patterns_clean_bayarea.rds"))
-metadata <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/metadata/cbg_field_descriptions.csv"), stringsAsFactors = F, header = T)
+metadata <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/metadata/cbg_geographic_data.csv"), stringsAsFactors = F, header = T)
 
 #get income and population data
 income <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b19.csv"), stringsAsFactors = F, header = T)
@@ -166,10 +166,10 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("log_shelter", reps)))
 }
 
-# # run regression for pre-covid
-# data_reg <- data %>% filter(year %in% c(2018,2019))
-# plot_title <- paste0("Mobility Index v Avg High 2018-2019")
-# plot_data(data_reg, plot_title)
+## add monthweek and countyyear for the regression
+
+plot_title <- paste0("Mobility Index v Avg High 2018-2019")
+plot_data(data, plot_title)
 # 
 # # run and plot regression post-covid
 # data_reg <- data %>% filter(date > "2020-04-01")

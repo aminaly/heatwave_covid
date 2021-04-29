@@ -25,8 +25,8 @@ p <- p %>% filter(fips %in% included_fips)
 
 saveRDS(p, (paste0(getwd(),"/heatwaves_manual/patterns_bayarea.rds")))
 
-t <- readRDS(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
-t <- t %>% filter(fips %in% included_fips)
-
-saveRDS(t, (paste0(getwd(),"/heatwaves_manual/bayarea_temp_data_clean_2021.rds")))
-
+# t <- readRDS(paste0(getwd(), "/heatwaves_manual/all_temperature_data_clean_2021.rds"))
+# t <- t %>% filter(fips %in% included_fips)
+# 
+# saveRDS(t, (paste0(getwd(),"/heatwaves_manual/bayarea_temp_data_clean_2021.rds")))
+# 
