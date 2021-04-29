@@ -15,6 +15,7 @@ library(stringr)
 library(broom)
 library(gridExtra)
 library(wesanderson)
+library(SafeGraphR)
 
 
 ##Read in datasets
@@ -71,7 +72,7 @@ pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
-text(x = 0.5, y = 0.5, paste(timestamp(), "\n Santa Clara Data Overview"),
+text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
      cex = 1.5, col = "black")
 
 ## cutting up the data so that we only get the "covid" timeline
@@ -144,7 +145,7 @@ ggplot(data=t_recent, aes(x=date, y=p_high)) +
 plot_data <- function(data, plot_title, lows=FALSE) {
   
   xlab <- "High Temp in County"
-  par(mfcol = c(2,2))
+  par(mfcol = c(2,1))
   print(plot_title)
   model <- fe_model(data, level = 1)
   boots <- bootstrap_data(data, short=T, level=1)
@@ -155,10 +156,10 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   # reps <- nrow(mo)
   # model_output <- rbind(model_output, cbind(tidy(model), title = rep(plot_title, reps), ytype = rep("shelter", reps)))
   
-  data$yvar <- log(data$yvar)
-  model <- fe_model(data, level = 1)
-  boots <- bootstrap_data(data, short=T, level=1)
-  plot_regs(data, boots, plot_title, level = 1,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
+  # data$yvar <- log(data$yvar)
+  # model <- fe_model(data, level = 1)
+  # boots <- bootstrap_data(data, short=T, level=1)
+  # plot_regs(data, boots, plot_title, level = 1,xlabel = xlab, ylabel = "Log Shelter Index", model = model)
   
   # #table of coefs
   # mo <- tidy(model)
