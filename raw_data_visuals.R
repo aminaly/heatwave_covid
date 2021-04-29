@@ -147,7 +147,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   xlab <- "High Temp in County"
   par(mfcol = c(2,1))
   print(plot_title)
-  model <- fe_model(data, level = 1)
+  model <- fe_model(data, level = 2)
   boots <- bootstrap_data(data, short=T, level=1)
   plot_regs(data, boots, plot_title, level = 1, xlabel = xlab, ylabel = "Shelter Index", model=model)
   # 
