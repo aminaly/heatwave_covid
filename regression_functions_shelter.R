@@ -15,7 +15,7 @@ library(reshape2)
 # Data must have the following columns: deaths, measure (temp), fips (county id), monthyear (pasted together)
 fe_model <- function(dta, level, interact=F) {
   
-  dta <- na.omit(dta, cols=c("measure", "deaths"))
+  dta <- na.omit(dta, cols=c("measure", "yvar"))
   # if(interact) {
   #   if (level == 1) {
   #     mod <- felm(deaths ~ measure + measure:income_group | fips + monthyear, data=dta)
