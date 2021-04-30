@@ -53,8 +53,7 @@ cols(
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-Error in plot.window(...) : need finite 'ylim' values
-Calls: plot_data ... plot_regs -> plot -> plot.default -> localWindow -> plot.window
-In addition: Warning message:
-In log(data$yvar) : NaNs produced
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
