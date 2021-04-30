@@ -175,7 +175,7 @@ plot_title <- paste0("Mobility Index v Avg High")
 plot_data(data, plot_title)
 
 ## just summer months 
-data_summer <- data %>% filter(between(month, 5, 9))
+data_summer <- data %>% filter(between(month.x, 5, 9))
 plot_title <- paste0("Mobility Index v Avg High Summer")
 plot_data(data_summer, plot_title)
 
@@ -185,7 +185,7 @@ plot_title <- paste0("Mobility Index v Avg High 2020")
 plot_data(data_2020, plot_title)
 
 ## just 2020 summer
-data_2020_summer <- data_2020 %>% filter(between(month, 5, 9))
+data_2020_summer <- data_2020 %>% filter(between(month.x, 5, 9))
 plot_title <- paste0("Mobility Index v /n Avg High 2020 Summer")
 plot_data(data_2020_summer, plot_title)
 # 
