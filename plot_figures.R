@@ -80,9 +80,6 @@ data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mut
 data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
 data_mar_dec <- rbind(data2019, data2020)
 
-#get the median mobility for each income group on any given day 
-data_median <- data %>% 
-
 # line plot of outside visitors over time separated by income group, just covid timeline
 ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
@@ -150,12 +147,13 @@ plot_data <- function(data, plot_title, lows=FALSE, bins=1) {
   
   # now lets do it binned
   lvl = 1
-  data_binned <- data %>% mutate(measure_bin = ntile(measure, bins))
+  data <- data %>% mutate(measure_bin = ntile(measure, bins))
   plot_return <- NA
   
   for(k in 1:bins) {
     
-    par(mfcol = c(2,1))
+    data_binned <- data %>% filter(measure_bin == k)
+    #par(mfcol = c(2,1))
     print(plot_title)
     model <- fe_model(data_binned, level = lvl)
     boots <- bootstrap_data(data_binned, short=T, level= lvl)
