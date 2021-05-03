@@ -26,9 +26,11 @@ fe_model <- function(dta, level, interact=F) {
   #   }
   # } else {
   if (level == 1) {
-    mod <- felm(yvar ~ measure| fips + monthyear, data=dta)
+    mod <- felm(yvar ~ measure  + 
+                  as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
   } else if (level == "log") {
-    mod <- felm(yvar ~ log(measure) | fips + monthyear, data=dta )
+    mod <- felm(yvar ~ log(measure)  + 
+                  as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
   } else if (level > 1) {
     mod <- felm(yvar ~ poly(measure,level,raw=T) + 
                   as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
@@ -132,7 +134,7 @@ plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", yla
 }
 
 #Function to output plot with binned regressions 
-plot_regs_binned <- function(data, coefs, title, level, model, plt) {
+plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=NA) {
   
   coefs <- coefs[[1]]
   max_val <- max(data$measure, na.rm = T)
@@ -164,9 +166,28 @@ plot_regs_binned <- function(data, coefs, title, level, model, plt) {
   #figure out the 95 and 5 percentiles of the bootstraps
   confint <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
   
+  #if this is the first plot, start ggplot, if not, just add to plt
+  if(is.na(plt)) {
   
-  plt <- plt + geom_line(x, confint[2,])
-  plt <- plt + geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1)
+    plt <- ggplot(data=data, aes(x=x, y=confint[2,])) +
+      geom_point() +
+      geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1) +
+      ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Temperature") +
+      #scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+      scale_x_continuous() +
+      theme(text = element_text(size = 15)) + 
+      theme_bw()
+    
+  } else {
+    
+    plt <- plt + geom_line(x, confint[2,])
+    plt <- plt + geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1) +      
+      scale_x_continuous()
+
+  }
+  
+  return(plt)
+
   
   
 }
