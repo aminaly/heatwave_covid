@@ -180,7 +180,7 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
     
   } else {
     
-    plt <- plt + geom_line(x, confint[2,])
+    plt <- plt + geom_line(aes(x, confint[2,]))
     plt <- plt + geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1) +      
       scale_x_continuous()
 
