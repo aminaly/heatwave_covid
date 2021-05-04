@@ -66,7 +66,6 @@ data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-27
 data <- rename(data, measure = mean_high_c)
 data <- rename(data, yvar = visitors_percap)
 data <- na.omit(data)
-saveRDS(data, "heatwaves_manual/data_for_regression.rds")
 
 ## lets do some plots
 pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
@@ -187,6 +186,8 @@ plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1) {
 ## add monthweek and countyyear for the regression
 data$countyyear <- paste0(data$fips, data$year)
 data$monthweek <- paste0(month(data$date, label = T), week(data$date))
+
+saveRDS(data, "./heatwaves_manual/data_for_regression.rds")
 
 plot_title <- paste0("Mobility Index v Avg High")
 plot_data(data, plot_title)
