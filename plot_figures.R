@@ -149,9 +149,8 @@ plot_data <- function(data, plot_title, lows=FALSE) {
   lvl <- 1
   par(mfcol = c(2,1))
   print(plot_title)
-  model <- fe_model(data_binned, level = lvl)
-  boots <- bootstrap_data(data_binned, short=T, level= lvl)
-  plot_regs(data, boots, plot_title, level = lvl, xlabel = xlab, model=model)
+  model <- fe_model(data, level = lvl)
+  boots <- bootstrap_data(data, short=T, level= lvl)
   plot_regs(data, boots, plot_title, level = lvl, xlab = "Temp (C)", ylab = "# Visitors / Home Devices", model=model)
 
 }
