@@ -66,6 +66,7 @@ data <- data %>% mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-27
 data <- rename(data, measure = mean_high_c)
 data <- rename(data, yvar = visitors_percap)
 data <- na.omit(data)
+saveRDS(data, "heatwaves_manual/data_for_regression.rds")
 
 ## lets do some plots
 pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
@@ -143,7 +144,19 @@ ggplot(data=t_recent, aes(x=date, y=p_high)) +
 
 #### Regressions
 ## Quick function that takes data and plots all the variations we'd want
-plot_data <- function(data, plot_title, lows=FALSE, bins=1) {
+plot_data <- function(data, plot_title, lows=FALSE) {
+  
+  lvl <- 1
+  par(mfcol = c(2,1))
+  print(plot_title)
+  model <- fe_model(data_binned, level = lvl)
+  boots <- bootstrap_data(data_binned, short=T, level= lvl)
+  plot_regs(data, boots, plot_title, level = 2, xlabel = xlab, model=model)
+  plot_regs(data, boots, plot_title, level = lvl, xlab = "Temp (C)", ylab = "# Visitors / Home Devices", model=model)
+
+}
+
+plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1) {
   
   # now lets do it binned
   lvl = 1

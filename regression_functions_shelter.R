@@ -78,7 +78,7 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
 
 
 #Function to output a plot with the regression and 95% confidence interval
-plot_regs <- function(data, coefs, title, level, xlabel = "Temperature (C)", ylabel, model) {
+plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
   
   coefs <- coefs[[1]]
   max_val <- max(data$measure, na.rm = T)
@@ -172,8 +172,7 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
     plt <- ggplot(data=data, aes(x=x, y=confint[2,])) +
       geom_point() +
       geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1) +
-      ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Temperature") +
-      #scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+      ggtitle(title) + ylab(ylab) + xlab(xlab) +
       scale_x_continuous() +
       theme(text = element_text(size = 15)) + 
       theme_bw()
