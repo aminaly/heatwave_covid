@@ -154,7 +154,7 @@ plot_data <- function(data, plot_title, lows=FALSE) {
 
 }
 
-plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1) {
+plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1, xlab="Temp (C)") {
   
   # now lets do it binned
   lvl = 1
@@ -170,7 +170,8 @@ plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1) {
     boots <- bootstrap_data(data_binned, short=T, level= lvl)
     
     
-    plot_return <- plot_regs_binned(data_binned, boots, plot_title, level = lvl, xlab = "Temp (C)", ylab = "# Visitors / Home Devices", model=model, plt = plot_return)
+    plot_return <- plot_regs_binned(data_binned, boots, plot_title, level = lvl, xlab = xlab, 
+                                    ylab = "# Visitors / Home Devices", model=model, plt = plot_return)
   
   }
   
@@ -189,27 +190,48 @@ data$monthweek <- paste0(month(data$date, label = T), week(data$date))
 
 saveRDS(data, "./heatwaves_manual/data_for_regression.rds")
 
+## plot binned data for 2018/19 
+data_old <- data %>% filter(year %in% c(2018,2019))
 plot_title <- paste0("Mobility Index v Avg High")
-plot_data(data, plot_title)
+plot_data_bin(data_old, plot_title, 10)
 
-## just summer months 
-data_summer <- data %>% filter(between(month.x, 5, 9))
-plot_title <- paste0("Mobility Index v Avg High Summer")
-plot_data(data_summer, plot_title)
-
-## just 2020 
+## plot binned data for 2020
 data_2020 <- data %>% filter(year == 2020)
 plot_title <- paste0("Mobility Index v Avg High 2020")
-plot_data(data_2020, plot_title)
+plot_data_bin(data_2020, plot_title, 10)
 
-## just 2020 summer
+## plot binned data for 2018/19 summer only 
+data_summer <- data %>% filter(between(month.x, 5, 9)) %>% filter(year %in% c(2018,2019))
+plot_title <- paste0("Mobility Index v Avg High Summer 2018-19")
+plot_data_bin(data_summer, plot_title, 10)
+
+## plot binned data for 2020 summer only 
 data_2020_summer <- data_2020 %>% filter(between(month.x, 5, 9))
 plot_title <- paste0("Mobility Index v /n Avg High 2020 Summer")
-plot_data(data_2020_summer, plot_title)
-# 
-# # run and plot regression post-covid
-# data_reg <- data %>% filter(date > "2020-04-01")
-# plot_title <- paste0("Mobility Index v Avg High after 04/01/2020")
-# plot_data(data_reg, plot_title)
+plot_data_bin(data_2020_summer, plot_title, 10)
+
+## reset xvar to normalized z_score value
+data <- rename(data, mean_high_c = measure)
+data <- rename(data, measure = z_score_high)
+
+## plot binned data for 2018/19 
+data_old <- data %>% filter(year %in% c(2018,2019))
+plot_title <- paste0("Mobility Index v Avg High")
+plot_data_bin(data_old, plot_title, 10, xlab = "Z_Score of Temp")
+
+## plot binned data for 2020
+data_2020 <- data %>% filter(year == 2020)
+plot_title <- paste0("Mobility Index v Avg High 2020")
+plot_data_bin(data_2020, plot_title, 10, xlab = "Z_Score of Temp")
+
+## plot binned data for 2018/19 summer only 
+data_summer <- data %>% filter(between(month.x, 5, 9)) %>% filter(year %in% c(2018,2019))
+plot_title <- paste0("Mobility Index v Avg High Summer 2018-19")
+plot_data_bin(data_summer, plot_title, 10, xlab = "Z_Score of Temp")
+
+## plot binned data for 2020 summer only 
+data_2020_summer <- data_2020 %>% filter(between(month.x, 5, 9))
+plot_title <- paste0("Mobility Index v /n Avg High 2020 Summer")
+plot_data_bin(data_2020_summer, plot_title, 10, xlab = "Z_Score of Temp")
 
   

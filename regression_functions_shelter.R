@@ -83,26 +83,27 @@ plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
   coefs <- coefs[[1]]
   max_val <- max(data$measure, na.rm = T)
   min_val <- min(data$measure, na.rm = T)
-  x = min_val:max_val ###this should be the max SWE we see 
+  avg_val <- mean(data$measure, na.rm = T)
+  x = min_val:max_val ###this should be the max temp we see 
   bts <- matrix(nrow=100,ncol=length(x))
   
   #get all my y values
   if (level == 1) {
     for (j in 1:100) {
       yy <- x*coefs[j]
-      yy <- yy - yy[x=1] ## this x value should be the average swe. Otherwise we can just set it to the first yy value
+      yy <- yy - avg_val ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[j,] <- yy
     }  
   } else if (level == 2) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2]  
-      yy <- yy - yy[x=1]
+      yy <- yy - avg_val
       bts[j,] <- yy 
     }
   } else if (level == 3) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
-      yy <- yy - yy[x=1]
+      yy <- yy - avg_val
       bts[j,] <- yy 
     }
   }
@@ -139,26 +140,27 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
   coefs <- coefs[[1]]
   max_val <- max(data$measure, na.rm = T)
   min_val <- min(data$measure, na.rm = T)
-  x = min_val:max_val ###this should be the max SWE we see 
+  avg_val <- mean(data$measure, na.rm = T)
+  x = min_val:max_val ###this should be the max temp we see 
   bts <- matrix(nrow=100,ncol=length(x))
   
   #get all my y values
   if (level == 1) {
     for (j in 1:100) {
       yy <- x*coefs[j]
-      yy <- yy - yy[x=1] ## this x value should be the average swe. Otherwise we can just set it to the first yy value
+      yy <- yy - avg_val ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[j,] <- yy
     }  
   } else if (level == 2) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2]  
-      yy <- yy - yy[x=1]
+      yy <- yy - avg_val
       bts[j,] <- yy 
     }
   } else if (level == 3) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
-      yy <- yy - yy[x=1]
+      yy <- yy - avg_val
       bts[j,] <- yy 
     }
   }
