@@ -112,7 +112,7 @@ plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
   
   
   #plot median estimate among the bootstraps
-  plot(x, confint[2,], type = "l", las=1,xlab=xlabel,ylab=ylabel,
+  plot(x, confint[2,], type = "l", las=1,xlab=xlab,ylab=ylab,
        ylim = c(min(confint[1,]), max(confint[3,])), col="navy", main=title)   
   #plot confidence intervals
   polygon(c(x,rev(x)),c(confint[1,],rev(confint[3,])),col=adjustcolor("navy", alpha=.3),border = NA)
