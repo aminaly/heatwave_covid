@@ -49,10 +49,11 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-Error: Mapping should be created with `aes()` or `aes_()`.
-Backtrace:
-    █
- 1. ├─`%>%`(...)
- 2. ├─ggplot2::ggplot(...)
- 3. └─ggplot2:::ggplot.default(...)
-Execution halted
+`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
