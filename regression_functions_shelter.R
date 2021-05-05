@@ -171,8 +171,8 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
   #if this is the first plot, start ggplot, if not, just add to plt
   if(is.na(plt)) {
   
-    plt <- ggplot(data=data, aes(x=x, y=confint[2,])) +
-      geom_point() +
+    plt <- ggplot(aes(x=x, y=confint[2,])) +
+      geom_line() +
       geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1) +
       ggtitle(title) + ylab(ylab) + xlab(xlab) +
       scale_x_continuous() +
