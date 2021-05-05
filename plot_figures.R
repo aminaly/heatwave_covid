@@ -18,7 +18,7 @@ library(wesanderson)
 library(SafeGraphR)
 
 
-##Read in datasets
+######## Read in datasets ######## 
 t <- read_rds(paste0(getwd(), "/heatwaves_manual/bayarea_temp_data_clean_2021.rds"))
 r_master <- read_csv(paste0(getwd(), "/us_census/climate_regions.csv"))
 m_master <- read_rds(paste0(getwd(), "/calculated/all_mortality.rds"))
@@ -27,6 +27,8 @@ metadata <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_da
 
 #get income and population data
 income <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b19.csv"), stringsAsFactors = F, header = T)
+
+######## Prep Data ######## 
 
 # get state and regional information
 m_master$state <- str_sub(m_master$county, -2)
@@ -79,69 +81,69 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
 data2019 <- data %>% filter(date >= "2019-03-01" & date <= "2019-11-07") %>% mutate(day = day(date))
 data2020 <- data %>% filter(date >= "2020-03-01") %>% mutate(day = day(date))
 data_mar_dec <- rbind(data2019, data2020)
+######## Non Reg Figures ######## 
+# # line plot of outside visitors over time separated by income group, just covid timeline
+# ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
+#   geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
+#   ggtitle("Mobility Throughout Year - COVID TL") + ylab("# Visitors / Home Devices") + xlab("Date") +
+#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+#   facet_wrap( ~ year, scales = "free", nrow = 2) +
+#   scale_x_date() +
+#   theme(text = element_text(size = 15)) +
+#   labs(colour="$$ Grp (5 High)") +
+#   theme_bw()
+# 
+# # line plot of outside visitors over time separated by income group, grouped by year
+# ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
+#   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
+#   ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
+#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+#   facet_wrap( ~ year, scales = "free", nrow = 2) + 
+#   scale_x_date() +
+#   theme(text = element_text(size = 15)) + 
+#   labs(colour="$$ Grp (5 High)") +
+#   theme_bw()
+# 
+# # line plot of outside visitors over time separated by income group
+# ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
+#   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
+#   ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
+#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+#   scale_x_date() +
+#   theme(text = element_text(size = 15)) + 
+#   labs(colour="$$ Grp (5 High)") +
+#   theme_bw()
+#   
+# # bar plot showing with num of each income group in santa clara
+# i_m <- na.omit(left_join(m_master, i, by = "fips"))
+# i_m_short <- i_m %>% group_by(region_s, income_group) %>% count(income_group)
+# 
+# i_m_short %>% 
+#   ggplot() +
+#   geom_bar(data=i_m_short, aes(x=income_group, y = n),
+#            stat="identity",
+#            position='dodge') +
+#   theme_bw() + ylab("Count") +
+#   #facet_wrap( ~ region_s, scales = "free") + 
+#   #scale_y_continuous(expand = c(0, 2), limits = c(0, NA)) +
+#   #scale_x_continuous(expand = c(0, 0), limits = c(0, NA)) +
+#   theme(text = element_text(size = 20))
+# 
+# # loess plot showing how normal temps were each year
+# t_recent <- t_zs %>% filter(between(year, 2018, 2020))
+# ggplot(data=t_recent, aes(x=date, y=p_high)) +
+#   geom_point(aes(group=year, color=as.factor(year))) +
+#   geom_smooth(aes(group=year, color=as.factor(year))) +
+#   ggtitle("Temp Percentile") + ylab("Temp Percentile") + xlab("Date") +
+#   scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+#   #facet_wrap( ~ year, scales = "free") + 
+#   scale_x_date() +
+#   geom_hline(yintercept = 0) +
+#   theme(text = element_text(size = 15)) + 
+#   labs(colour="Year") +
+#   theme_bw()
 
-# line plot of outside visitors over time separated by income group, just covid timeline
-ggplot(data=data_mar_dec, aes(x=date, y=yvar, group=income_group)) +
-  geom_smooth(aes(group = income_group, colour=as.factor(income_group))) +
-  ggtitle("Mobility Throughout Year - COVID TL") + ylab("# Visitors / Home Devices") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year, scales = "free", nrow = 2) +
-  scale_x_date() +
-  theme(text = element_text(size = 15)) +
-  labs(colour="$$ Grp (5 High)") +
-  theme_bw()
-
-# line plot of outside visitors over time separated by income group, grouped by year
-ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
-  geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
-  ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  facet_wrap( ~ year, scales = "free", nrow = 2) + 
-  scale_x_date() +
-  theme(text = element_text(size = 15)) + 
-  labs(colour="$$ Grp (5 High)") +
-  theme_bw()
-
-# line plot of outside visitors over time separated by income group
-ggplot(data=data, aes(x=date, y=yvar, group=income_group)) +
-  geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
-  ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  scale_x_date() +
-  theme(text = element_text(size = 15)) + 
-  labs(colour="$$ Grp (5 High)") +
-  theme_bw()
-  
-# bar plot showing with num of each income group in santa clara
-i_m <- na.omit(left_join(m_master, i, by = "fips"))
-i_m_short <- i_m %>% group_by(region_s, income_group) %>% count(income_group)
-
-i_m_short %>% 
-  ggplot() +
-  geom_bar(data=i_m_short, aes(x=income_group, y = n),
-           stat="identity",
-           position='dodge') +
-  theme_bw() + ylab("Count") +
-  #facet_wrap( ~ region_s, scales = "free") + 
-  #scale_y_continuous(expand = c(0, 2), limits = c(0, NA)) +
-  #scale_x_continuous(expand = c(0, 0), limits = c(0, NA)) +
-  theme(text = element_text(size = 20))
-
-# loess plot showing how normal temps were each year
-t_recent <- t_zs %>% filter(between(year, 2018, 2020))
-ggplot(data=t_recent, aes(x=date, y=p_high)) +
-  geom_point(aes(group=year, color=as.factor(year))) +
-  geom_smooth(aes(group=year, color=as.factor(year))) +
-  ggtitle("Temp Percentile") + ylab("Temp Percentile") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
-  #facet_wrap( ~ year, scales = "free") + 
-  scale_x_date() +
-  geom_hline(yintercept = 0) +
-  theme(text = element_text(size = 15)) + 
-  labs(colour="Year") +
-  theme_bw()
-
-#### Regressions
+######## Regression Figures ######## 
 ## Quick function that takes data and plots all the variations we'd want
 plot_data <- function(data, plot_title, lows=FALSE) {
   
