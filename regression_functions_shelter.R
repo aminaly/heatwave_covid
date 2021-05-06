@@ -137,7 +137,7 @@ plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
 #Function to output plot with binned regressions 
 plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=NA) {
   
-  coefs <- coefs[[1]]
+  coefs <- data.frame(matrix(ncol))
   max_val <- max(data$measure, na.rm = T)
   min_val <- min(data$measure, na.rm = T)
   avg_val <- mean(data$measure, na.rm = T)
@@ -167,13 +167,14 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
   
   #figure out the 95 and 5 percentiles of the bootstraps
   confint <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
+  confint <- as.data.frame(rbind(x, confint))
   
   #if this is the first plot, start ggplot, if not, just add to plt
   if(is.na(plt)) {
   
-    plt <- ggplot(aes(x=x, y=confint[2,])) +
+    plt <- ggplot(data = confint, aes(x=confint[1,], y=confint[3,])) +
       geom_line() +
-      geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1) +
+      geom_ribbon(aes(ymin = confint[2,], ymax = confint[4,]), alpha = 0.1) +
       ggtitle(title) + ylab(ylab) + xlab(xlab) +
       scale_x_continuous() +
       theme(text = element_text(size = 15)) + 
@@ -181,8 +182,8 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
     
   } else {
     
-    plt <- plt + geom_line(aes(x, confint[2,]))
-    plt <- plt + geom_ribbon(aes(ymin = confint[1,], ymax = confint[3,]), alpha = 0.1) +      
+    plt <- plt + geom_line(data = confint, aes(confint[1,], confint[3,]))
+    plt <- plt + geom_ribbon(aes(ymin = confint[2,], ymax = confint[4,]), alpha = 0.1) +      
       scale_x_continuous()
 
   }
