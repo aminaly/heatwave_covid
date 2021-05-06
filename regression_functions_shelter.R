@@ -166,15 +166,15 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
   }
   
   #figure out the 95 and 5 percentiles of the bootstraps
-  confint <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
-  confint <- as.data.frame(rbind(x, confint))
+  conf <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
+  conf <- as.data.frame(rbind(x, conf))
   
   #if this is the first plot, start ggplot, if not, just add to plt
   if(is.na(plt)) {
   
-    plt <- ggplot(data = confint, aes(x=confint[1,], y=confint[3,])) +
+    plt <- ggplot(data = conf, aes(x=conf[1,], y=conf[3,])) +
       geom_line() +
-      geom_ribbon(aes(ymin = confint[2,], ymax = confint[4,]), alpha = 0.1) +
+      geom_ribbon(aes(ymin = conf[2,], ymax = conf[4,]), alpha = 0.1) +
       ggtitle(title) + ylab(ylab) + xlab(xlab) +
       scale_x_continuous() +
       theme(text = element_text(size = 15)) + 
@@ -182,8 +182,8 @@ plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=
     
   } else {
     
-    plt <- plt + geom_line(data = confint, aes(confint[1,], confint[3,]))
-    plt <- plt + geom_ribbon(aes(ymin = confint[2,], ymax = confint[4,]), alpha = 0.1) +      
+    plt <- plt + geom_line(data = conf, aes(conf[1,], conf[3,]))
+    plt <- plt + geom_ribbon(aes(ymin = conf[2,], ymax = conf[4,]), alpha = 0.1) +      
       scale_x_continuous()
 
   }
