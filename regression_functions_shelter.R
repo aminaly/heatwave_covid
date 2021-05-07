@@ -135,61 +135,41 @@ plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
 }
 
 #Function to output plot with binned regressions 
-plot_regs_binned <- function(data, coefs, title, level, xlab, ylab,  model, plt=NA) {
+build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model, dataset=NA) {
   
-  coefs <- data.frame(matrix(ncol))
+  coefs <- coefs[[1]]
   max_val <- max(data$measure, na.rm = T)
   min_val <- min(data$measure, na.rm = T)
   avg_val <- mean(data$measure, na.rm = T)
   x = min_val:max_val ###this should be the max temp we see 
-  bts <- matrix(nrow=100,ncol=length(x))
+  bts <- matrix(nrow=length(x),ncol=100)
   
   #get all my y values
   if (level == 1) {
     for (j in 1:100) {
       yy <- x*coefs[j]
       yy <- yy - avg_val ## this x value should be the average temp. Otherwise we can just set it to the first yy value
-      bts[j,] <- yy
+      bts[,j] <- yy
     }  
   } else if (level == 2) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2]  
       yy <- yy - avg_val
-      bts[j,] <- yy 
+      bts[,j] <- yy 
     }
   } else if (level == 3) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
       yy <- yy - avg_val
-      bts[j,] <- yy 
+      bts[,j] <- yy 
     }
   }
   
   #figure out the 95 and 5 percentiles of the bootstraps
-  conf <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
-  conf <- as.data.frame(rbind(x, conf))
-  
-  #if this is the first plot, start ggplot, if not, just add to plt
-  if(is.na(plt)) {
-  
-    plt <- ggplot(data = conf, aes(x=conf[1,], y=conf[3,])) +
-      geom_line() +
-      geom_ribbon(aes(ymin = conf[2,], ymax = conf[4,]), alpha = 0.1) +
-      ggtitle(title) + ylab(ylab) + xlab(xlab) +
-      scale_x_continuous() +
-      theme(text = element_text(size = 15)) + 
-      theme_bw()
-    
-  } else {
-    
-    plt <- plt + geom_line(data = conf, aes(conf[1,], conf[3,]))
-    plt <- plt + geom_ribbon(aes(ymin = conf[2,], ymax = conf[4,]), alpha = 0.1) +      
-      scale_x_continuous()
-
-  }
-  
-  return(plt)
-
-  
+  conf <- apply(bts,1,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
+  conf <- as.data.frame(cbind(x, conf[1,], conf[2,], conf[3,]))
+  colnames(conf) <- c("x", "low", "mid", "upper") 
+  return(rbind(dataset, conf))
   
 }
+
