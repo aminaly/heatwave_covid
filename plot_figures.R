@@ -176,7 +176,7 @@ plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1, xlab="Temp (C)",
   }
   
   ggplot(data = dataset, aes(x=x, y=mid)) +
-    geom_line() +
+    geom_point() +
     geom_ribbon(aes(ymin = low, ymax = upper), alpha = 0.1) +
     ggtitle(plot_title) + ylab(ylab) + xlab(xlab) +
     scale_x_continuous() +
@@ -200,7 +200,7 @@ saveRDS(data, "./heatwaves_manual/data_for_regression.rds")
 ## plot binned data for 2018/19 
 data_old <- data %>% filter(year %in% c(2018,2019))
 plot_title <- paste0("Mobility Index v Avg High")
-plot_data_bin(data_old, plot_title, bins = 3)
+plot_data_bin(data_old, plot_title, bins = 10)
 
 ## plot binned data for 2020
 data_2020 <- data %>% filter(year == 2020)
