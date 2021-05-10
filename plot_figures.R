@@ -160,7 +160,7 @@ plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1, xlab="Temp (C)",
   
   # now lets do it binned
   lvl = 1
-  data <- data %>% mutate(measure_bin =  floor(measure/10))
+  data <- data %>% mutate(measure_bin =  floor(measure/5))
   dataset <- NA
   bins <- unique(data$measure_bin)
   
