@@ -49,8 +49,11 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-Error in as.vector(x, mode) : 
-  cannot coerce type 'closure' to vector of type 'any'
-Calls: plot_data_bin ... plot_regs_binned -> data.frame -> matrix -> as.vector
-In addition: There were 50 or more warnings (use warnings() to see the first 50)
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
