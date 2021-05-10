@@ -201,10 +201,6 @@ saveRDS(data, "./heatwaves_manual/data_for_regression.rds")
 
 #### plot linear and centered around the average temp ####
 
-## reset xvar to temp value
-data <- rename(data, z_score_high = measure)
-data <- rename(data, measure = mean_high_c)
-
 data_old <- data %>% filter(year %in% c(2018,2019))
 plot_title <- paste0("Mobility Index v Avg High")
 plot_data(data_old, plot_title)
@@ -249,6 +245,11 @@ plot_title <- paste0("Mobility Index v /n Avg High 2020 Summer")
 plot_data(data_2020_summer, plot_title, xlab = "Z_Score of Temp")
 
 #### now plot binned stuff ####
+
+## reset xvar to temp value
+data <- rename(data, z_score_high = measure)
+data <- rename(data, measure = mean_high_c)
+
 ## plot binned data for 2018/19 
 data_old <- data %>% filter(year %in% c(2018,2019))
 plot_title <- paste0("Mobility Index v Avg High")
