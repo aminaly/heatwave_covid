@@ -164,7 +164,7 @@ plot_data_bin <- function(data, plot_title, lows=FALSE, xlab="Temp (C)", ylab = 
   dataset <- NA
   bins <- unique(data$measure_bin)
   
-  for(k in 1:bins) {
+  for(k in 1:8) {
     
     data_binned <- data %>% filter(measure_bin == k)
     #par(mfcol = c(2,1))
