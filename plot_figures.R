@@ -176,7 +176,7 @@ plot_data_bin <- function(data, plot_title, lows=FALSE, bins=1, xlab="Temp (C)",
   }
   
   ggplot(data = dataset, aes(x=x, y=mid)) +
-    geom_line() +
+    geom_point() +
     geom_ribbon(aes(ymin = low, ymax = upper), alpha = 0.1) +
     ggtitle(plot_title) + ylab(ylab) + xlab(xlab) +
     scale_x_continuous() +
