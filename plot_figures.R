@@ -227,7 +227,7 @@ data <- rename(data, measure = z_score_high)
 ## plot binned data for 2018/19 
 data_old <- data %>% filter(year %in% c(2018,2019))
 plot_title <- paste0("Mobility Index v Avg High")
-plot_data(data_old, plot_title, bins = 10, xlab = "Z_Score of Temp")
+plot_data(data_old, plot_title, xlab = "Z_Score of Temp")
 
 ## plot binned data for 2020
 data_2020 <- data %>% filter(year == 2020)
@@ -277,7 +277,7 @@ data <- rename(data, measure = z_score_high)
 ## plot binned data for 2018/19 
 data_old <- data %>% filter(year %in% c(2018,2019))
 plot_title <- paste0("Mobility Index v Avg High")
-plot_data_bin(data_old, plot_title, bins = 10, xlab = "Z_Score of Temp")
+plot_data_bin(data_old, plot_title, xlab = "Z_Score of Temp")
 
 ## plot binned data for 2020
 data_2020 <- data %>% filter(year == 2020)
