@@ -145,14 +145,14 @@ data_mar_dec <- rbind(data2019, data2020)
 
 ######## Regression Figures ######## 
 ## Quick function that takes data and plots all the variations we'd want
-plot_data <- function(data, plot_title, lows=FALSE) {
+plot_data <- function(data, plot_title, xlab = "Temp (C)" ) {
   
   lvl <- 1
   par(mfcol = c(2,1))
   print(plot_title)
   model <- fe_model(data, level = lvl)
   boots <- bootstrap_data(data, short=T, level= lvl)
-  plot_regs(data, boots, plot_title, level = lvl, xlab = "Temp (C)", ylab = "# Visitors / Home Devices", model=model)
+  plot_regs(data, boots, plot_title, level = lvl, xlab = xlab, ylab = "# Visitors / Home Devices", model=model)
 
 }
 
