@@ -57,3 +57,8 @@ There were 50 or more warnings (use warnings() to see the first 50)
 There were 50 or more warnings (use warnings() to see the first 50)
 There were 50 or more warnings (use warnings() to see the first 50)
 There were 50 or more warnings (use warnings() to see the first 50)
+Error in makematrix(mf, contrasts, pf = parent.frame(), clustervar, wildcard = wildcard) : 
+  0 (non-NA) cases; no valid data
+Calls: plot_data_bin -> fe_model -> felm -> makematrix
+In addition: There were 50 or more warnings (use warnings() to see the first 50)
+Execution halted
