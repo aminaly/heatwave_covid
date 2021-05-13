@@ -12,27 +12,27 @@ library(reshape2)
 
 ####Functions####
 # Dta is the data
-# Data must have the following columns: deaths, measure (temp), fips (county id), monthyear (pasted together)
+# Data must have the following columns: deaths, xvar (temp), fips (county id), monthyear (pasted together)
 fe_model <- function(dta, level, interact=F) {
   
-  dta <- na.omit(dta, cols=c("measure", "yvar"))
+  dta <- na.omit(dta, cols=c("xvar", "yvar"))
   # if(interact) {
   #   if (level == 1) {
-  #     mod <- felm(deaths ~ measure + measure:income_group | fips + monthyear, data=dta)
+  #     mod <- felm(deaths ~ xvar + xvar:income_group | fips + monthyear, data=dta)
   #   } else if (level == "log") {
-  #     mod <- felm(deaths ~ log(measure) + log(measure):income_group | fips + monthyear, data=dta )
+  #     mod <- felm(deaths ~ log(xvar) + log(xvar):income_group | fips + monthyear, data=dta )
   #   } else if (level > 1) {
-  #     mod <- felm(deaths ~ poly(measure,level,raw=T) + measure:income_group | fips + monthyear, data=dta)
+  #     mod <- felm(deaths ~ poly(xvar,level,raw=T) + xvar:income_group | fips + monthyear, data=dta)
   #   }
   # } else {
   if (level == 1) {
-    mod <- felm(yvar ~ measure  + 
+    mod <- felm(yvar ~ xvar  + 
                   as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
   } else if (level == "log") {
-    mod <- felm(yvar ~ log(measure)  + 
+    mod <- felm(yvar ~ log(xvar)  + 
                   as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
   } else if (level > 1) {
-    mod <- felm(yvar ~ poly(measure,level,raw=T) + 
+    mod <- felm(yvar ~ poly(xvar,level,raw=T) + 
                   as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
   }
   #}
@@ -78,12 +78,12 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
 
 
 #Function to output a plot with the regression and 95% confidence interval
-plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
+build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
   
   coefs <- coefs[[1]]
-  max_val <- max(data$measure, na.rm = T)
-  min_val <- min(data$measure, na.rm = T)
-  avg_val <- mean(data$measure, na.rm = T)
+  max_val <- max(data$xvar, na.rm = T)
+  min_val <- min(data$xvar, na.rm = T)
+  avg_val <- mean(data$xvar, na.rm = T)
   x = min_val:max_val ###this should be the max temp we see 
   bts <- matrix(nrow=100,ncol=length(x))
   
@@ -109,28 +109,10 @@ plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
   }
   
   #figure out the 95 and 5 percentiles of the bootstraps
-  confint <- apply(bts,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
-  
-  
-  #plot median estimate among the bootstraps
-  plot(x, confint[2,], type = "l", las=1,xlab=xlab,ylab=ylab,
-       ylim = c(min(confint[1,]), max(confint[3,])), col="navy", main=title)   
-  #plot confidence intervals
-  polygon(c(x,rev(x)),c(confint[1,],rev(confint[3,])),col=adjustcolor("navy", alpha=.3),border = NA)
-  rug(data$measure, side = 1, col=adjustcolor("black", alpha = 0.05))
-  
-  #Get the R^2, p-val, and AIC value
-  r <- summary(model)$r.squared
-  pval <- summary(model)$coefficients[,4]
-  aic <- AIC(model)
-  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
-       main = title)
-  text(x = 0.5, y = 0.5, paste(title, 
-                               "\n R^2 =", round(r, 3), 
-                               "\n pvals =", round(pval[1],3), 
-                               ",", round(pval[2],3),
-                               "\n AIC =", round(aic,3)), 
-       cex = .75, col = "black")
+  conf <- apply(bts,1,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
+  conf <- as.data.frame(cbind(x, conf[1,], conf[2,], conf[3,]))
+  colnames(conf) <- c("x", "low", "mid", "upper")   
+  return(conf)
   
 }
 
@@ -138,9 +120,9 @@ plot_regs <- function(data, coefs, title, level, xlab, ylab, model) {
 build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model, dataset=NA) {
   
   coefs <- coefs[[1]]
-  max_val <- max(data$measure, na.rm = T)
-  min_val <- min(data$measure, na.rm = T)
-  avg_val <- mean(data$measure, na.rm = T)
+  max_val <- max(data$xvar, na.rm = T)
+  min_val <- min(data$xvar, na.rm = T)
+  avg_val <- mean(data$xvar, na.rm = T)
   x = min_val:max_val ###this should be the max temp we see 
   bts <- matrix(nrow=length(x),ncol=100)
   
