@@ -91,19 +91,19 @@ build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
   if (level == 1) {
     for (j in 1:100) {
       yy <- x*coefs[j]
-      yy <- yy - avg_val ## this x value should be the average temp. Otherwise we can just set it to the first yy value
+      yy <- yy - yy[x=20] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[j,] <- yy
     }  
   } else if (level == 2) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2]  
-      yy <- yy - avg_val
+      yy <- yy - yy[x=20]
       bts[j,] <- yy 
     }
   } else if (level == 3) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
-      yy <- yy - avg_val
+      yy <- yy - yy[x=20]
       bts[j,] <- yy 
     }
   }
@@ -130,19 +130,19 @@ build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model
   if (level == 1) {
     for (j in 1:100) {
       yy <- x*coefs[j]
-      yy <- yy - avg_val ## this x value should be the average temp. Otherwise we can just set it to the first yy value
+      yy <- yy - yy[x=20] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[,j] <- yy
     }  
   } else if (level == 2) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2]  
-      yy <- yy - avg_val
+      yy <- yy - yy[x=20]
       bts[,j] <- yy 
     }
   } else if (level == 3) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
-      yy <- yy - avg_val
+      yy <- yy - yy[x=20]
       bts[,j] <- yy 
     }
   }
