@@ -49,8 +49,14 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-Error in paste(title, "\n R^2 =", round(r, 3), "\n pvals =", round(pval[1],  : 
-  cannot coerce type 'closure' to vector of type 'character'
-Calls: plot_data -> text -> text.default -> as.graphicsAnnot -> paste
-In addition: There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+Error in uniqiue(data$xvar) : could not find function "uniqiue"
+Calls: plot_data_bin
 Execution halted
