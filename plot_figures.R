@@ -161,7 +161,7 @@ plot_data <- function(data, plot_title, xlab = "Temp (C)" ) {
   aic <- AIC(model)
   plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
        main = title)
-  text(x = 0.5, y = 0.5, paste(title, 
+  text(x = 0.5, y = 0.5, paste(plot_title, 
                                "\n R^2 =", round(r, 3), 
                                "\n pvals =", round(pval[1],3), 
                                ",", round(pval[2],3),
