@@ -136,49 +136,47 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
 
 ######## Regression Figures ######## 
 ## Quick function that takes data and plots all the variations we'd want
-plot_data <- function(data, plot_title, xlab = "Temp (C)" ) {
+plot_data <- function(data, plot_title, xlab = "Temp (C)", ylab = "# Visitors / Home Devices" ) {
   
   lvl <- 1
   print(plot_title)
   model <- fe_model(data, level = lvl)
   boots <- bootstrap_data(data, short=T, level= lvl)
-  dataset <- build_plot_dataset(data, boots, plot_title, level = lvl, xlab = xlab, ylab = "# Visitors / Home Devices", model=model)
+  dataset <- build_plot_dataset(data, boots, plot_title, level = lvl, xlab = xlab, ylab = ylab, model=model)
+  
+  
+  #get model info: ^2, p-val, and AIC value
+  r <- summary(model)$r.squared
+  pval <- summary(model)$coefficients[,4]
+  aic <- AIC(model)
+  label <- paste(plot_title, 
+                 "\n R^2 =", round(r, 3), 
+                 "\n pvals =", round(pval,3),
+                 "\n AIC =", round(aic,3))
   
   #plot median estimate among the bootstraps
-  par(mfcol = c(2,1))
   ggplot(data = dataset, aes(x=x, y=mid)) +
-    geom_point() +
+    geom_line() +
     geom_ribbon(aes(ymin = low, ymax = upper), alpha = 0.1) +
     geom_rug(sides="b") +
     ggtitle(plot_title) + ylab(ylab) + xlab(xlab) +
     scale_x_continuous() +
     theme(text = element_text(size = 15)) + 
-    theme_bw()
-  
-  #Get the R^2, p-val, and AIC value
-  r <- summary(model)$r.squared
-  pval <- summary(model)$coefficients[,4]
-  aic <- AIC(model)
-  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
-       main = title)
-  text(x = 0.5, y = 0.5, paste(plot_title, 
-                               "\n R^2 =", round(r, 3), 
-                               "\n pvals =", round(pval[1],3), 
-                               ",", round(pval[2],3),
-                               "\n AIC =", round(aic,3)), 
-       cex = .75, col = "black")
+    theme_bw() +
+    labs(caption = label)
+
 
 }
 
-plot_data_bin <- function(data, plot_title, lows=FALSE, xlab="Temp (C)", ylab = "# Visitors / Home Devices") {
+plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices") {
   
   # now lets do it binned
   lvl <- 1
-  data <- data %>% mutate(xvar_bin = cut(xvar, 8, labels = c(1,2,3,4,5,6,7,8)))
+  data <- data %>% mutate(xvar_bin = cut(xvar, 5, labels = c(1,2, 3, 4, 5)))
   dataset <- NA
   bins <- unique(data$xvar_bin)
   
-  for(k in uniqiue(data$xvar)) {
+  for(k in 1:5) {
     
     print(paste0("we're on bin # ", k))
     data_binned <- data %>% filter(xvar_bin == k)

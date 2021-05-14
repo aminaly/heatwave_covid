@@ -84,7 +84,7 @@ build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
   max_val <- max(data$xvar, na.rm = T)
   min_val <- min(data$xvar, na.rm = T)
   avg_val <- mean(data$xvar, na.rm = T)
-  x = min_val:max_val ###this should be the max temp we see 
+  x = 0:40 ###this should be the max temp we see 
   xlen <- length(x)
   bts <- matrix(nrow=100,ncol=length(x))
   
@@ -92,19 +92,19 @@ build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
   if (level == 1) {
     for (j in 1:100) {
       yy <- x*coefs[j]
-      yy <- yy - yy[x=(xlen/2)] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
+      yy <- yy - yy[x=20] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[j,] <- yy
     }  
   } else if (level == 2) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2]  
-      yy <- yy - yy[x=(xlen/2)]
+      yy <- yy - yy[x=20]
       bts[j,] <- yy 
     }
   } else if (level == 3) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
-      yy <- yy - yy[x=(xlen/2)]
+      yy <- yy - yy[x=20]
       bts[j,] <- yy 
     }
   }
