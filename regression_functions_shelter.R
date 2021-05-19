@@ -31,11 +31,16 @@ fe_model <- function(dta, level, interact=F) {
   } else if (level == "log") {
     mod <- felm(yvar ~ log(xvar)  + 
                   as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
+    
+  } else if(level == "bin") {
+      dta <- na.omit(dta, cols=c("xvar_bin", "yvar"))
+      mod <- felm(yvar ~ xvar_bin + 
+                    as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
+    
   } else if (level > 1) {
     mod <- felm(yvar ~ poly(xvar,level,raw=T) + 
                   as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
-  }
-  #}
+  } 
   
   return(mod)
 }
@@ -48,14 +53,8 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
   
   num <- ifelse(short, 100, 1000)
   ll = dim(data)[1]
-  # if(interact) {
-  #   coef <- matrix(nrow=num, ncol=(ifelse(level=="log", 1, level) + 1))
-  # } else {
-  #   
-  # }
-  
-  coef <- matrix(nrow=num, ncol=ifelse(level=="log", 1, level))
-  
+  coefs <- NA 
+
   i <- 1
   while (i <= num)  {
     #sample the original data and pull subset of rows
@@ -64,15 +63,13 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
     #estimate our regression y = b1*T + err
     model <- fe_model(newdata, level, interact)
     #extract the coefficient estimates of b1 and b2 and store them in the matrix we made above
-    if(level == "log") {coef[i,] <- coef(model)[1]} else {coef[i,] <- coef(model)[1:level]}
-    #print(i)  #print this out so you can watch progress 
-    i <- i+1
+    model_coef <- coef(model)
+    coefs <- rbind(coefs, model_coef[grepl('xvar', names(model_coef))])
   }
   #bootstrapped
   print("bootstrapped")
   #save it out for the next run if name was provided
-  returnlist <- list(coef)
-  return(returnlist)
+  return(coefs)
   
 }
 
@@ -80,7 +77,6 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
 #Function to output a plot with the regression and 95% confidence interval
 build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
   
-  coefs <- coefs[[1]]
   max_val <- max(data$xvar, na.rm = T)
   min_val <- min(data$xvar, na.rm = T)
   avg_val <- mean(data$xvar, na.rm = T)
@@ -88,20 +84,22 @@ build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
   xlen <- length(x)
   bts <- matrix(nrow=100,ncol=length(x))
   
+  num_coefs <- ncol(coef)
+  
   #get all my y values
-  if (level == 1) {
+  if (num_coefs == 1) {
     for (j in 1:100) {
       yy <- x*coefs[j]
       yy <- yy - yy[x=20] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[j,] <- yy
     }  
-  } else if (level == 2) {
+  } else if (num_coefs == 2) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2]  
       yy <- yy - yy[x=20]
       bts[j,] <- yy 
     }
-  } else if (level == 3) {
+  } else if (num_coefs == 3) {
     for (j in 1:100) {
       yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
       yy <- yy - yy[x=20]
@@ -120,7 +118,6 @@ build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
 #Function to output plot with binned regressions 
 build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model, dataset=NA) {
   
-  coefs <- coefs[[1]]
   max_val <- max(data$xvar, na.rm = T)
   min_val <- min(data$xvar, na.rm = T)
   avg_val <- mean(data$xvar, na.rm = T)
