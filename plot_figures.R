@@ -252,8 +252,8 @@ data <- na.omit(data)
 #### now plot binned stuff ####
 
 ## reset xvar to temp value
-data <- rename(data, z_score_high = xvar)
-data <- rename(data, xvar = mean_high_c)
+# data <- rename(data, z_score_high = xvar)
+# data <- rename(data, xvar = mean_high_c)
 
 ## plot binned data for 2018/19 
 data_old <- data %>% filter(year %in% c(2018,2019))
