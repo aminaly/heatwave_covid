@@ -49,14 +49,47 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
-Error in uniqiue(data$xvar) : could not find function "uniqiue"
-Calls: plot_data_bin
-Execution halted
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In newols(mm, nostats = nostats[1], exactDOF = exactDOF, onlyse = onlyse,  :
+  Negative eigenvalues set to zero in multiway clustered variance matrix. See felm(...,psdef=FALSE)
+3: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In newols(mm, nostats = nostats[1], exactDOF = exactDOF, onlyse = onlyse,  :
+  Negative eigenvalues set to zero in multiway clustered variance matrix. See felm(...,psdef=FALSE)
+3: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+Warning messages:
+1: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
+2: In chol.default(mat, pivot = TRUE, tol = tol) :
+  the matrix is either rank-deficient or indefinite
