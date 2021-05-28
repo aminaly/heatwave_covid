@@ -16,6 +16,7 @@ library(broom)
 library(gridExtra)
 library(wesanderson)
 library(SafeGraphR)
+library(interactions)
 
 
 ######## Read in datasets ######## 
@@ -187,8 +188,10 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   ggplot(coefs, aes(term, estimate))+
     geom_point()+
     geom_pointrange(aes(ymin = conf.low, ymax = conf.high))+
-    labs(title = plot_title) +
+    labs(title = plot_title, xlab = xlab) +
     theme(axis.text.x = element_text(angle = 90))
+  
+  cat_plot(model, pred = xvar, geom = "line", plot.points = T)
   
 }
 
@@ -257,23 +260,23 @@ data <- na.omit(data)
 
 ## plot binned data for 2018/19 
 data_old <- data %>% filter(year %in% c(2018,2019))
-plot_title <- paste0("Mobility Index v Avg High")
-plot_data_bin(data_old, plot_title)
+plot_title <- paste0("Mobility Index v Avg High 2018-19")
+plot_data_bin(data_old, plot_title, xlab = "high_temp (0-40C)")
 
 ## plot binned data for 2020
 data_2020 <- data %>% filter(year == 2020)
 plot_title <- paste0("Mobility Index v Avg High 2020")
-plot_data_bin(data_2020, plot_title)
+plot_data_bin(data_2020, plot_title, xlab = "high_temp (0-40C)")
 
 ## plot binned data for 2018/19 summer only 
 data_summer <- data %>% filter(between(month.x, 5, 9)) %>% filter(year %in% c(2018,2019))
 plot_title <- paste0("Mobility Index v Avg High Summer 2018-19")
-plot_data_bin(data_summer, plot_title)
+plot_data_bin(data_summer, plot_title, xlab = "high_temp (0-40C)")
 
 ## plot binned data for 2020 summer only 
 data_2020_summer <- data_2020 %>% filter(between(month.x, 5, 9))
 plot_title <- paste0("Mobility Index v Avg High 2020 Summer")
-plot_data_bin(data_2020_summer, plot_title)
+plot_data_bin(data_2020_summer, plot_title, xlab = "high_temp (0-40C)")
 
 ## reset xvar to normalized z_score value
 data <- rename(data, mean_high_c = xvar)
