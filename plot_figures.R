@@ -191,7 +191,7 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
     labs(title = plot_title, xlab = xlab) +
     theme(axis.text.x = element_text(angle = 90))
   
-  cat_plot(model, pred = xvar, geom = "line", plot.points = T)
+  cat_plot(model, pred = xvar_bin, geom = "line", plot.points = T)
   
 }
 
