@@ -178,7 +178,7 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   
   print(plot_title)
   model <- fe_model(data, level = LVL)
-  boots <- bootstrap_data_bin(data, short=T, level= LVL, bins = BINS)
+  boots <- bootstrap_data(data, short=T, level= LVL, bins = BINS)
   dataset <- build_bin_plot_dataset(data, boots, plot_title, level = LVL, xlab = xlab, ylab = ylab, model=model, bins = BINS)
   
   
