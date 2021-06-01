@@ -168,21 +168,18 @@ plot_data <- function(data, plot_title, xlab = "Temp (C)", ylab = "# Visitors / 
 
 }
 
-plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices") {
+plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", BINS = 3) {
   
   #create the bins
   LVL <- "bin"
-  BINS <- 9
   data <- data %>% mutate(xvar_bin = cut(xvar, BINS, labels = F)) %>% mutate(xvar_bin = factor(xvar_bin, 
                                                                                                levels = as.character(1:BINS)))
   dataset <- NA
   
   print(plot_title)
   model <- fe_model(data, level = LVL)
-  #boots <- bootstrap_data(data, short=T, level= LVL)
-  #dataset <- build_plot_dataset(data, boots, plot_title, level = LVL, xlab = xlab, ylab = ylab, model=model)
-  coefs <- tidy(model, conf.int = T)
-  coefs <- coefs[grepl("xvar_bin", coefs$term),]
+  boots <- bootstrap_data_bin(data, short=T, level= LVL, bins = BINS)
+  dataset <- build_bin_plot_dataset(data, boots, plot_title, level = LVL, xlab = xlab, ylab = ylab, model=model, bins = BINS)
   
   
   ggplot(coefs, aes(term, estimate))+
@@ -191,7 +188,17 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
     labs(title = plot_title, xlab = xlab) +
     theme(axis.text.x = element_text(angle = 90))
   
-  cat_plot(model, pred = xvar_bin, geom = "line", plot.points = T)
+  ggplot(data = dataset, aes(x=x, y=mid)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = low, ymax = upper), alpha = 0.1) +
+    geom_rug(sides="b") +
+    ggtitle(plot_title) + ylab(ylab) + xlab(xlab) +
+    scale_x_continuous() +
+    theme(text = element_text(size = 15)) + 
+    theme_bw() +
+    labs(caption = label)
+  
+  #cat_plot(model, pred = xvar_bin, geom = "line", plot.points = T)
   
 }
 

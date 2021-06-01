@@ -73,7 +73,6 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
   
 }
 
-
 #Function to output a plot with the regression and 95% confidence interval
 build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
   
@@ -116,40 +115,33 @@ build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
 }
 
 #Function to output plot with binned regressions 
-build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model, dataset=NA) {
+build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model, dataset=NA, bins) {
   
-  max_val <- max(data$xvar, na.rm = T)
-  min_val <- min(data$xvar, na.rm = T)
-  avg_val <- mean(data$xvar, na.rm = T)
-  x = min_val:max_val ###this should be the max temp we see 
-  bts <- matrix(nrow=length(x),ncol=100)
   
-  #get all my y values
-  if (level == 1) {
+  
+  for(b in bins) {
+    
+    dta <- data %>% filter(xvar_bin == b)
+    max_val <- max(dta$xvar, na.rm = T)
+    min_val <- min(dta$xvar, na.rm = T)
+    avg_val <- mean(dta$xvar, na.rm = T)
+    x = min_val:max_val ###this should be the max temp we see 
+    bts <- matrix(nrow=length(x),ncol=100)
+    
     for (j in 1:100) {
       yy <- x*coefs[j]
-      yy <- yy - yy[x=1] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
+      #yy <- yy - yy[x=1] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[,j] <- yy
     }  
-  } else if (level == 2) {
-    for (j in 1:100) {
-      yy <- x*coefs[j,1] + x^2*coefs[j,2]  
-      yy <- yy - yy[x=1]
-      bts[,j] <- yy 
-    }
-  } else if (level == 3) {
-    for (j in 1:100) {
-      yy <- x*coefs[j,1] + x^2*coefs[j,2] + x^3*coefs[j,3] 
-      yy <- yy - yy[x=1]
-      bts[,j] <- yy 
-    }
+    
+    #figure out the 95 and 5 percentiles of the bootstraps
+    conf <- apply(bts,1,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
+    conf <- as.data.frame(cbind(x, conf[1,], conf[2,], conf[3,]))
+    colnames(conf) <- c("x", "low", "mid", "upper") 
+    dataset <- rbind(dataset, conf)
   }
-  
-  #figure out the 95 and 5 percentiles of the bootstraps
-  conf <- apply(bts,1,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
-  conf <- as.data.frame(cbind(x, conf[1,], conf[2,], conf[3,]))
-  colnames(conf) <- c("x", "low", "mid", "upper") 
-  return(rbind(dataset, conf))
+ 
+  return(dataset)
   
 }
 
