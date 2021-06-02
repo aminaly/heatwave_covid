@@ -181,17 +181,18 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   boots <- bootstrap_data(data, short=T, level= LVL)
   dataset <- build_bin_plot_dataset(data, boots, plot_title, level = LVL, xlab = xlab, ylab = ylab, model=model, bins = BINS)
   
-  model_coef <- tidy(model)
-  coefs <-  model_coef[grepl('xvar', names(model_coef))]
+  coefs <- tidy(model, conf.int = T)
+  coefs <- coefs[grepl("xvar_bin", coefs$term),]
+  coefs$sig <- coefs$p.value < 0.05
   
   ggplot(coefs, aes(term, estimate))+
-    geom_point()+
     geom_pointrange(aes(ymin = conf.low, ymax = conf.high))+
+    geom_point(aes(group = sig, color=as.factor(sig))) +
     labs(title = plot_title, xlab = xlab) +
-    theme(axis.text.x = element_text(angle = 90))
+    theme(axis.text.x = element_text(angle = 90)) 
   
   ggplot(data = dataset, aes(x=x, y=mid)) +
-    geom_line(group=bin, color=as.factor(bin)) +
+    geom_line(aes(group=bin, color=as.factor(bin))) +
     geom_ribbon(aes(ymin = low, ymax = upper), alpha = 0.1) +
     geom_rug(sides="b") +
     ggtitle(plot_title) + ylab(ylab) + xlab(xlab) +
