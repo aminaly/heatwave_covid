@@ -168,7 +168,7 @@ plot_data <- function(data, plot_title, xlab = "Temp (C)", ylab = "# Visitors / 
 
 }
 
-plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", BINS = 3) {
+plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", BINS = 6) {
   
   #create the bins
   LVL <- "bin"
