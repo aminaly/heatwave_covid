@@ -49,3 +49,4 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
+slurmstepd: error: *** JOB 25574243 ON sh02-09n70 CANCELLED AT 2021-06-01T21:32:35 DUE TO TIME LIMIT ***
