@@ -49,4 +49,8 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-slurmstepd: error: *** JOB 25574243 ON sh02-09n70 CANCELLED AT 2021-06-01T21:32:35 DUE TO TIME LIMIT ***
+Error in geom_line(group = bin, color = as.factor(bin)) : 
+  object 'bin' not found
+Calls: plot_data_bin -> geom_line -> layer
+In addition: There were 50 or more warnings (use warnings() to see the first 50)
+Execution halted
