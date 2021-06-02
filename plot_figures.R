@@ -168,7 +168,7 @@ plot_data <- function(data, plot_title, xlab = "Temp (C)", ylab = "# Visitors / 
 
 }
 
-plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", BINS = 6) {
+plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", BINS = 10) {
   
   #create the bins
   LVL <- "bin"
@@ -180,6 +180,7 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   model <- fe_model(data, level = LVL)
   boots <- bootstrap_data(data, short=T, level= LVL)
   dataset <- build_bin_plot_dataset(data, boots, plot_title, level = LVL, xlab = xlab, ylab = ylab, model=model, bins = BINS)
+  dataset <- dataset[-1,]
   
   coefs <- tidy(model, conf.int = T)
   coefs <- coefs[grepl("xvar_bin", coefs$term),]

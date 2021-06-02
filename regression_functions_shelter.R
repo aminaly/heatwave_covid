@@ -122,7 +122,7 @@ build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model
   coefs <- cbind("xvar_bin1" = 0, coefs)
   coefs <- coefs[-1,]
   
-  for(b in 1:bins) {
+  for(b in 2:bins) {
     
     dta <- data %>% filter(xvar_bin == b)
     max_val <- max(dta$xvar, na.rm = T)
