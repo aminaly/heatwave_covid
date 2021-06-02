@@ -52,7 +52,7 @@ fe_model <- function(dta, level, interact=F) {
 bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
   
   num <- ifelse(short, 100, 1000)
-  ll = dim(data)[1]
+  ll = nrow(data)
   coefs <- NA 
 
   i <- 1
@@ -65,6 +65,7 @@ bootstrap_data <- function(data, short=T, level, interact=F, name = "") {
     #extract the coefficient estimates of b1 and b2 and store them in the matrix we made above
     model_coef <- coef(model)
     coefs <- rbind(coefs, model_coef[grepl('xvar', names(model_coef))])
+    i <- i+1
   }
   #bootstrapped
   print("bootstrapped")
@@ -117,27 +118,29 @@ build_plot_dataset <- function(data, coefs, title, level, xlab, ylab, model) {
 #Function to output plot with binned regressions 
 build_bin_plot_dataset <- function(data, coefs, title, level, xlab, ylab,  model, dataset=NA, bins) {
   
+  #clean up coefs for loop
+  coefs <- cbind("xvar_bin1" = 0, coefs)
+  coefs <- coefs[-1,]
   
-  
-  for(b in bins) {
+  for(b in 1:bins) {
     
     dta <- data %>% filter(xvar_bin == b)
     max_val <- max(dta$xvar, na.rm = T)
     min_val <- min(dta$xvar, na.rm = T)
     avg_val <- mean(dta$xvar, na.rm = T)
-    x = min_val:max_val ###this should be the max temp we see 
+    x = min_val:max_val ###this should be the max temp we see in this bin
     bts <- matrix(nrow=length(x),ncol=100)
     
     for (j in 1:100) {
-      yy <- x*coefs[j]
+      yy <- x*coefs[j, paste0("xvar_bin", b)]
       #yy <- yy - yy[x=1] ## this x value should be the average temp. Otherwise we can just set it to the first yy value
       bts[,j] <- yy
     }  
     
     #figure out the 95 and 5 percentiles of the bootstraps
     conf <- apply(bts,1,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
-    conf <- as.data.frame(cbind(x, conf[1,], conf[2,], conf[3,]))
-    colnames(conf) <- c("x", "low", "mid", "upper") 
+    conf <- as.data.frame(cbind(x, conf[1,], conf[2,], conf[3,], b))
+    colnames(conf) <- c("x", "low", "mid", "upper", "bin") 
     dataset <- rbind(dataset, conf)
   }
  
