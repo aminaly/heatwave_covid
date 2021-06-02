@@ -191,7 +191,7 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
     theme(axis.text.x = element_text(angle = 90))
   
   ggplot(data = dataset, aes(x=x, y=mid)) +
-    geom_line(group=bin, color=as.factor(bin))) +
+    geom_line(group=bin, color=as.factor(bin)) +
     geom_ribbon(aes(ymin = low, ymax = upper), alpha = 0.1) +
     geom_rug(sides="b") +
     ggtitle(plot_title) + ylab(ylab) + xlab(xlab) +
