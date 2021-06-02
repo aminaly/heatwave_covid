@@ -49,8 +49,15 @@ cols(
   region_s = col_character(),
   region_s_num = col_double()
 )
-Error in geom_line(group = bin, color = as.factor(bin)) : 
-  object 'bin' not found
-Calls: plot_data_bin -> geom_line -> layer
-In addition: There were 50 or more warnings (use warnings() to see the first 50)
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
+geom_path: Each group consists of only one observation. Do you need to adjust
+the group aesthetic?
+There were 50 or more warnings (use warnings() to see the first 50)
+geom_path: Each group consists of only one observation. Do you need to adjust
+the group aesthetic?
+There were 50 or more warnings (use warnings() to see the first 50)
