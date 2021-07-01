@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=runMT
+#SBATCH --job-name=runIntersect
 #SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runIntersect.err
 #SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runIntersect.out
 #SBATCH --nodes=1

@@ -1,0 +1,26 @@
+Linking to GEOS 3.6.2, GDAL 2.2.1, PROJ 4.9.3
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+✔ ggplot2 3.3.2     ✔ purrr   0.3.4
+✔ tibble  3.0.3     ✔ stringr 1.4.0
+✔ tidyr   1.1.0     ✔ forcats 0.5.0
+✔ readr   1.3.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+Linking to liblwgeom 3.0.0beta1 r16016, GEOS 3.6.2, PROJ 4.9.3
+although coordinates are longitude/latitude, st_intersection assumes that they are planar
+Error in CPL_geos_op2(op, x, y) : 
+  Evaluation error: TopologyException: Input geom 1 is invalid: Self-intersection at or near point -121.70709135394048 37.929312751659879 at -121.70709135394048 37.929312751659879.
+Calls: st_intersection ... geos_op2_df -> geos_op2_geom -> st_sfc -> CPL_geos_op2
+Execution halted

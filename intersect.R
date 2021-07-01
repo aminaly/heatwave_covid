@@ -13,7 +13,7 @@ ifelse(dir.exists("~/Box Sync/heatwave_covid/"),
        setwd("~/Box Sync/heatwave_covid/"),
        setwd("/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/"))
 
-bayarea <- st_write(bayarea, dsn = "./BayAreaZoning/data/shapefile/bayarea_zoning.shp")
+bayarea <- st_read("./BayAreaZoning/data/shapefile/bayarea_zoning.shp")
 cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp")
 cbg_cali <- cbg %>% filter(STATEFP == "06")
 
