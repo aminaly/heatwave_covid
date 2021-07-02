@@ -11,3 +11,6 @@ geometry type:  MULTIPOLYGON
 dimension:      XY
 bbox:           xmin: -179.1489 ymin: -14.5487 xmax: 179.7785 ymax: 71.36516
 CRS:            4269
+Writing layer `zoning_cbg' to data source `./BayAreaZoning/data/shapefile/zoning_cbg.shp' using driver `ESRI Shapefile'
+Writing 180007 features with 11 fields and geometry type Unknown (any).
+Failed to create feature 78053 in zoning_cbg

@@ -20,7 +20,10 @@ The following objects are masked from ‘package:base’:
 ✖ dplyr::lag()    masks stats::lag()
 Linking to liblwgeom 3.0.0beta1 r16016, GEOS 3.6.2, PROJ 4.9.3
 although coordinates are longitude/latitude, st_intersection assumes that they are planar
-Error in CPL_geos_op2(op, x, y) : 
-  Evaluation error: TopologyException: Input geom 1 is invalid: Self-intersection at or near point -121.70709135394048 37.929312751659879 at -121.70709135394048 37.929312751659879.
-Calls: st_intersection ... geos_op2_df -> geos_op2_geom -> st_sfc -> CPL_geos_op2
+Warning message:
+attribute variables are assumed to be spatially constant throughout all geometries 
+Error in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options),  : 
+  Feature creation failed.
+Calls: st_write -> st_write.sf -> CPL_write_ogr
+In addition: There were 50 or more warnings (use warnings() to see the first 50)
 Execution halted
