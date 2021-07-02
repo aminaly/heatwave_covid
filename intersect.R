@@ -23,7 +23,6 @@ bayarea <- st_make_valid(bayarea)
 
 #### Join the datasets (Intersection)
 cbg_cali <- st_transform(cbg_cali, crs = st_crs(bayarea)) #make sure the crs are matching. 
-zoning_cbg <- merge(cbg_cali, bayarea)
 zoning_cbg <- st_intersection(cbg_cali, bayarea)
 write_rds(zoning_cbg, "./heatwaves_manual/BayAreaZoning/data/shapefile/zoning_cbg.rds")
 st_write(zoning_cbg, "./heatwaves_manual/BayAreaZoning/data/shapefile/zoning_cbg.shp")
