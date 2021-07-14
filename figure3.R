@@ -22,7 +22,7 @@ library(interactions)
 data <- readRDS("./heatwaves_manual/data_for_regression.rds")
 
 ## lets do some plots
-pdf(paste0("./visuals/patterns_", Sys.Date(), ".pdf"))
+pdf(paste0("./visuals/figure3", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
