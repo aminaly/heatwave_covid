@@ -41,27 +41,11 @@ The following object is masked from ‘package:dplyr’:
 
     combine
 
-Parsed with column specification:
-cols(
-  region = col_character(),
-  state = col_character(),
-  region_num = col_double(),
-  region_s = col_character(),
-  region_s_num = col_double()
-)
 There were 50 or more warnings (use warnings() to see the first 50)
 There were 50 or more warnings (use warnings() to see the first 50)
 There were 50 or more warnings (use warnings() to see the first 50)
 There were 50 or more warnings (use warnings() to see the first 50)
-geom_path: Each group consists of only one observation. Do you need to adjust
-the group aesthetic?
 There were 50 or more warnings (use warnings() to see the first 50)
-geom_path: Each group consists of only one observation. Do you need to adjust
-the group aesthetic?
 There were 50 or more warnings (use warnings() to see the first 50)
-geom_path: Each group consists of only one observation. Do you need to adjust
-the group aesthetic?
 There were 50 or more warnings (use warnings() to see the first 50)
-geom_path: Each group consists of only one observation. Do you need to adjust
-the group aesthetic?
 There were 50 or more warnings (use warnings() to see the first 50)
