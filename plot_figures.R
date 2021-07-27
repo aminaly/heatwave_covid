@@ -46,7 +46,7 @@ income <- income %>% mutate(income_group = ntile(median_income, 5))
 i <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips), fips)) %>% 
   dplyr::select(fips, median_income, income_group, census_block_group)
 
-i$census_block_group <- as.character(i$census_block_group)
+ime$census_block_group <- as.character(i$census_block_group)
 
 #combine shelter with icncome, and select region if we want it
 shelter <- left_join(s, i, by = c("census_block_group", "fips"))
