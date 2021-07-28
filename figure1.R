@@ -58,7 +58,7 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
 ### Map of mobility difference between 2019 and 2020
 ggplot(data = cast_temp) +
   ggtitle("Bay Area Summer Mobility Difference 2020 - 2019") +
-  geom_sf(data = cast_temp, size = .002, aes(fill = diff_cut)) +
+  geom_sf(data = cast_temp, size = 0.002, aes(fill = diff_cut)) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
@@ -69,18 +69,19 @@ temp_mobility_data_nona <- temp_mobility_data %>% filter(!is.na(income_group))
 ggplot(data=temp_mobility_data_nona, aes(x=date, y=visitors_percap, group=income_group)) +
   geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
   ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=5, name="Zissou1")) +
+  scale_fill_gradient(low = "darkorange", high = "darkgreen") +
   scale_x_date() +
   theme(text = element_text(size = 15)) +
   labs(colour="$$ Grp (5 High)") +
   theme_bw()
 
 ### bar chart of temperatures 
-temp_mobility_data_nona_day <- temp_mobility_data_nona %>% group_by(date) %>% 
+temp_mobility_data_byday <- temp_mobility_data %>% group_by(date) %>% 
   summarize(avg_temp = mean(mean_high_c, na.rm = T))
 
-ggplot(data = a, aes(x=date, y = avg_temp)) +
-  geom_line(alpha=0.2, position="identity")
+ggplot(data = temp_mobility_data_byday, aes(x=date, y = avg_temp)) +
+  geom_line(alpha=0.2, position="identity") + 
+  theme_bw()
 
 dev.off()
 
