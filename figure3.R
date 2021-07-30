@@ -34,7 +34,9 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   #create the bins
   LVL <- "bin"
   BINS <- 9
-  data <- data %>% mutate(xvar_bin = cut(xvar, breaks = seq(0, 45, 5), labels = F))
+  data <- data %>% mutate(xvar_bin = cut(xvar, breaks = seq(0, 45, 5), labels = F)) %>% 
+    mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS)))
+  
   #separate the two datasets
   data_1 <- data %>% filter(year %in% c(2018,2019))
   data_2 <- data %>% filter(year == 2020)
