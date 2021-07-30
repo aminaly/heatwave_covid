@@ -31,18 +31,15 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
 
 plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices") {
   
-  #separate the two datasets
-  data_1 <- data %>% filter(year %in% c(2018,2019))
-  data_2 <- data %>% filter(year == 2020)
-  
   #create the bins
   LVL <- "bin"
   BINS <- 9
-  data_1 <- data_1 %>% mutate(xvar_bin = cut(xvar, BINS, labels = F)) %>% 
+  data <- data %>% mutate(xvar_bin = cut(xvar, BINS, labels = F)) %>% 
     mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS)))
-  data_2 <- data_2 %>% mutate(xvar_bin = cut(xvar, BINS, labels = F)) %>% 
-    mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS)))
-
+  
+  #separate the two datasets
+  data_1 <- data %>% filter(year %in% c(2018,2019))
+  data_2 <- data %>% filter(year == 2020)
 
   #get the results of the model
   model_1 <- fe_model(data_1, level = LVL)
