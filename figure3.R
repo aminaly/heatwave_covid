@@ -100,7 +100,7 @@ data <- rename(data, yvar = visitors_percap)
 
 ## plot binned data for full year
 plot_title <- paste0("Mobility Index v Avg High pre + post 2020")
-plot_data_bin(data_2020, plot_title, xlab = "high_temp (0-40C)")
+plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)")
 
 ## plot binned data for 2018/19 summer only 
 data_summer <- data %>% filter(between(month.x, 5, 9))

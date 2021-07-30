@@ -41,5 +41,11 @@ The following object is masked from ‘package:dplyr’:
 
     combine
 
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
+Parsed with column specification:
+cols(
+  region = col_character(),
+  state = col_character(),
+  region_num = col_double(),
+  region_s = col_character(),
+  region_s_num = col_double()
+)
