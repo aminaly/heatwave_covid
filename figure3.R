@@ -34,7 +34,7 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   #create the bins
   LVL <- "bin"
   BINS <- 7
-  data <- data %>% mutate(xvar_bin = cut(xvar, breaks = seq(5, 40, 5), labels = F)) %>% 
+  data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(10, 35, 5), Inf), labels = F)) %>% 
     mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS))) %>% filter(!is.na(xvar_bin))
 
   #separate the two datasets
