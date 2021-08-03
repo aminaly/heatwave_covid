@@ -34,18 +34,19 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   #create the bins
   LVL <- "bin"
   if(summer) {
-    BINS <- 6
-    data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(15, 35, 5), Inf), labels = F)) %>% 
+    BINS <- 8
+    data_s <- data %>% filter(between(month.x, 5, 9))
+    data_s <- data_s %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(17, 35, 3), Inf), labels = F)) %>% 
       mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS))) %>% filter(!is.na(xvar_bin))
   } else {
-    BINS <- 7
-    data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(10, 35, 5), Inf), labels = F)) %>% 
+    BINS <- 10
+    data_s <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(10, 35, 3), Inf), labels = F)) %>% 
     mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS))) %>% filter(!is.na(xvar_bin))
   }
   
   #separate the two datasets
-  data_1 <- data %>% filter(year %in% c(2018,2019))
-  data_2 <- data %>% filter(year == 2020)
+  data_1 <- data_s %>% filter(year %in% c(2018,2019))
+  data_2 <- data_s %>% filter(year == 2020)
   
   #get the results of the model
   model_1 <- fe_model(data_1, level = LVL)
@@ -105,9 +106,8 @@ plot_title <- paste0("Mobility Index v Avg High pre + post 2020")
 plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)")
 
 ## plot binned data for 2018/19 summer only 
-data_summer <- data %>% filter(between(month.x, 5, 9))
 plot_title <- paste0("Mobility Index v Avg High Summer pre + post 2020")
-plot_data_bin(data_summer, plot_title, xlab = "high_temp (0-40C)")
+plot_data_bin(data_summer, plot_title, xlab = "high_temp (0-40C)", summer = T)
 
 dev.off()
 
