@@ -75,7 +75,8 @@ ggplot(data = zoning_cbg_summary) +
   theme_bw()
 
 #### Plot 2020 mobility for each zone in Santa Clara County
-santaclara <- zoning_mob_2020 %>% filter(fips == 06085)
+santaclara <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
+  filter(fips == "06085")
 
 ggplot(data = santaclara) +
   ggtitle("Mobility Santa Clara County") +
@@ -86,7 +87,8 @@ ggplot(data = santaclara) +
   theme_bw()
 
 #### Plot 2020 mobility for each zone in SF County
-sf <- zoning_mob %>% filter(fips == 06075)
+sf <- zoning_mob %>% mutate(fips = substr(cbg, 1, 5)) %>%
+  filter(fips == "06075") 
 
 ggplot(data = sf) +
   ggtitle("Mobility Santa Clara County") +
@@ -98,7 +100,8 @@ ggplot(data = sf) +
 
 
 #### Plot 2020 mobility for each zone in Alameda County
-alameda <- zoning_mob %>% filter(fips == 06001)
+alameda <- zoning_mob %>% mutate(fips = substr(cbg, 1, 5)) %>%
+  filter(fips == "06001")
 
 ggplot(data = alameda) +
   ggtitle("Mobility Santa Clara County") +
