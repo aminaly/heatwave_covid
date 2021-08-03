@@ -43,7 +43,7 @@ zoning_cbg_nogeo$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.
 
 ## combine zoning with mobility data
 temp_mobility_data_sm <- temp_mobility_data %>% select(cbg = census_block_group, date, 
-                                                       yvar = visitors_percap, year, month, fips)
+                                                       yvar = visitors_percap, year, month = month.x, fips)
 zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
 
 ## zoning and mobility average for 2020
