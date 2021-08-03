@@ -48,13 +48,13 @@ zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
 
 ## zoning and mobility average for 2020
 temp_mobility_2020 <- temp_mobility_data_sm %>% filter(year == 2020) %>%
-  group_by(cbg) %>% summarise(visitors_percap = mean(visitors_percap, na.rm = T))
+  group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T))
 zoning_mob_2020 <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
 
 ## zoning and mobility average for summer 2020
 temp_mobility_summer_2020 <- temp_mobility_data_sm %>% 
   filter(year == 2020 & month %in% c(5:9)) %>%
-  group_by(cbg) %>% summarise(visitors_percap = mean(visitors_percap, na.rm = T))
+  group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T))
 zoning_mob_summer_2020 <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
 
 #### Start PDF
@@ -78,7 +78,7 @@ santaclara <- zoning_mob_2020 %>% filter(fips == 06085)
 
 ggplot(data = santaclara) +
   ggtitle("Mobility Santa Clara County") +
-  geom_sf(data = zoning_cbg_summary, aes(fill = visitors_percap), color = NA) +
+  geom_sf(data = zoning_cbg_summary, aes(fill = yvar), color = NA) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   facet_wrap( ~ main_zoning, scales = "free", nrow = 2) +
   labs(colour="Zoning") +
@@ -89,7 +89,7 @@ sf <- zoning_mob %>% filter(fips == 06075)
 
 ggplot(data = sf) +
   ggtitle("Mobility Santa Clara County") +
-  geom_sf(data = zoning_cbg_summary, aes(fill = visitors_percap), color = NA) +
+  geom_sf(data = zoning_cbg_summary, aes(fill = yvar), color = NA) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   facet_wrap( ~ main_zoning, scales = "free", nrow = 2) +
   labs(colour="Zoning") +
@@ -101,7 +101,7 @@ alameda <- zoning_mob %>% filter(fips == 06001)
 
 ggplot(data = alameda) +
   ggtitle("Mobility Santa Clara County") +
-  geom_sf(data = zoning_cbg_summary, aes(fill = visitors_percap), color = NA) +
+  geom_sf(data = zoning_cbg_summary, aes(fill = yvar), color = NA) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   facet_wrap( ~ main_zoning, scales = "free", nrow = 2) +
   labs(colour="Zoning") +
