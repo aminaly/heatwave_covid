@@ -29,14 +29,19 @@ plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
 text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
      cex = 1.5, col = "black")
 
-plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices") {
+plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", summer = F) {
   
   #create the bins
   LVL <- "bin"
   BINS <- 7
+  if(summer) {
+    data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(15, 35, 5), Inf), labels = F)) %>% 
+      mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS))) %>% filter(!is.na(xvar_bin))
+  } else {
   data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(10, 35, 5), Inf), labels = F)) %>% 
     mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS))) %>% filter(!is.na(xvar_bin))
-
+  }
+  
   #separate the two datasets
   data_1 <- data %>% filter(year %in% c(2018,2019))
   data_2 <- data %>% filter(year == 2020)
