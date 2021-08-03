@@ -33,12 +33,13 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   
   #create the bins
   LVL <- "bin"
-  BINS <- 7
   if(summer) {
+    BINS <- 6
     data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(15, 35, 5), Inf), labels = F)) %>% 
       mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS))) %>% filter(!is.na(xvar_bin))
   } else {
-  data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(10, 35, 5), Inf), labels = F)) %>% 
+    BINS <- 7
+    data <- data %>% mutate(xvar_bin = cut(xvar, breaks = c(-Inf, seq(10, 35, 5), Inf), labels = F)) %>% 
     mutate(xvar_bin = factor(xvar_bin, levels = as.character(1:BINS))) %>% filter(!is.na(xvar_bin))
   }
   
