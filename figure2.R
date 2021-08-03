@@ -49,13 +49,13 @@ zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
 ## zoning and mobility average for 2020
 temp_mobility_2020 <- temp_mobility_data_sm %>% filter(year == 2020) %>%
   group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T))
-zoning_mob_2020 <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
+zoning_mob_2020 <- merge(temp_mobility_2020, zoning_cbg_summary, by = "cbg")
 
 ## zoning and mobility average for summer 2020
 temp_mobility_summer_2020 <- temp_mobility_data_sm %>% 
   filter(year == 2020 & month %in% c(5:9)) %>%
   group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T))
-zoning_mob_summer_2020 <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
+zoning_mob_summer_2020 <- merge(temp_mobility_summer_2020, zoning_cbg_summary, by = "cbg")
 
 #### Start PDF
 pdf(paste0("./visuals/pub_figures/fig2_", Sys.time(), ".pdf"))
