@@ -107,7 +107,7 @@ plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)")
 
 ## plot binned data for 2018/19 summer only 
 plot_title <- paste0("Mobility Index v Avg High Summer pre + post 2020")
-plot_data_bin(data_summer, plot_title, xlab = "high_temp (0-40C)", summer = T)
+plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)", summer = T)
 
 dev.off()
 
