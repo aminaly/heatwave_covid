@@ -26,6 +26,8 @@ zoning_cbg <- read_rds("./heatwaves_manual/BayAreaZoning/data/shapefile/zoning_c
 temp_mobility_data <- read_rds("./heatwaves_manual/data_for_regression.rds")
 
 #### prep data
+
+## simplify zoning data
 zoning_cbg$cbg <- paste0(zoning_cbg$STATEFP, zoning_cbg$COUNTYFP, zoning_cbg$TRACTCE, zoning_cbg$BLKGRPCE)
 zoning_cbg$fips <- paste0(zoning_cbg$STATEFP, zoning_cbg$COUNTYFP)
 zoning_cbg_summary <- zoning_cbg %>% filter(zoning %in% c(0:3)) %>% group_by(cbg, fips) %>%
@@ -44,21 +46,14 @@ zoning_cbg_nogeo$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.
 
 ## combine zoning with mobility data
 temp_mobility_data_sm <- temp_mobility_data %>% select(cbg = census_block_group, date, 
+                                                       stops_by_day, number_devices_residing,
                                                        yvar = visitors_percap, year, 
-                                                       month = month.x, fips)
-zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
+                                                       month = month.x, fips,
+                                                       xvar = mean_high_c)
+zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = c("cbg", "fips"))
 
-## zoning and mobility average for 2020
-temp_mobility_2020 <- temp_mobility_data_sm %>% filter(year == 2020) %>%
-  group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T)) %>%
-  mutate(yvar_cut = cut(yvar, breaks = c(seq(-1, 3, .5), Inf)))
-zoning_mob_2020 <- merge(temp_mobility_2020, zoning_cbg_summary, by = "cbg")
-
-## zoning and mobility average for summer 2020
-temp_mobility_summer_2020 <- temp_mobility_data_sm %>% 
-  filter(year == 2020 & month %in% c(5:9)) %>%
-  group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T))
-zoning_mob_summer_2020 <- merge(temp_mobility_summer_2020, zoning_cbg_summary, by = "cbg")
+## find the hottest days each year (over 90th percentile for the year)
+zoning_mob_over30 <- zoning_mob %>% filter(xvar >= 30)
 
 #### Start PDF
 pdf(paste0("./visuals/pub_figures/fig3_", Sys.Date(), ".pdf"))
@@ -68,112 +63,34 @@ plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
 text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
      cex = 1.5, col = "black")
 
-#### Plot zoning allocations
-ggplot(data = zoning_cbg_summary) +
-  ggtitle("Main Zoning per CBG") +
-  geom_sf(data = zoning_cbg_summary, aes(fill = main_zoning), color = NA) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
-  labs(colour="Zoning") +
+#### Plot mobility on days over 30 in 2018
+zoning_mob_over30_all <- zoning_mob_over30 %>% group_by(year, cbg) %>% 
+  summarize(yvar = mean(yvar, na.rm = T))
+
+zoning_mob_over30_2018 <- zoning_mob_over30_all %>% filter(year == 2018)
+zoning_mob_over30_2019 <- zoning_mob_over30_all %>% filter(year == 2019)
+zoning_mob_over30_2020 <- zoning_mob_over30_all %>% filter(year == 2020)
+
+ggplot(data = zoning_mob_over30_2018) +
+  ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
+  geom_sf(data = zoning_mob_over30_2018, size = 0.002, aes(fill = yvar)) +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
+  labs(colour="Mobility Metric") +
   theme_bw()
 
-#plot zoning in specific counties
-#santa clara
-santaclara <- zoning_cbg_summary %>% mutate(fips = substr(cbg, 1, 5)) %>%
-  filter(fips == "06085")
-ggplot(data = santaclara) +
-  ggtitle("Main Zoning per CBG") +
-  geom_sf(data = santaclara, aes(fill = main_zoning), color = NA) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
-  labs(colour="Zoning") +
+ggplot(data = zoning_mob_over30_2019) +
+  ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
+  geom_sf(data = zoning_mob_over30_2019, size = 0.002, aes(fill = yvar)) +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
+  labs(colour="Mobility Metric") +
   theme_bw()
 
-#san francisco
-sf <- zoning_cbg_summary %>% mutate(fips = substr(cbg, 1, 5)) %>%
-  filter(fips == "06075")
-ggplot(data = sf) +
-  ggtitle("Main Zoning per CBG") +
-  geom_sf(data = sf, aes(fill = main_zoning), color = NA) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
-  labs(colour="Zoning") +
+ggplot(data = zoning_mob_over30_2020) +
+  ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
+  geom_sf(data = zoning_mob_over30_2020, size = 0.002, aes(fill = yvar)) +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
+  labs(colour="Mobility Metric") +
   theme_bw()
-
-#alameda
-alameda <- zoning_cbg_summary %>% mutate(fips = substr(cbg, 1, 5)) %>%
-  filter(fips == "06001")
-ggplot(data = alameda) +
-  ggtitle("Main Zoning per CBG") +
-  geom_sf(data = alameda, aes(fill = main_zoning), color = NA) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
-  labs(colour="Zoning") +
-  theme_bw()
-
-#### Plot 2020 mobility for each zone in Santa Clara County
-santaclara <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
-  filter(fips == "06085") 
-ggplot(data = santaclara) +
-  ggtitle("Mobility Santa Clara County") +
-  geom_sf(data = santaclara, size = 0.002, aes(fill = yvar_cut, geometry = geometry), color = NA) +
-  scale_color_gradient(low = "#31a354", high = "#c51b8a", na.value = "grey") +
-  facet_wrap( ~ main_zoning, nrow = 2) +
-  labs(colour="Zoning") +
-  theme_bw()
-
-#### Plot 2020 mobility for each zone in SF County
-sf <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
-  filter(fips == "06075") 
-ggplot(data = sf) +
-  ggtitle("Mobility San Francisco County") +
-  geom_sf(data = sf, aes(fill = yvar_cut, geometry = geometry), color = NA) +
-  scale_color_gradient(low = "#31a354", high = "#c51b8a", na.value = "grey") +
-  facet_wrap( ~ main_zoning, nrow = 2) +
-  labs(colour="Zoning") +
-  theme_bw()
-
-#### Plot 2020 mobility for each zone in Alameda County
-alameda <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
-  filter(fips == "06001")
-ggplot(data = alameda) +
-  ggtitle("Mobility Alameda County") +
-  geom_sf(data = alameda, aes(fill = yvar_cut, geometry = geometry), color = NA) +
-  scale_color_gradient(low = "#31a354", high = "#c51b8a", na.value = "grey") +
-  facet_wrap( ~ main_zoning, nrow = 2) +
-  labs(colour="Zoning") +
-  theme_bw()
-
-
-##over time
-# # line plot of mobility visitors over time separated by main zoning, grouped by year
-ggplot(data=zoning_mob, aes(x=date, y=yvar, group=main_zoning)) +
-  geom_smooth(aes(group=main_zoning, color=as.factor(main_zoning))) +
-  ggtitle("Mobility by Zoning") + ylab("# Visitors / Home Devices") + xlab("Date") +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1")) +
-  scale_x_date() +
-  theme(text = element_text(size = 15)) +
-  labs(colour="Zoning") +
-  theme_bw()
-
-
-## for each county, a box plot of mobility grouped by zoning
-## using just santa clara, sf, and alameda for now
-zoning_mob_2020_sub <- zoning_mob_2020 %>% 
-  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 5)
-ggplot(data = zoning_mob_2020_sub, aes(x = fips, y = yvar, fill = main_zoning)) +
-  geom_boxplot(position=position_dodge(1)) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1")) +
-  labs(colour = "Zoning") +
-  ggtitle("Mobility by zoning for SCC, SF, and ALA") +
-  theme_bw()
-  
-zoning_mob_summer_2020_sub <- zoning_mob_summer_2020 %>% 
-  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 5)
-ggplot(data = zoning_mob_summer_2020_sub, aes(x = fips, y = yvar, fill = main_zoning)) +
-  geom_boxplot(position=position_dodge(1)) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1")) +
-  labs(colour = "Zoning") +
-  ggtitle("Summer Mobility by zoning for SCC, SF, and ALA") +
-  theme_bw()
-  
-
 
 #### Shut down pdf
 dev.off()
