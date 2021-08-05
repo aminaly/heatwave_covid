@@ -42,11 +42,6 @@ The following object is masked from ‘package:dplyr’:
     combine
 
 Linking to GEOS 3.6.2, GDAL 2.2.1, PROJ 4.9.3
-Error: Problem with `filter()` input `..1`.
-✖ object 'fips' not found
-ℹ Input `..1` is `fips == 6085`.
-Backtrace:
- 1. zoning_mob_2020 %>% filter(fips == 6085)
- 7. base::.handleSimpleError(...)
- 8. dplyr:::h(simpleError(msg, call))
+Error in FUN(X[[i]], ...) : object 'yvar' not found
+Calls: <Anonymous> ... ggplot_build.ggplot -> by_layer -> f -> <Anonymous> -> f -> lapply -> FUN
 Execution halted
