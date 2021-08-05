@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=runViz
-#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz.err
-#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz.out
+#SBATCH --job-name=runViz3
+#SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz3.err
+#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz3.out
 #SBATCH --nodes=1
 #SBATCH --time=23:00:00
 #SBATCH --ntasks-per-node=1
