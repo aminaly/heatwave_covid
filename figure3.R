@@ -35,8 +35,8 @@ zoning_cbg_summary <- zoning_cbg %>% filter(zoning %in% c(0:3)) %>% group_by(cbg
             non_dev = sum(zoning == 3)/length(zoning))
 
 # version without geometry for calulations across columns
-zoning_cbg_nogeo <- as.data.frame(zoning_cbg_summary)[,1:4]
-zcng_nocbg <- zoning_cbg_nogeo[,2:4]
+zoning_cbg_nogeo <- as.data.frame(zoning_cbg_summary)[,1:5]
+zcng_nocbg <- zoning_cbg_nogeo[,3:5]
 
 # calculate which zone type is the dominant and return column name (also populate nogeo)
 zoning_cbg_summary$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.max)]
@@ -156,7 +156,7 @@ ggplot(data=zoning_mob, aes(x=date, y=yvar, group=main_zoning)) +
 ## for each county, a box plot of mobility grouped by zoning
 ## using just santa clara, sf, and alameda for now
 zoning_mob_2020_sub <- zoning_mob_2020 %>% 
-  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 10)
+  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 5)
 ggplot(data = zoning_mob_2020_sub, aes(x = fips, y = yvar, fill = main_zoning)) +
   geom_boxplot(position=position_dodge(1)) +
   scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1")) +
@@ -165,7 +165,7 @@ ggplot(data = zoning_mob_2020_sub, aes(x = fips, y = yvar, fill = main_zoning)) 
   theme_bw()
   
 zoning_mob_summer_2020_sub <- zoning_mob_summer_2020 %>% 
-  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 10)
+  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 5)
 ggplot(data = zoning_mob_summer_2020_sub, aes(x = fips, y = yvar, fill = main_zoning)) +
   geom_boxplot(position=position_dodge(1)) +
   scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1")) +
