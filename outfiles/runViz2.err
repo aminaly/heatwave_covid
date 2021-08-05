@@ -41,7 +41,3 @@ The following object is masked from ‘package:dplyr’:
 
     combine
 
-Linking to GEOS 3.6.2, GDAL 2.2.1, PROJ 4.9.3
-Error in FUN(X[[i]], ...) : object 'yvar' not found
-Calls: <Anonymous> ... ggplot_build.ggplot -> by_layer -> f -> <Anonymous> -> f -> lapply -> FUN
-Execution halted

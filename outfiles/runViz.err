@@ -41,5 +41,7 @@ The following object is masked from ‘package:dplyr’:
 
     combine
 
-There were 50 or more warnings (use warnings() to see the first 50)
-There were 50 or more warnings (use warnings() to see the first 50)
+Linking to GEOS 3.6.2, GDAL 2.2.1, PROJ 4.9.3
+`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+Warning message:
+Removed 2195 rows containing non-finite values (stat_smooth). 
