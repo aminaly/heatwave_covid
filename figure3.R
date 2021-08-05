@@ -60,7 +60,7 @@ temp_mobility_summer_2020 <- temp_mobility_data_sm %>%
 zoning_mob_summer_2020 <- merge(temp_mobility_summer_2020, zoning_cbg_summary, by = "cbg")
 
 #### Start PDF
-pdf(paste0("./visuals/pub_figures/fig3_", Sys.time(), ".pdf"))
+pdf(paste0("./visuals/pub_figures/fig3_", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
