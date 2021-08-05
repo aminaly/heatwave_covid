@@ -42,7 +42,4 @@ The following object is masked from ‘package:dplyr’:
     combine
 
 There were 50 or more warnings (use warnings() to see the first 50)
-Error in filter(., between(month.x, 5, 9)) : 
-  object 'data_summer' not found
-Calls: plot_data_bin -> %>% -> filter
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
