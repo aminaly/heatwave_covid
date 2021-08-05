@@ -49,7 +49,8 @@ zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
 
 ## zoning and mobility average for 2020
 temp_mobility_2020 <- temp_mobility_data_sm %>% filter(year == 2020) %>%
-  group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T))
+  group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T)) %>%
+  mutate(mobility = cut(yvar, breaks = c(-Inf, seq(-3, 3, 1), Inf))
 zoning_mob_2020 <- merge(temp_mobility_2020, zoning_cbg_summary, by = "cbg")
 
 ## zoning and mobility average for summer 2020
@@ -76,17 +77,15 @@ ggplot(data = zoning_cbg_summary) +
 
 #### Plot 2020 mobility for each zone in Santa Clara County
 santaclara <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
-  filter(fips == "06085")
-print("I got to santa clara")
+  filter(fips == "06085") %>% mutate(yvar = as.numeric(yvar))
+
 ggplot(data = santaclara) +
   ggtitle("Mobility Santa Clara County") +
-  geom_sf(data = zoning_cbg_summary, aes(fill = yvar), color = NA) +
-  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
-  facet_wrap( ~ main_zoning, scales = "free", nrow = 2) +
+  geom_sf(data = santaclara, size = 0.002, aes(fill = yvar, geometry = geometry), color = NA) +
+  scale_color_gradient(low = "#31a354", high = "#c51b8a", na.value = "grey") +
+  facet_wrap( ~ main_zoning, nrow = 2) +
   labs(colour="Zoning") +
   theme_bw()
-
-print("I plotted santa clara")
 
 #### Plot 2020 mobility for each zone in SF County
 sf <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
@@ -94,23 +93,22 @@ sf <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
 print("I got to sf ")
 
 ggplot(data = sf) +
-  ggtitle("Mobility Santa Clara County") +
-  geom_sf(data = zoning_cbg_summary, aes(fill = yvar), color = NA) +
-  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
-  facet_wrap( ~ main_zoning, scales = "free", nrow = 2) +
+  ggtitle("Mobility San Francisco County") +
+  geom_sf(data = santaclara, aes(fill = yvar, geometry = geometry), color = NA) +
+  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
+  facet_wrap( ~ main_zoning, nrow = 2) +
   labs(colour="Zoning") +
   theme_bw()
-
 
 #### Plot 2020 mobility for each zone in Alameda County
 alameda <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
   filter(fips == "06001")
 
 ggplot(data = alameda) +
-  ggtitle("Mobility Santa Clara County") +
-  geom_sf(data = zoning_cbg_summary, aes(fill = yvar), color = NA) +
-  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
-  facet_wrap( ~ main_zoning, scales = "free", nrow = 2) +
+  ggtitle("Mobility Alameda County") +
+  geom_sf(data = santaclara, aes(fill = yvar, geometry = geometry), color = NA) +
+  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
+  facet_wrap( ~ main_zoning, nrow = 2) +
   labs(colour="Zoning") +
   theme_bw()
 
