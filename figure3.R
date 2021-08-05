@@ -27,7 +27,8 @@ temp_mobility_data <- read_rds("./heatwaves_manual/data_for_regression.rds")
 
 #### prep data
 zoning_cbg$cbg <- paste0(zoning_cbg$STATEFP, zoning_cbg$COUNTYFP, zoning_cbg$TRACTCE, zoning_cbg$BLKGRPCE)
-zoning_cbg_summary <- zoning_cbg %>% filter(zoning %in% c(0:3)) %>% group_by(cbg) %>%
+zoning_cbg$fips <- paste0(zoning_cbg$STATEFP, zoning_cbg$COUNTYFP)
+zoning_cbg_summary <- zoning_cbg %>% filter(zoning %in% c(0:3)) %>% group_by(cbg, fips) %>%
   summarize(non_res = sum(zoning == 0)/length(zoning), 
             multi = sum(zoning == 2)/length(zoning), 
             single = sum(zoning == 1)/length(zoning),
@@ -50,7 +51,7 @@ zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = "cbg")
 ## zoning and mobility average for 2020
 temp_mobility_2020 <- temp_mobility_data_sm %>% filter(year == 2020) %>%
   group_by(cbg) %>% summarise(yvar = mean(yvar, na.rm = T)) %>%
-  mutate(yvar_cut = cut(yvar, breaks = c(seq(1, 3, .5), Inf)))
+  mutate(yvar_cut = cut(yvar, breaks = c(seq(-1, 3, .5), Inf)))
 zoning_mob_2020 <- merge(temp_mobility_2020, zoning_cbg_summary, by = "cbg")
 
 ## zoning and mobility average for summer 2020
@@ -109,7 +110,6 @@ ggplot(data = alameda) +
 #### Plot 2020 mobility for each zone in Santa Clara County
 santaclara <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
   filter(fips == "06085") 
-
 ggplot(data = santaclara) +
   ggtitle("Mobility Santa Clara County") +
   geom_sf(data = santaclara, size = 0.002, aes(fill = yvar_cut, geometry = geometry), color = NA) +
@@ -121,12 +121,10 @@ ggplot(data = santaclara) +
 #### Plot 2020 mobility for each zone in SF County
 sf <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
   filter(fips == "06075") 
-print("I got to sf ")
-
 ggplot(data = sf) +
   ggtitle("Mobility San Francisco County") +
-  geom_sf(data = santaclara, aes(fill = yvar_cut, geometry = geometry), color = NA) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
+  geom_sf(data = sf, aes(fill = yvar_cut, geometry = geometry), color = NA) +
+  scale_color_gradient(low = "#31a354", high = "#c51b8a", na.value = "grey") +
   facet_wrap( ~ main_zoning, nrow = 2) +
   labs(colour="Zoning") +
   theme_bw()
@@ -134,11 +132,10 @@ ggplot(data = sf) +
 #### Plot 2020 mobility for each zone in Alameda County
 alameda <- zoning_mob_2020 %>% mutate(fips = substr(cbg, 1, 5)) %>%
   filter(fips == "06001")
-
 ggplot(data = alameda) +
   ggtitle("Mobility Alameda County") +
-  geom_sf(data = santaclara, aes(fill = yvar_cut, geometry = geometry), color = NA) +
-  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1"), na.value = "grey") +
+  geom_sf(data = alameda, aes(fill = yvar_cut, geometry = geometry), color = NA) +
+  scale_color_gradient(low = "#31a354", high = "#c51b8a", na.value = "grey") +
   facet_wrap( ~ main_zoning, nrow = 2) +
   labs(colour="Zoning") +
   theme_bw()
@@ -154,6 +151,29 @@ ggplot(data=zoning_mob, aes(x=date, y=yvar, group=main_zoning)) +
   theme(text = element_text(size = 15)) +
   labs(colour="Zoning") +
   theme_bw()
+
+
+## for each county, a box plot of mobility grouped by zoning
+## using just santa clara, sf, and alameda for now
+zoning_mob_2020_sub <- zoning_mob_2020 %>% 
+  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 10)
+ggplot(data = zoning_mob_2020_sub, aes(x = fips, y = yvar, fill = main_zoning)) +
+  geom_boxplot(position=position_dodge(1)) +
+  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1")) +
+  labs(colour = "Zoning") +
+  ggtitle("Mobility by zoning for SCC, SF, and ALA") +
+  theme_bw()
+  
+zoning_mob_summer_2020_sub <- zoning_mob_summer_2020 %>% 
+  filter(fips %in% c("06085", "06075", "06001")) %>% filter(yvar < 10)
+ggplot(data = zoning_mob_summer_2020_sub, aes(x = fips, y = yvar, fill = main_zoning)) +
+  geom_boxplot(position=position_dodge(1)) +
+  scale_color_manual(values=wes_palette(n=4, name="GrandBudapest1")) +
+  labs(colour = "Zoning") +
+  ggtitle("Summer Mobility by zoning for SCC, SF, and ALA") +
+  theme_bw()
+  
+
 
 #### Shut down pdf
 dev.off()
