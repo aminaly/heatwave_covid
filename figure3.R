@@ -45,15 +45,13 @@ zoning_cbg_summary$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, whic
 zoning_cbg_nogeo$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.max)]
 
 ## combine zoning with mobility data
-temp_mobility_data_sm <- temp_mobility_data %>% select(cbg = census_block_group, date, 
-                                                       stops_by_day, number_devices_residing,
-                                                       yvar = visitors_percap, year, 
-                                                       month = month.x, fips,
-                                                       xvar = mean_high_c)
-zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = c("cbg", "fips"))
+temp_mobility_data_sm <- temp_mobility_data %>% 
+  filter(mean_high_c >= 34) %>%
+  group_by(year, cbg, fips, xvar = mean_high_c) %>%
+  summarize(yvar = mean(visitors_percap, na.rm = T))
 
-## find the hottest days each year (over 90th percentile for the year)
-zoning_mob_over30 <- zoning_mob %>% filter(xvar >= 30)
+zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = c("cbg", "fips"))
+zoning_mob <- st_as_sf(zoning_mob)
 
 #### Start PDF
 pdf(paste0("./visuals/pub_figures/fig3_", Sys.Date(), ".pdf"))
@@ -64,29 +62,27 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
      cex = 1.5, col = "black")
 
 #### Plot mobility on days over 30 in 2018
-zoning_mob_over30_all <- zoning_mob_over30 %>% group_by(year, cbg) %>% 
-  summarize(yvar = mean(yvar, na.rm = T))
 
-zoning_mob_over30_2018 <- zoning_mob_over30_all %>% filter(year == 2018)
-zoning_mob_over30_2019 <- zoning_mob_over30_all %>% filter(year == 2019)
-zoning_mob_over30_2020 <- zoning_mob_over30_all %>% filter(year == 2020)
+zoning_mob_over30_2018 <- zoning_mob %>% filter(year == 2018)
+zoning_mob_over30_2019 <- zoning_mob %>% filter(year == 2019)
+zoning_mob_over30_2020 <- zoning_mob %>% filter(year == 2020)
 
 ggplot(data = zoning_mob_over30_2018) +
   ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
   geom_sf(data = zoning_mob_over30_2018, size = 0.002, aes(fill = yvar, geometry = "geometry")) +
-  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
-  labs(colour="Mobility Metric") +
+  #scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
+  #labs(colour="Mobility Metric") +
   theme_bw()
 
 ggplot(data = zoning_mob_over30_2019) +
-  ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
+  ggtitle("Bay Area 2019 Summer Mobility Over 30 Degrees") +
   geom_sf(data = zoning_mob_over30_2019, size = 0.002, aes(fill = yvar, geometry = "geometry")) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
 ggplot(data = zoning_mob_over30_2020) +
-  ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
+  ggtitle("Bay Area 2020 Summer Mobility Over 30 Degrees") +
   geom_sf(data = zoning_mob_over30_2020, size = 0.002, aes(fill = yvar, geometry = "geometry")) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
