@@ -24,9 +24,10 @@ ifelse(dir.exists("~/Box Sync/heatwave_covid/"),
 
 zoning_cbg <- read_rds("./heatwaves_manual/BayAreaZoning/data/shapefile/zoning_cbg.rds")
 temp_mobility_data <- read_rds("./heatwaves_manual/data_for_regression.rds")
+cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp", stringsAsFactors = F) 
 
-#### prep data
-
+#### prep data ####
+#### Prep Zoning Data ####
 ## simplify zoning data
 zoning_cbg$cbg <- paste0(zoning_cbg$STATEFP, zoning_cbg$COUNTYFP, zoning_cbg$TRACTCE, zoning_cbg$BLKGRPCE)
 zoning_cbg$fips <- paste0(zoning_cbg$STATEFP, zoning_cbg$COUNTYFP)
@@ -44,16 +45,24 @@ zcng_nocbg <- zoning_cbg_nogeo[,3:5]
 zoning_cbg_summary$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.max)]
 zoning_cbg_nogeo$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.max)]
 
+#### prep CBG data ####
+temp_mobility_data <- temp_mobility_data %>% filter(!is.na(visitors_percap))
+
+## combine temp and census block group shapefile
+temp_mobility_data <- temp_mobility_data %>% mutate(STATEFP = substr(census_block_group, 1, 2), COUNTYFP = substr(census_block_group, 3, 5),
+                                                    TRACTCE = substr(census_block_group, 1, 11))
+cbg$cbg <- paste0(cbg$STATEFP, cbg$COUNTYFP, cbg$TRACTCE, cbg$BLKGRPCE)
+cbg <- cbg %>% filter(census_block_group %in% temp_mobility_data$census_block_group)
+
 ## combine zoning with mobility data
 temp_mobility_data_sm <- temp_mobility_data %>% 
   filter(mean_high_c >= 34) %>%
   group_by(year, cbg = census_block_group, fips) %>%
   summarize(yvar = mean(visitors_percap, na.rm = T))
 
-zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = c("cbg", "fips"))
-zoning_mob <- st_as_sf(zoning_mob)
+temp_mobility_cbg <- merge(cbg, temp_mobility_data_sm, by = "cbg")
 
-#### Start PDF
+#### Start PDF ####
 pdf(paste0("./visuals/pub_figures/fig3_", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
@@ -63,9 +72,9 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
 
 #### Plot mobility on days over 30 in 2018
 
-zoning_mob_over30_2018 <- st_as_sf(zoning_mob %>% filter(year == 2018))
-zoning_mob_over30_2019 <- st_as_sf(zoning_mob %>% filter(year == 2019))
-zoning_mob_over30_2020 <- st_as_sf(zoning_mob %>% filter(year == 2020))
+zoning_mob_over30_2018 <- temp_mobility_cbg %>% filter(year == 2018)
+zoning_mob_over30_2019 <- temp_mobility_cbg %>% filter(year == 2019)
+zoning_mob_over30_2020 <- temp_mobility_cbg %>% filter(year == 2020)
 
 ggplot(data = zoning_mob_over30_2018) +
   ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
