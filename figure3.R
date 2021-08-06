@@ -47,7 +47,7 @@ zoning_cbg_nogeo$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.
 ## combine zoning with mobility data
 temp_mobility_data_sm <- temp_mobility_data %>% 
   filter(mean_high_c >= 34) %>%
-  group_by(year, cbg = census_block_group, fips, xvar = mean_high_c) %>%
+  group_by(year, cbg = census_block_group, fips) %>%
   summarize(yvar = mean(visitors_percap, na.rm = T))
 
 zoning_mob <- merge(temp_mobility_data_sm, zoning_cbg_summary, by = c("cbg", "fips"))
@@ -63,9 +63,9 @@ text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
 
 #### Plot mobility on days over 30 in 2018
 
-zoning_mob_over30_2018 <- zoning_mob %>% filter(year == 2018)
-zoning_mob_over30_2019 <- zoning_mob %>% filter(year == 2019)
-zoning_mob_over30_2020 <- zoning_mob %>% filter(year == 2020)
+zoning_mob_over30_2018 <- st_as_sf(zoning_mob %>% filter(year == 2018))
+zoning_mob_over30_2019 <- st_as_sf(zoning_mob %>% filter(year == 2019))
+zoning_mob_over30_2020 <- st_as_sf(zoning_mob %>% filter(year == 2020))
 
 ggplot(data = zoning_mob_over30_2018) +
   ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
