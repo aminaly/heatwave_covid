@@ -73,21 +73,21 @@ zoning_mob_over30_2020 <- zoning_mob_over30_all %>% filter(year == 2020)
 
 ggplot(data = zoning_mob_over30_2018) +
   ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
-  geom_sf(data = zoning_mob_over30_2018, size = 0.002, aes(fill = yvar, geometry = geometry)) +
+  geom_sf(data = zoning_mob_over30_2018, size = 0.002, geometry = geometry, aes(fill = yvar)) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
 ggplot(data = zoning_mob_over30_2019) +
   ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
-  geom_sf(data = zoning_mob_over30_2019, size = 0.002, aes(fill = yvar, geometry = geometry)) +
+  geom_sf(data = zoning_mob_over30_2019, size = 0.002, geometry = geometry, aes(fill = yvar)) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
 ggplot(data = zoning_mob_over30_2020) +
   ggtitle("Bay Area 2018 Summer Mobility Over 30 Degrees") +
-  geom_sf(data = zoning_mob_over30_2020, size = 0.002, aes(fill = yvar, geometry = geometry)) +
+  geom_sf(data = zoning_mob_over30_2020, size = 0.002, geometry = geometry, aes(fill = yvar)) +
   scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
