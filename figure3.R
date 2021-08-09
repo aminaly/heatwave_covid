@@ -59,7 +59,7 @@ temp_mobility_data_sm <- temp_mobility_data %>%
   filter(mean_high_c >= 34) %>%
   group_by(year, cbg = census_block_group, fips) %>%
   summarize(yvar = mean(visitors_percap, na.rm = T)) %>%
-  mutate(yvar_cut = cut(yvar, c(seq(-1, 5, .5), Inf)))
+  mutate(yvar_cut = cut(yvar, c(seq(-1, 5, 1), Inf)))
 
 temp_mobility_cbg <- merge(cbg, temp_mobility_data_sm, by = "cbg")
 
