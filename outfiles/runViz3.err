@@ -44,3 +44,33 @@ The following object is masked from ‘package:dplyr’:
 Linking to GEOS 3.6.2, GDAL 2.2.1, PROJ 4.9.3
 `summarise()` has grouped output by 'cbg'. You can override using the `.groups` argument.
 `summarise()` has grouped output by 'year', 'cbg'. You can override using the `.groups` argument.
+Warning message:
+In RColorBrewer::brewer.pal(n, pal) :
+  n too large, allowed maximum for palette PiYG is 11
+Returning the palette you asked for with that many colors
+
+Warning message:
+In RColorBrewer::brewer.pal(n, pal) :
+  n too large, allowed maximum for palette PiYG is 11
+Returning the palette you asked for with that many colors
+
+Warning message:
+In RColorBrewer::brewer.pal(n, pal) :
+  n too large, allowed maximum for palette PiYG is 11
+Returning the palette you asked for with that many colors
+
+Warning message:
+In RColorBrewer::brewer.pal(n, pal) :
+  n too large, allowed maximum for palette PiYG is 11
+Returning the palette you asked for with that many colors
+
+Warning message:
+In RColorBrewer::brewer.pal(n, pal) :
+  n too large, allowed maximum for palette PiYG is 11
+Returning the palette you asked for with that many colors
+
+Warning message:
+In RColorBrewer::brewer.pal(n, pal) :
+  n too large, allowed maximum for palette PiYG is 11
+Returning the palette you asked for with that many colors
+
