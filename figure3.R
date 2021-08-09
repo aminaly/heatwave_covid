@@ -58,7 +58,8 @@ cbg <- cbg %>% filter(cbg %in% temp_mobility_data$census_block_group)
 temp_mobility_data_sm <- temp_mobility_data %>% 
   filter(mean_high_c >= 34) %>%
   group_by(year, cbg = census_block_group, fips) %>%
-  summarize(yvar = mean(visitors_percap, na.rm = T))
+  summarize(yvar = mean(visitors_percap, na.rm = T)) %>%
+  mutate(yvar = ifelse(yvar > 3, 3.1, yvar))
 
 temp_mobility_cbg <- merge(cbg, temp_mobility_data_sm, by = "cbg")
 
