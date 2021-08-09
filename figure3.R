@@ -132,11 +132,11 @@ ggplot(data = tm_ala_19_20) +
 
 ## looking at the difference between the biggest yvars on days over 34
 tm_sf_19_20_max <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips == "06075") %>% mutate(yvar = ifelse(yvar < 5, NA, yvar))
+  filter(fips == "06075") %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
 tm_scc_19_20_max <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips == "06085") %>% mutate(yvar = ifelse(yvar < 5, NA, yvar))
+  filter(fips == "06085") %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
 tm_ala_19_20_max <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips ==  "06001") %>% mutate(yvar = ifelse(yvar < 5, NA, yvar))
+  filter(fips ==  "06001") %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
 
 ggplot(data = tm_sf_19_20_max) +
   ggtitle("SF Summer Mobility Over 34 Degrees") +
