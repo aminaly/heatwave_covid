@@ -52,7 +52,7 @@ temp_mobility_data <- temp_mobility_data %>% filter(!is.na(visitors_percap))
 temp_mobility_data <- temp_mobility_data %>% mutate(STATEFP = substr(census_block_group, 1, 2), COUNTYFP = substr(census_block_group, 3, 5),
                                                     TRACTCE = substr(census_block_group, 1, 11))
 cbg$cbg <- paste0(cbg$STATEFP, cbg$COUNTYFP, cbg$TRACTCE, cbg$BLKGRPCE)
-cbg <- cbg %>% filter(census_block_group %in% temp_mobility_data$census_block_group)
+cbg <- cbg %>% filter(cbg %in% temp_mobility_data$census_block_group)
 
 ## combine zoning with mobility data
 temp_mobility_data_sm <- temp_mobility_data %>% 
