@@ -76,11 +76,11 @@ tm_2018 <- temp_mobility_cbg %>% filter(year == 2018)
 tm_2019 <- temp_mobility_cbg %>% filter(year == 2019)
 tm_2020 <- temp_mobility_cbg %>% filter(year == 2020)
 tm_sf_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips %in% 06075)
+  filter(fips == "06075")
 tm_scc_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips %in% 06085)
+  filter(fips == "06085")
 tm_ala_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips %in% 06001)
+  filter(fips ==  "06001")
 
 
 ggplot(data = tm_2018) +
