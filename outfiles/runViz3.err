@@ -44,9 +44,3 @@ The following object is masked from ‘package:dplyr’:
 Linking to GEOS 3.6.2, GDAL 2.2.1, PROJ 4.9.3
 `summarise()` has grouped output by 'cbg'. You can override using the `.groups` argument.
 `summarise()` has grouped output by 'year', 'cbg'. You can override using the `.groups` argument.
-Warning message:
-Removed 3531 rows containing non-finite values (stat_sf). 
-Warning message:
-Removed 4942 rows containing non-finite values (stat_sf). 
-Warning message:
-Removed 4942 rows containing non-finite values (stat_sf). 
