@@ -59,7 +59,7 @@ temp_mobility_data_sm <- temp_mobility_data %>%
   filter(mean_high_c >= 34) %>%
   group_by(year, cbg = census_block_group, fips) %>%
   summarize(yvar = mean(visitors_percap, na.rm = T)) %>%
-  mutate(yvar_cut = c(seq(-1, 5, .5), Inf))
+  mutate(yvar_cut = cut(yvar, c(seq(-1, 5, .5), Inf)))
 
 temp_mobility_cbg <- merge(cbg, temp_mobility_data_sm, by = "cbg")
 
@@ -80,21 +80,21 @@ tm_2020 <- temp_mobility_cbg %>% filter(year == 2020)
 ggplot(data = tm_2018) +
   ggtitle("Bay Area 2018 Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_2018, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
 ggplot(data = tm_2019) +
   ggtitle("Bay Area 2019 Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_2019, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
 ggplot(data = tm_2020) +
   ggtitle("Bay Area 2020 Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_2020, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
@@ -109,7 +109,7 @@ tm_ala_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>%
 ggplot(data = tm_sf_19_20) +
   ggtitle("SF Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_sf_19_20, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   facet_wrap( ~ year, nrow = 2) +
   labs(colour="Mobility Metric") +
   theme_bw()
@@ -117,7 +117,7 @@ ggplot(data = tm_sf_19_20) +
 ggplot(data = tm_scc_19_20) +
   ggtitle("SCC Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_scc_19_20, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   facet_wrap( ~ year, nrow = 2) +
   labs(colour="Mobility Metric") +
   theme_bw()
@@ -125,7 +125,7 @@ ggplot(data = tm_scc_19_20) +
 ggplot(data = tm_ala_19_20) +
   ggtitle("SF Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_ala_19_20, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
   facet_wrap( ~ year, nrow = 2) +
   labs(colour="Mobility Metric") +
   theme_bw()
