@@ -149,7 +149,7 @@ ggplot(data = tm_sf_19_20_max) +
 ggplot(data = tm_scc_19_20_max) +
   ggtitle("SCC Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_scc_19_20_max, size = 0.002, aes(fill = yvar)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
   facet_wrap( ~ year, nrow = 2) +
   labs(colour="Mobility Metric") +
   theme_bw()
@@ -157,7 +157,7 @@ ggplot(data = tm_scc_19_20_max) +
 ggplot(data = tm_ala_19_20_max) +
   ggtitle("SF Summer Mobility Over 34 Degrees") +
   geom_sf(data = tm_ala_19_20_max, size = 0.002, aes(fill = yvar)) +
-  scale_fill_continuous(low = "#e9a3c9", high = "#a1d76a", na.value = "grey") +
+  scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
   facet_wrap( ~ year, nrow = 2) +
   labs(colour="Mobility Metric") +
   theme_bw()
