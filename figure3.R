@@ -116,11 +116,13 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   ggplot(data = tm_19_20_max) +
     ggtitle(paste(fip, " Summer Mobility Over 34 Degrees & MI > 3")) +
-    geom_sf(data = tm_sf_19_20_max, size = 0.002, aes(fill = yvar)) +
+    geom_sf(data = tm_19_20_max, size = 0.002, aes(fill = yvar)) +
     scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
     facet_wrap( ~ year, nrow = 2) +
     labs(colour="Mobility Metric") +
     theme_bw()
+  
+  
 }
 
 #### Shut down pdf
