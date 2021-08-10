@@ -99,68 +99,29 @@ ggplot(data = tm_2020) +
   theme_bw()
 
 ## lets look at some smaller areas 
-tm_sf_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips == "06075")
-tm_scc_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips == "06085")
-tm_ala_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips ==  "06001")
 
-ggplot(data = tm_sf_19_20) +
-  ggtitle("SF Summer Mobility Over 34 Degrees") +
-  geom_sf(data = tm_sf_19_20, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
-  facet_wrap( ~ year, nrow = 2) +
-  labs(colour="Mobility Metric") +
-  theme_bw()
-
-ggplot(data = tm_scc_19_20) +
-  ggtitle("SCC Summer Mobility Over 34 Degrees") +
-  geom_sf(data = tm_scc_19_20, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
-  facet_wrap( ~ year, nrow = 2) +
-  labs(colour="Mobility Metric") +
-  theme_bw()
-
-ggplot(data = tm_ala_19_20) +
-  ggtitle("SF Summer Mobility Over 34 Degrees") +
-  geom_sf(data = tm_ala_19_20, size = 0.002, aes(fill = yvar_cut)) +
-  scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
-  facet_wrap( ~ year, nrow = 2) +
-  labs(colour="Mobility Metric") +
-  theme_bw()
-
-## looking at the difference between the biggest yvars on days over 34
-tm_sf_19_20_max <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips == "06075") %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
-tm_scc_19_20_max <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips == "06085") %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
-tm_ala_19_20_max <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(fips ==  "06001") %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
-
-ggplot(data = tm_sf_19_20_max) +
-  ggtitle("SF Summer Mobility Over 34 Degrees & MI > 3") +
-  geom_sf(data = tm_sf_19_20_max, size = 0.002, aes(fill = yvar)) +
-  scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
-  facet_wrap( ~ year, nrow = 2) +
-  labs(colour="Mobility Metric") +
-  theme_bw()
-
-ggplot(data = tm_scc_19_20_max) +
-  ggtitle("SCC Summer Mobility Over 34 Degrees & MI > 3") +
-  geom_sf(data = tm_scc_19_20_max, size = 0.002, aes(fill = yvar)) +
-  scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
-  facet_wrap( ~ year, nrow = 2) +
-  labs(colour="Mobility Metric") +
-  theme_bw()
-
-ggplot(data = tm_ala_19_20_max) +
-  ggtitle("SF Summer Mobility Over 34 Degrees & MI > 3") +
-  geom_sf(data = tm_ala_19_20_max, size = 0.002, aes(fill = yvar)) +
-  scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
-  facet_wrap( ~ year, nrow = 2) +
-  labs(colour="Mobility Metric") +
-  theme_bw()
+for(fip in unique(temp_mobility_cbg$fips)) {
+  tm_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
+    filter(fips == fip)
+  
+  ggplot(data = tm_19_20) +
+    ggtitle(paste(fip, "SF Summer Mobility Over 34 Degrees")) +
+    geom_sf(data = tm_19_20, size = 0.002, aes(fill = yvar_cut)) +
+    scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
+    facet_wrap( ~ year, nrow = 2) +
+    labs(colour="Mobility Metric") +
+    theme_bw()
+  
+  tm_19_20_max <- tm_19_20 %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
+  
+  ggplot(data = tm_19_20_max) +
+    ggtitle(paste(fip, " Summer Mobility Over 34 Degrees & MI > 3")) +
+    geom_sf(data = tm_sf_19_20_max, size = 0.002, aes(fill = yvar)) +
+    scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
+    facet_wrap( ~ year, nrow = 2) +
+    labs(colour="Mobility Metric") +
+    theme_bw()
+}
 
 #### Shut down pdf
 dev.off()
