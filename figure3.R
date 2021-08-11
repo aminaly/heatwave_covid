@@ -38,8 +38,8 @@ zoning_cbg_summary <- zoning_cbg %>% filter(zoning %in% c(0:3)) %>% group_by(cbg
             non_dev = sum(zoning == 3)/length(zoning))
 
 # version without geometry for calulations across columns
-zoning_cbg_nogeo <- as.data.frame(zoning_cbg_summary)[,1:5]
-zcng_nocbg <- zoning_cbg_nogeo[,3:5]
+zoning_cbg_nogeo <- st_drop_geometry(zoning_cbg_summary)
+zcng_nocbg <- zoning_cbg_nogeo[,3:6]
 
 # calculate which zone type is the dominant and return column name (also populate nogeo)
 zoning_cbg_summary$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.max)]
@@ -122,7 +122,21 @@ for(fip in unique(temp_mobility_cbg$fips)) {
     labs(colour="Mobility Metric") +
     theme_bw()
   
+  ## rearrange and add in zoning information for this fips
+  tm_max_cast <- st_drop_geometry(tm_19_20 %>% select(cbg, fips, year, yvar))
+  tm_max_cast <- dcast(tm_max_cast, cbg + fips ~ year, value.var = "yvar")
+  tm_max_cast <- tm_max_cast %>% mutate(diff = `2020` - `2019`) %>%
+    filter(!is.na(diff)) %>%
+    mutate(diff_cut = cut(diff, c(-Inf, 0, Inf), labels = c("Decrease in 2020", "Increase in 2020"))) 
+  tm_max_cast <- left_join(tm_max_cast, zoning_cbg_nogeo, by = c("cbg", "fips"))
+  tm_max_cast <- tm_max_cast %>% filter(!is.na(main_zoning))
   
+  ggplot(data = tm_max_cast, aes(x=diff_cut, y=main_zoning, fill=main_zoning)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    ggtitle(paste(fip, "Count of Zoning Type by Change in Mobility")) +
+    scale_color_manual(values=wes_palette(n=2, name="Zissou1")) +
+    theme_bw()
+
 }
 
 #### Shut down pdf
