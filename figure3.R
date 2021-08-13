@@ -25,6 +25,7 @@ ifelse(dir.exists("~/Box Sync/heatwave_covid/"),
 zoning_cbg <- read_rds("./heatwaves_manual/BayAreaZoning/data/shapefile/zoning_cbg.rds")
 temp_mobility_data <- read_rds("./heatwaves_manual/data_for_regression.rds")
 cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp", stringsAsFactors = F) 
+pop <- read_csv("us_census/annual_population_2010-2019.csv")
 
 #### prep data ####
 #### Prep Zoning Data ####
@@ -102,10 +103,10 @@ ggplot(data = tm_2020) +
 
 for(fip in unique(temp_mobility_cbg$fips)) {
   tm_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-    filter(fips == fip)
+    filter(fips == fip) %>% mutate(pop_density = population / ALAND)
   
   print(ggplot(data = tm_19_20) +
-    ggtitle(paste(fip, "SF Summer Mobility Over 34 Degrees")) +
+    ggtitle(paste(fip, "Summer Mobility Over 34 Degrees")) +
     geom_sf(data = tm_19_20, size = 0.002, aes(fill = yvar_cut)) +
     scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
     facet_wrap( ~ year, nrow = 2) +
@@ -122,20 +123,27 @@ for(fip in unique(temp_mobility_cbg$fips)) {
     labs(colour="Mobility Metric") +
     theme_bw())
   
-  ## rearrange and add in zoning information for this fips
-  tm_max_cast <- st_drop_geometry(tm_19_20 %>% select(cbg, fips, year, yvar))
-  tm_max_cast <- dcast(tm_max_cast, cbg + fips ~ year, value.var = "yvar")
-  tm_max_cast <- tm_max_cast %>% mutate(diff = `2020` - `2019`) %>%
-    filter(!is.na(diff)) %>%
-    mutate(diff_cut = cut(diff, c(-Inf, 0, Inf), labels = c("Decrease in 2020", "Increase in 2020"))) 
-  tm_max_cast <- left_join(tm_max_cast, zoning_cbg_nogeo, by = c("cbg", "fips"))
-  tm_max_cast <- tm_max_cast %>% filter(!is.na(main_zoning))
+  tm_onlymax <- tm_19_20_max %>% filter(!is.na(yvar)) 
   
-  print(ggplot(data = tm_max_cast, aes(x=diff_cut, y=main_zoning, fill=main_zoning)) +
-    geom_bar(stat="identity", position=position_dodge()) +
-    ggtitle(paste(fip, "Count of Zoning Type by Change in Mobility")) +
-    scale_color_manual(values=wes_palette(n=2, name="Zissou1")) +
-    theme_bw())
+  print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
+          geom_histogram() +
+          ggtitle("Distribution of CBGs with MI > 3") +
+          theme_bw())
+  
+  ## rearrange and add in zoning information for this fips
+  # tm_max_cast <- st_drop_geometry(tm_19_20 %>% select(cbg, fips, year, yvar, ALAND))
+  # tm_max_cast <- dcast(tm_max_cast, ALAND + cbg + fips ~ year, value.var = "yvar")
+  # tm_max_cast <- tm_max_cast %>% mutate(diff = `2020` - `2019`) %>%
+  #   filter(!is.na(diff)) %>%
+  #   mutate(diff_cut = cut(diff, c(-Inf, 0, Inf), labels = c("Decrease in 2020", "Increase in 2020"))) 
+  # tm_max_cast <- left_join(tm_max_cast, zoning_cbg_nogeo, by = c("cbg", "fips"))
+  # 
+  # print(ggplot(data = tm_max_cast, aes(x=diff_cut, y=main_zoning, fill=main_zoning)) +
+  #   geom_bar(stat="identity", position=position_dodge()) +
+  #   ggtitle(paste(fip, "Count of Zoning Type by Change in Mobility")) +
+  #   scale_color_manual(values=wes_palette(n=2, name="Zissou1")) +
+  #   theme_bw())
+
 
 }
 
