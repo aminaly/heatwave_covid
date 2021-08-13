@@ -25,7 +25,7 @@ ifelse(dir.exists("~/Box Sync/heatwave_covid/"),
 zoning_cbg <- read_rds("./heatwaves_manual/BayAreaZoning/data/shapefile/zoning_cbg.rds")
 temp_mobility_data <- read_rds("./heatwaves_manual/data_for_regression.rds")
 cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp", stringsAsFactors = F) 
-pop <- read_csv("us_census/annual_population_2010-2019.csv")
+pop <- read_csv("./heatwaves_manual/safegraph_open_census_data/data/cbg_b00.csv")
 
 #### prep data ####
 #### Prep Zoning Data ####
@@ -46,6 +46,10 @@ zcng_nocbg <- zoning_cbg_nogeo[,3:6]
 zoning_cbg_summary$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.max)]
 zoning_cbg_nogeo$main_zoning <- colnames(zcng_nocbg)[apply(zcng_nocbg, 1, which.max)]
 
+#### Prep population Data ####
+pop <- pop %>% select(cbg = census_block_group, population = B00001e1) %>% 
+  filter(cbg %in% unique(temp_mobility_data$census_block_group))
+
 #### prep CBG data ####
 temp_mobility_data <- temp_mobility_data %>% filter(!is.na(visitors_percap))
 
@@ -61,6 +65,8 @@ temp_mobility_data_sm <- temp_mobility_data %>%
   group_by(year, cbg = census_block_group, fips) %>%
   summarize(yvar = mean(visitors_percap, na.rm = T)) %>%
   mutate(yvar_cut = cut(yvar, c(seq(-1, 5, 1), Inf)))
+
+temp_mobility_data_sm <- left_join(temp_mobility_data_sm, pop, by = "cbg")
 
 temp_mobility_cbg <- merge(cbg, temp_mobility_data_sm, by = "cbg")
 
@@ -126,7 +132,13 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   tm_onlymax <- tm_19_20_max %>% filter(!is.na(yvar)) 
   
   print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
+          geom_density() +
+          ggtitle("Distribution of CBGs with MI > 3") +   
+          facet_wrap( ~ year, nrow = 2) +
+          theme_bw())
+  print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
           geom_histogram() +
+          facet_wrap( ~ year, nrow = 2) +
           ggtitle("Distribution of CBGs with MI > 3") +
           theme_bw())
   
