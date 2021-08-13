@@ -105,6 +105,20 @@ ggplot(data = tm_2020) +
   labs(colour="Mobility Metric") +
   theme_bw()
 
+tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
+  filter(yvar >= 3) %>% mutate(pop_density = population / (ALAND + AWATER))
+
+print(ggplot(data = tm_all_onlymax, aes(x = pop_density)) +
+        geom_density() +
+        ggtitle("Distribution of CBGs with MI > 3") +   
+        facet_wrap( ~ year, nrow = 2) +
+        theme_bw())
+print(ggplot(data = tm_all_onlymax, aes(x = pop_density)) +
+        geom_histogram() +
+        facet_wrap( ~ year, nrow = 2) +
+        ggtitle("Distribution of CBGs with MI > 3") +
+        theme_bw())
+
 ## lets look at some smaller areas 
 
 for(fip in unique(temp_mobility_cbg$fips)) {
