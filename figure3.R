@@ -109,7 +109,7 @@ ggplot(data = tm_2020) +
 
 for(fip in unique(temp_mobility_cbg$fips)) {
   tm_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-    filter(fips == fip) %>% mutate(pop_density = population / ALAND)
+    filter(fips == fip) %>% mutate(pop_density = population / (ALAND + AWATER))
   
   print(ggplot(data = tm_19_20) +
     ggtitle(paste(fip, "Summer Mobility Over 34 Degrees")) +
