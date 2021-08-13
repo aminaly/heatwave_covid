@@ -42,5 +42,28 @@ The following object is masked from ‘package:dplyr’:
     combine
 
 Linking to GEOS 3.6.2, GDAL 2.2.1, PROJ 4.9.3
+Parsed with column specification:
+cols(
+  census_block_group = col_character(),
+  B00001e1 = col_double(),
+  B00001m1 = col_double(),
+  B00002e1 = col_double(),
+  B00002m1 = col_double()
+)
 `summarise()` has grouped output by 'cbg'. You can override using the `.groups` argument.
 `summarise()` has grouped output by 'year', 'cbg'. You can override using the `.groups` argument.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+Warning messages:
+1: Removed 2 rows containing non-finite values (stat_density). 
+2: Removed 2 rows containing non-finite values (stat_bin). 
+3: Removed 2 rows containing non-finite values (stat_density). 
+4: Removed 2 rows containing non-finite values (stat_bin). 
