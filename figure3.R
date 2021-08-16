@@ -108,10 +108,16 @@ ggplot(data = tm_2020) +
 tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
   filter(yvar >= 3) %>% mutate(pop_density = population / (ALAND + AWATER))
 
+tmom_19 <- tm_all_onlymax %>% filter(year == 2019)
+tmom_20 <- tm_all_onlymax %>% filter(year == 2020)
+MW_U <- wilcox.test(one$yvar, two$yvar)
+
 print(ggplot(data = tm_all_onlymax, aes(x = pop_density)) +
         geom_density() +
         ggtitle("Distribution of CBGs with MI > 3") +   
         facet_wrap( ~ year, nrow = 2) +
+        annotate('text', label=paste("MW_U: W =", MW_U$statistic, "pval = ", round(MW_U$p.value, 3)),
+                 x=-Inf, y=Inf, hjust=0, vjust=1) +
         theme_bw())
 print(ggplot(data = tm_all_onlymax, aes(x = pop_density)) +
         geom_histogram() +
@@ -145,10 +151,16 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   tm_onlymax <- tm_19_20_max %>% filter(!is.na(yvar)) 
   
+  tmom_19 <- tm_onlymax %>% filter(year == 2019)
+  tmom_20 <- tm_onlymax %>% filter(year == 2020)
+  MW_U <- wilcox.test(one$yvar, two$yvar)
+  
   print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
           geom_density() +
           ggtitle("Distribution of CBGs with MI > 3") +   
           facet_wrap( ~ year, nrow = 2) +
+          annotate('text', label=paste("MW_U: W =", MW_U$statistic, "pval = ", round(MW_U$p.value, 3)),
+                   x=-Inf, y=Inf, hjust=0, vjust=1) +
           theme_bw())
   print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
           geom_histogram() +
