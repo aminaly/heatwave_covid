@@ -53,6 +53,9 @@ cols(
 `summarise()` has grouped output by 'cbg'. You can override using the `.groups` argument.
 `summarise()` has grouped output by 'year', 'cbg'. You can override using the `.groups` argument.
 Warning message:
+In ks.test(tmom_19$pop_density, tmom_20$pop_density) :
+  p-value will be approximate in the presence of ties
+Warning message:
 Removed 4 rows containing non-finite values (stat_density). 
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 Warning message:
@@ -67,8 +70,4 @@ Removed 4 rows containing non-finite values (stat_bin).
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-Warning messages:
-1: Removed 2 rows containing non-finite values (stat_density). 
-2: Removed 2 rows containing non-finite values (stat_bin). 
-3: Removed 2 rows containing non-finite values (stat_density). 
-4: Removed 2 rows containing non-finite values (stat_bin). 
+There were 14 warnings (use warnings() to see them)
