@@ -126,6 +126,11 @@ print(ggplot(data = tm_all_onlymax, aes(x = pop_density)) +
         facet_wrap( ~ year, nrow = 2) +
         ggtitle("Distribution of CBGs with MI > 3") +
         theme_bw())
+print(ggplot(data = tm_all_onlymax, aes(x=fips, y=pop_density, group=year, fill = year)) + 
+        geom_boxplot() +
+        scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
+        facet_wrap(~fips, scale = "free") +
+        theme_bw())
 
 ## lets look at some smaller areas 
 
@@ -171,6 +176,13 @@ for(fip in unique(temp_mobility_cbg$fips)) {
           facet_wrap( ~ year, nrow = 2) +
           ggtitle("Distribution of CBGs with MI > 3") +
           theme_bw())
+  print(ggplot(data = tm_onlymax, aes(x=year, y=pop_density, group = year, fill = year)) + 
+          geom_boxplot() +
+          annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
+                                       "\n KS: pval = ", round(KS$p.value, 3)),
+                   x=-Inf, y=Inf, hjust=0, vjust=1) +
+          scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
+          facet_wrap(~fips, scale = "free"))
   
   ## rearrange and add in zoning information for this fips
   # tm_max_cast <- st_drop_geometry(tm_19_20 %>% select(cbg, fips, year, yvar, ALAND))
