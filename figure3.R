@@ -184,15 +184,15 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   tm_onlymax <- tm_19_20_max %>% filter(!is.na(yvar)) 
   
-  tmom_19 <- tm_19_20 %>% filter(year == 2019) %>% arrange(desc(yvar)) %>% slice(1:25)
-  tmom_20 <- tm_19_20 %>% filter(year == 2020) %>% arrange(desc(yvar)) %>% slice(1:25)
+  tmom_19 <- tm_19_20 %>% filter(year == 2019) %>% arrange(desc(yvar)) %>% slice(1:15)
+  tmom_20 <- tm_19_20 %>% filter(year == 2020) %>% arrange(desc(yvar)) %>% slice(1:15)
   tmom_19_20 <- bind_rows(tmom_19, tmom_20)
   MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
   KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
   
   print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
           geom_density() +
-          ggtitle("Distribution of top 25 CBGs") +   
+          ggtitle("Distribution of top 15 CBGs") +   
           facet_wrap( ~ year, nrow = 2) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
@@ -201,13 +201,13 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
           geom_histogram() +
           facet_wrap( ~ year, nrow = 2) +
-          ggtitle("Distribution of top 25 CBGs") +
+          ggtitle("Distribution of top 15 CBGs") +
           theme_bw())
   
   ## couple boxplots (w & w/w outliers)
   print(ggplot(data = tmom_19_20, aes(x=year, y=pop_density, group = year, fill = year)) + 
           geom_boxplot() +
-          ggtitle("Distribution of Pop Density Top 25 MI (all incl outliers)") +
+          ggtitle("Distribution of Pop Density Top 15 MI (all incl outliers)") +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
@@ -218,7 +218,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   print(ggplot(data = tmom_19_20, aes(x=year, y=pop_density, group = year, fill = year)) + 
           geom_boxplot() +
-          ggtitle("Distribution of  Pop Density Top 25 MI (no outliers)") +
+          ggtitle("Distribution of  Pop Density Top 15 MI (no outliers)") +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
