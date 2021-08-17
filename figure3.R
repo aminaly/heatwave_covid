@@ -106,7 +106,7 @@ ggplot(data = tm_2020) +
   theme_bw()
 
 tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  filter(yvar >= 3) %>% mutate(pop_density = population / (ALAND + AWATER))
+  mutate(pop_density = population / (ALAND + AWATER))
 
 tmom_19 <- tm_all_onlymax %>% filter(year == 2019)
 tmom_20 <- tm_all_onlymax %>% filter(year == 2020)
@@ -159,7 +159,6 @@ print(ggplot(data = tm_all_onlymax, aes(x=fips, y=pop_density, group=year, fill 
 
 
 ## lets look at some smaller areas 
-
 for(fip in unique(temp_mobility_cbg$fips)) {
   tm_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
     filter(fips == fip) %>% mutate(pop_density = population / (ALAND + AWATER))
@@ -184,14 +183,14 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   tm_onlymax <- tm_19_20_max %>% filter(!is.na(yvar)) 
   
-  tmom_19 <- tm_onlymax %>% filter(year == 2019)
-  tmom_20 <- tm_onlymax %>% filter(year == 2020)
+  tmom_19 <- tm_19_20 %>% filter(year == 2019)
+  tmom_20 <- tm_19_20 %>% filter(year == 2020)
   MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
   KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
   
   print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
           geom_density() +
-          ggtitle("Distribution of CBGs with MI > 3") +   
+          ggtitle("Distribution of CBGs") +   
           facet_wrap( ~ year, nrow = 2) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
@@ -200,7 +199,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
           geom_histogram() +
           facet_wrap( ~ year, nrow = 2) +
-          ggtitle("Distribution of CBGs with MI > 3") +
+          ggtitle("Distribution of CBGs") +
           theme_bw())
   
   ## couple boxplots (w & w/w outliers)
