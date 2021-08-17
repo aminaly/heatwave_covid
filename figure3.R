@@ -113,6 +113,7 @@ tmom_20 <- tm_all_onlymax %>% filter(year == 2020)
 MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
 KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
 
+## pop density distributon
 print(ggplot(data = tm_all_onlymax, aes(x = pop_density)) +
         geom_density() +
         ggtitle("Distribution of CBGs with MI > 3") +   
@@ -126,11 +127,36 @@ print(ggplot(data = tm_all_onlymax, aes(x = pop_density)) +
         facet_wrap( ~ year, nrow = 2) +
         ggtitle("Distribution of CBGs with MI > 3") +
         theme_bw())
+
+## make some boxplots of population density
 print(ggplot(data = tm_all_onlymax, aes(x=fips, y=pop_density, group=year, fill = year)) + 
         geom_boxplot() +
+        ggtitle("Distribution of Population Density (split by County)") +
         scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
         facet_wrap(~fips, scale = "free") +
         theme_bw())
+print(ggplot(data = tm_all_onlymax, aes(x=fips, y=pop_density, group=year, fill = year)) + 
+        geom_boxplot() +
+        ggtitle("Distribution of Population Density (all incl outliers)") +
+        annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
+                                    "\n KS: pval = ", round(KS$p.value, 3)),
+                x=-Inf, y=Inf, hjust=0, vjust=1) +
+        scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
+        theme_bw())
+
+# compute lower and upper whiskers
+ylim1 = boxplot.stats(tm_all_onlymax$pop_density)$stats[c(1, 5)]
+
+print(ggplot(data = tm_all_onlymax, aes(x=fips, y=pop_density, group=year, fill = year)) + 
+        geom_boxplot() +
+        ggtitle("Distribution of Population Density (no outliers)") +
+        scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
+        annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
+                                     "\n KS: pval = ", round(KS$p.value, 3)),
+                 x=-Inf, y=Inf, hjust=0, vjust=1) +
+        coord_cartesian(ylim = ylim1*1.05) +
+        theme_bw())
+
 
 ## lets look at some smaller areas 
 
@@ -176,13 +202,29 @@ for(fip in unique(temp_mobility_cbg$fips)) {
           facet_wrap( ~ year, nrow = 2) +
           ggtitle("Distribution of CBGs with MI > 3") +
           theme_bw())
+  
+  ## couple boxplots (w & w/w outliers)
   print(ggplot(data = tm_onlymax, aes(x=year, y=pop_density, group = year, fill = year)) + 
           geom_boxplot() +
+          ggtitle("Distribution of Population Density (all incl outliers)") +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
           scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
           facet_wrap(~fips, scale = "free"))
+  
+  ylim1 = boxplot.stats(tm_onlymax$pop_density)$stats[c(1, 5)]
+  
+  print(ggplot(data = tm_onlymax, aes(x=year, y=pop_density, group = year, fill = year)) + 
+          geom_boxplot() +
+          ggtitle("Distribution of Population Density (no outliers)") +
+          annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
+                                       "\n KS: pval = ", round(KS$p.value, 3)),
+                   x=-Inf, y=Inf, hjust=0, vjust=1) +
+          coord_cartesian(ylim = ylim1*1.05) +
+          scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
+          facet_wrap(~fips, scale = "free"))
+  
   
   ## rearrange and add in zoning information for this fips
   # tm_max_cast <- st_drop_geometry(tm_19_20 %>% select(cbg, fips, year, yvar, ALAND))
