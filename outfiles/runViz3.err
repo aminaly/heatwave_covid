@@ -60,6 +60,12 @@ Removed 4 rows containing non-finite values (stat_density).
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 Warning message:
 Removed 4 rows containing non-finite values (stat_bin). 
+Warning message:
+Removed 4 rows containing non-finite values (stat_boxplot). 
+Warning message:
+Removed 4 rows containing non-finite values (stat_boxplot). 
+Warning message:
+Removed 4 rows containing non-finite values (stat_boxplot). 
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -70,4 +76,4 @@ Removed 4 rows containing non-finite values (stat_bin).
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-There were 14 warnings (use warnings() to see them)
+There were 26 warnings (use warnings() to see them)
