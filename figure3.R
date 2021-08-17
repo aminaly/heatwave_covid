@@ -155,7 +155,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   tmom_19 <- tm_onlymax %>% filter(year == 2019)
   tmom_20 <- tm_onlymax %>% filter(year == 2020)
-  MW_U <- wilcox.test(tmom_19$yvar, tmom_20$yvar)
+  MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
   KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
   
   print(ggplot(data = tm_onlymax, aes(x = pop_density)) +
