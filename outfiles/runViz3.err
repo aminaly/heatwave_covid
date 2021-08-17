@@ -56,16 +56,16 @@ Warning message:
 In ks.test(tmom_19$pop_density, tmom_20$pop_density) :
   p-value will be approximate in the presence of ties
 Warning message:
-Removed 4 rows containing non-finite values (stat_density). 
+Removed 8 rows containing non-finite values (stat_density). 
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 Warning message:
-Removed 4 rows containing non-finite values (stat_bin). 
+Removed 8 rows containing non-finite values (stat_bin). 
 Warning message:
-Removed 4 rows containing non-finite values (stat_boxplot). 
+Removed 8 rows containing non-finite values (stat_boxplot). 
 Warning message:
-Removed 4 rows containing non-finite values (stat_boxplot). 
+Removed 8 rows containing non-finite values (stat_boxplot). 
 Warning message:
-Removed 4 rows containing non-finite values (stat_boxplot). 
+Removed 8 rows containing non-finite values (stat_boxplot). 
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -76,4 +76,4 @@ Removed 4 rows containing non-finite values (stat_boxplot).
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-There were 26 warnings (use warnings() to see them)
+There were 18 warnings (use warnings() to see them)
