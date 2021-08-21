@@ -60,16 +60,22 @@ temp_mobility_data <- temp_mobility_data %>% mutate(STATEFP = substr(census_bloc
 cbg$cbg <- paste0(cbg$STATEFP, cbg$COUNTYFP, cbg$TRACTCE, cbg$BLKGRPCE)
 cbg <- cbg %>% filter(cbg %in% temp_mobility_data$census_block_group)
 
-## combine zoning with mobility data
+## combine zoning with mobility data, add in population density, and identify outliers
 temp_mobility_data_sm <- temp_mobility_data %>% 
   filter(mean_high_c >= 34) %>%
   group_by(year, cbg = census_block_group, fips) %>%
   summarize(yvar = mean(visitors_percap, na.rm = T)) %>%
-  mutate(yvar_cut = cut(yvar, c(seq(-1, 5, 1), Inf)))
+  mutate(yvar_cut = cut(yvar, c(seq(-1, 5, 1), Inf))) 
 
 temp_mobility_data_sm <- left_join(temp_mobility_data_sm, pop, by = "cbg")
 
 temp_mobility_cbg <- merge(cbg, temp_mobility_data_sm, by = "cbg")
+
+temp_mobility_cbg <- temp_mobility_cbg %>% 
+  mutate(population = ifelse(is.na(population), 0, population)) %>%
+  mutate(pop_density = population / ((ALAND + AWATER) / 1000))
+  
+temp_mobility_cbg <- temp_mobility_cbg %>% mutate(dense = pop_density >= quantile(pop_density, .75, na.rm = T))
 
 #### Start PDF ####
 pdf(paste0("./visuals/pub_figures/fig3_", Sys.Date(), ".pdf"))
@@ -105,8 +111,7 @@ ggplot(data = tm_2020) +
   labs(colour="Mobility Metric") +
   theme_bw()
 
-tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-  mutate(pop_density = population / (ALAND + AWATER))
+tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) 
 
 tmom_19 <- tm_all_onlymax %>% filter(year == 2019) %>% arrange(desc(yvar)) %>% slice(1:100)
 tmom_20 <- tm_all_onlymax %>% filter(year == 2020) %>% arrange(desc(yvar)) %>% slice(1:100)
@@ -125,6 +130,8 @@ print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
         theme_bw())
 print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
         geom_histogram() +
+        annotate('text', label=paste("#Dense CBGs 2019:", sum(tmom_19$dense, na.rm = T), "\n 2020:", sum(tmom_20$dense, na.rm = T)),
+                 x=-Inf, y=Inf, hjust=0, vjust=1) +
         facet_wrap( ~ year, nrow = 2) +
         ggtitle("Distribution of Top 100 MI") +   
         theme_bw())
@@ -200,6 +207,8 @@ for(fip in unique(temp_mobility_cbg$fips)) {
           theme_bw())
   print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
           geom_histogram() +
+          annotate('text', label=paste("#Dense CBGs 2019:", sum(tmom_19$dense, na.rm = T), "\n 2020:", sum(tmom_20$dense, na.rm = T)),
+                   x=-Inf, y=Inf, hjust=0, vjust=1) +
           facet_wrap( ~ year, nrow = 2) +
           ggtitle("Distribution of top 15 CBGs") +
           theme_bw())
@@ -243,6 +252,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
 
 
 }
+
 
 #### Shut down pdf
 dev.off()
