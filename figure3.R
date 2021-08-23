@@ -177,6 +177,8 @@ for(fip in unique(temp_mobility_cbg$fips)) {
     filter(fips == fip) %>% mutate(pop_density = population / (ALAND + AWATER)) %>% 
     mutate(dense = pop_density >= quantile(pop_density, .75, na.rm = T))
   
+  county <- unique(tm_19_20$county)
+  
   print(ggplot(data = tm_19_20) +
     ggtitle(paste(county, "Summer Mobility Over 34 Degrees")) +
     geom_sf(data = tm_19_20, size = 0.002, aes(fill = yvar_cut)) +
