@@ -111,10 +111,10 @@ ggplot(data = tm_2020) +
   labs(colour="Mobility Metric") +
   theme_bw()
 
-tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) 
+tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% filter(yvar >= 3)
 
-tmom_19 <- tm_all_onlymax %>% filter(year == 2019) %>% arrange(desc(yvar)) %>% slice(1:100)
-tmom_20 <- tm_all_onlymax %>% filter(year == 2020) %>% arrange(desc(yvar)) %>% slice(1:100)
+tmom_19 <- tm_all_onlymax %>% filter(year == 2019) 
+tmom_20 <- tm_all_onlymax %>% filter(year == 2020) 
 tmom_19_20 <- bind_rows(tmom_19, tmom_20)
 MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
 KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
@@ -125,7 +125,7 @@ BT <- binom.test(sum(tmom_20$dense, na.rm = T), nrow(tmom_19_20),
 ## pop density distributon
 print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
         geom_density() +
-        ggtitle("Distribution of Top 100 MI") +   
+        ggtitle("Distribution MI >= 3") +   
         facet_wrap( ~ year, nrow = 2) +
         annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                      "\n KS: pval = ", round(KS$p.value, 3)),
@@ -138,19 +138,19 @@ print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
                                      "\n Binom Prob Success:", BT$estimate, "    p value:", round(BT$p.value, 3), "   null:", BT$null.value),
                  x=-Inf, y=Inf, hjust=0, vjust=1) +
         facet_wrap( ~ year, nrow = 2) +
-        ggtitle("Distribution of Top 100 MI") +   
+        ggtitle("Distribution MI >= 3") +   
         theme_bw())
 
 ## make some boxplots of population density
 print(ggplot(data = tmom_19_20, aes(x=fips, y=pop_density, group=year, fill = year)) + 
         geom_boxplot() +
-        ggtitle("Distribution of Pop Density of Top 100 MI (split by County)") +
+        ggtitle("Distribution of Pop Density MI >= 3 (split by County)") +
         scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
         facet_wrap(~fips, scale = "free") +
         theme_bw())
 print(ggplot(data = tmom_19_20, aes(x=fips, y=pop_density, group=year, fill = year)) + 
         geom_boxplot() +
-        ggtitle("Distribution of Pop Density of Top 100 MI (all incl outliers)") +
+        ggtitle("Distribution of Pop Density MI >= 3 (all incl outliers)") +
         annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                     "\n KS: pval = ", round(KS$p.value, 3)),
                 x=-Inf, y=Inf, hjust=0, vjust=1) +
@@ -162,7 +162,7 @@ ylim1 = boxplot.stats(tmom_19_20$pop_density)$stats[c(1, 5)]
 
 print(ggplot(data = tmom_19_20, aes(x=fips, y=pop_density, group=year, fill = year)) + 
         geom_boxplot() +
-        ggtitle("Distribution of Pop Density of Top 100 MI (no outliers)") +
+        ggtitle("Distribution of Pop Density MI >= 3 (no outliers)") +
         scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
         annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                      "\n KS: pval = ", round(KS$p.value, 3)),
@@ -190,7 +190,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   tm_19_20_max <- tm_19_20 %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
   
   print(ggplot(data = tm_19_20_max) +
-    ggtitle(paste(county, " Summer Mobility Over 34 Degrees & MI > 3")) +
+    ggtitle(paste(county, " Summer Mobility Over 34 Degrees & MI >= 3")) +
     geom_sf(data = tm_19_20_max, size = 0.002, aes(fill = yvar)) +
     scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
     facet_wrap( ~ year, nrow = 2) +
@@ -200,8 +200,8 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   tm_onlymax <- tm_19_20_max %>% filter(!is.na(yvar)) 
   
   ## set up and run all of our statistical tests
-  tmom_19 <- tm_19_20 %>% filter(year == 2019) %>% arrange(desc(yvar)) %>% slice(1:15)
-  tmom_20 <- tm_19_20 %>% filter(year == 2020) %>% arrange(desc(yvar)) %>% slice(1:15)
+  tmom_19 <- tm_onlymax %>% filter(year == 2019) 
+  tmom_20 <- tm_onlymax %>% filter(year == 2020) 
   tmom_19_20 <- bind_rows(tmom_19, tmom_20)
   MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
   KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
@@ -211,7 +211,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
           geom_density() +
-          ggtitle(paste(county, "Distribution of top 15 CBGs")) +   
+          ggtitle(paste(county, "Distribution of CBGs MI >= 3")) +   
           facet_wrap( ~ year, nrow = 2) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
@@ -224,13 +224,13 @@ for(fip in unique(temp_mobility_cbg$fips)) {
                                         "\n Binom Prob Success:", BT$estimate, "    p value:", round(BT$p.value, 3), "   null:", BT$null.value),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
           facet_wrap( ~ year, nrow = 2) +
-          ggtitle(paste(county, "Distribution of top 15 CBGs")) +
+          ggtitle(paste(county, "Distribution of CBGs MI >= 3")) +
           theme_bw())
   
   ## couple boxplots (w & w/w outliers)
   print(ggplot(data = tmom_19_20, aes(x=year, y=pop_density, group = year, fill = year)) + 
           geom_boxplot() +
-          ggtitle(paste(county, "Distribution of Pop Density Top 15 MI (all incl outliers)")) +
+          ggtitle(paste(county, "Distribution of Pop Density MI >= 3 (all incl outliers)")) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
@@ -241,7 +241,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   print(ggplot(data = tmom_19_20, aes(x=year, y=pop_density, group = year, fill = year)) + 
           geom_boxplot() +
-          ggtitle(paste(county, "Distribution of  Pop Density Top 15 MI (no outliers)")) +
+          ggtitle(paste(county, "Distribution of  Pop Density MI >= 3 (no outliers)")) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
