@@ -51,7 +51,7 @@ cols(
   B00002m1 = col_double()
 )
 `summarise()` has grouped output by 'cbg'. You can override using the `.groups` argument.
-`summarise()` has grouped output by 'year', 'cbg'. You can override using the `.groups` argument.
+`summarise()` has grouped output by 'year', 'cbg', 'fips'. You can override using the `.groups` argument.
 Warning message:
 In ks.test(tmom_19$pop_density, tmom_20$pop_density) :
   p-value will be approximate in the presence of ties
