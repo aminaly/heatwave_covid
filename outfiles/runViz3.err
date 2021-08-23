@@ -66,4 +66,4 @@ In ks.test(tmom_19$pop_density, tmom_20$pop_density) :
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-There were 20 warnings (use warnings() to see them)
+There were 18 warnings (use warnings() to see them)
