@@ -63,7 +63,7 @@ cbg <- cbg %>% filter(cbg %in% temp_mobility_data$census_block_group)
 ## combine zoning with mobility data, add in population density, and identify outliers
 temp_mobility_data_sm <- temp_mobility_data %>% 
   filter(mean_high_c >= 34) %>%
-  group_by(year, cbg = census_block_group, fips) %>%
+  group_by(year, cbg = census_block_group, fips, county) %>%
   summarize(yvar = mean(visitors_percap, na.rm = T)) %>%
   mutate(yvar_cut = cut(yvar, c(seq(-1, 5, 1), Inf))) 
 
@@ -118,6 +118,9 @@ tmom_20 <- tm_all_onlymax %>% filter(year == 2020) %>% arrange(desc(yvar)) %>% s
 tmom_19_20 <- bind_rows(tmom_19, tmom_20)
 MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
 KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
+BT <- binom.test(sum(tmom_20$dense, na.rm = T), nrow(tmom_19_20), 
+                 sum(tmom_19$dense, na.rm = T)/nrow(tmom_19), 
+                 alternative = "l")
 
 ## pop density distributon
 print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
@@ -130,7 +133,9 @@ print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
         theme_bw())
 print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
         geom_histogram() +
-        annotate('text', label=paste("#Dense CBGs 2019:", sum(tmom_19$dense, na.rm = T), "\n 2020:", sum(tmom_20$dense, na.rm = T)),
+        annotate('text', label=paste0("\n Dense CBGs 2019: ", sum(tmom_19$dense, na.rm = T), 
+                                     " 2020: ", sum(tmom_20$dense, na.rm = T),
+                                     "\n Binom Prob Success:", BT$estimate, "    p value:", round(BT$p.value, 3), "   null:", BT$null.value),
                  x=-Inf, y=Inf, hjust=0, vjust=1) +
         facet_wrap( ~ year, nrow = 2) +
         ggtitle("Distribution of Top 100 MI") +   
@@ -169,10 +174,11 @@ print(ggplot(data = tmom_19_20, aes(x=fips, y=pop_density, group=year, fill = ye
 ## lets look at some smaller areas 
 for(fip in unique(temp_mobility_cbg$fips)) {
   tm_19_20 <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% 
-    filter(fips == fip) %>% mutate(pop_density = population / (ALAND + AWATER))
+    filter(fips == fip) %>% mutate(pop_density = population / (ALAND + AWATER)) %>% 
+    mutate(dense = pop_density >= quantile(pop_density, .75, na.rm = T))
   
   print(ggplot(data = tm_19_20) +
-    ggtitle(paste(fip, "Summer Mobility Over 34 Degrees")) +
+    ggtitle(paste(county, "Summer Mobility Over 34 Degrees")) +
     geom_sf(data = tm_19_20, size = 0.002, aes(fill = yvar_cut)) +
     scale_fill_brewer(palette = "PiYG", direction = -1, na.value = "grey") +
     facet_wrap( ~ year, nrow = 2) +
@@ -182,7 +188,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   tm_19_20_max <- tm_19_20 %>% mutate(yvar = ifelse(yvar < 3, NA, yvar))
   
   print(ggplot(data = tm_19_20_max) +
-    ggtitle(paste(fip, " Summer Mobility Over 34 Degrees & MI > 3")) +
+    ggtitle(paste(county, " Summer Mobility Over 34 Degrees & MI > 3")) +
     geom_sf(data = tm_19_20_max, size = 0.002, aes(fill = yvar)) +
     scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
     facet_wrap( ~ year, nrow = 2) +
@@ -191,15 +197,19 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   tm_onlymax <- tm_19_20_max %>% filter(!is.na(yvar)) 
   
+  ## set up and run all of our statistical tests
   tmom_19 <- tm_19_20 %>% filter(year == 2019) %>% arrange(desc(yvar)) %>% slice(1:15)
   tmom_20 <- tm_19_20 %>% filter(year == 2020) %>% arrange(desc(yvar)) %>% slice(1:15)
   tmom_19_20 <- bind_rows(tmom_19, tmom_20)
   MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
   KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
+  BT <- binom.test(sum(tmom_20$dense, na.rm = T), nrow(tmom_19_20), 
+                   sum(tmom_19$dense, na.rm = T)/nrow(tmom_19), 
+                   alternative = "l")
   
   print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
           geom_density() +
-          ggtitle("Distribution of top 15 CBGs") +   
+          ggtitle(paste(county, "Distribution of top 15 CBGs")) +   
           facet_wrap( ~ year, nrow = 2) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
@@ -207,16 +217,18 @@ for(fip in unique(temp_mobility_cbg$fips)) {
           theme_bw())
   print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
           geom_histogram() +
-          annotate('text', label=paste("#Dense CBGs 2019:", sum(tmom_19$dense, na.rm = T), "\n 2020:", sum(tmom_20$dense, na.rm = T)),
+          annotate('text', label=paste0("\n Dense CBGs 2019: ", sum(tmom_19$dense, na.rm = T), 
+                                        " 2020: ", sum(tmom_20$dense, na.rm = T),
+                                        "\n Binom Prob Success:", BT$estimate, "    p value:", round(BT$p.value, 3), "   null:", BT$null.value),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
           facet_wrap( ~ year, nrow = 2) +
-          ggtitle("Distribution of top 15 CBGs") +
+          ggtitle(paste(county, "Distribution of top 15 CBGs")) +
           theme_bw())
   
   ## couple boxplots (w & w/w outliers)
   print(ggplot(data = tmom_19_20, aes(x=year, y=pop_density, group = year, fill = year)) + 
           geom_boxplot() +
-          ggtitle("Distribution of Pop Density Top 15 MI (all incl outliers)") +
+          ggtitle(paste(county, "Distribution of Pop Density Top 15 MI (all incl outliers)")) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
@@ -227,7 +239,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
   
   print(ggplot(data = tmom_19_20, aes(x=year, y=pop_density, group = year, fill = year)) + 
           geom_boxplot() +
-          ggtitle("Distribution of  Pop Density Top 15 MI (no outliers)") +
+          ggtitle(paste(county, "Distribution of  Pop Density Top 15 MI (no outliers)")) +
           annotate('text', label=paste("MW_U: pval = ", round(MW_U$p.value, 3),
                                        "\n KS: pval = ", round(KS$p.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
