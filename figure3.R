@@ -116,6 +116,17 @@ tm_all_onlymax <- temp_mobility_cbg %>% filter(year %in% c(2019, 2020)) %>% filt
 tmom_19 <- tm_all_onlymax %>% filter(year == 2019) 
 tmom_20 <- tm_all_onlymax %>% filter(year == 2020) 
 tmom_19_20 <- bind_rows(tmom_19, tmom_20)
+
+## split each county
+ggplot(data = tm_19_20_max) +
+  ggtitle(paste(county, " Summer Mobility Over 34 Degrees & MI >= 3")) +
+  geom_sf(data = tm_19_20_max, size = 0.002, aes(fill = yvar)) +
+  scale_fill_continuous(low = "#addd8e", high = "#31a354", na.value = "#e9a3c9") +
+  facet_wrap( ~ year + county, nrow = 2) +
+  labs(colour="Mobility Metric") +
+  theme_bw()
+
+## run all of our statistical tests
 MW_U <- wilcox.test(tmom_19$pop_density, tmom_20$pop_density)
 KS <- ks.test(tmom_19$pop_density, tmom_20$pop_density)
 BT <- binom.test(sum(tmom_20$dense, na.rm = T), nrow(tmom_19_20), 
@@ -268,7 +279,6 @@ for(fip in unique(temp_mobility_cbg$fips)) {
 
 
 }
-
 
 #### Shut down pdf
 dev.off()
