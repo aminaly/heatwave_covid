@@ -136,7 +136,7 @@ print(ggplot(data = tmom_19_20, aes(x = pop_density)) +
         annotate('text', label=paste0("\n Dense CBGs 2019: ", sum(tmom_19$dense, na.rm = T), 
                                      " 2020: ", sum(tmom_20$dense, na.rm = T),
                                      "\n Binom Prob Success:", round(BT$estimate, 3), "    p value:", round(BT$p.value, 3), 
-                                     "   null:", round(BT$null.value), 3),
+                                     "   null:", round(BT$null.value, 3)),
                  x=-Inf, y=Inf, hjust=0, vjust=1) +
         facet_wrap( ~ year, nrow = 2) +
         ggtitle("Distribution MI >= 3") +   
@@ -223,7 +223,7 @@ for(fip in unique(temp_mobility_cbg$fips)) {
           annotate('text', label=paste0("\n Dense CBGs 2019: ", sum(tmom_19$dense, na.rm = T), 
                                         " 2020: ", sum(tmom_20$dense, na.rm = T),
                                         "\n Binom Prob Success:", round(BT$estimate, 3), "    p value:", round(BT$p.value, 3), 
-                                        "   null:", round(BT$null.value), 3),
+                                        "   null:", round(BT$null.value, 3)),
                    x=-Inf, y=Inf, hjust=0, vjust=1) +
           facet_wrap( ~ year, nrow = 2) +
           ggtitle(paste(county, "Distribution of CBGs MI >= 3")) +
