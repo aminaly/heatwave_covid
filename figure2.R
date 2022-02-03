@@ -45,8 +45,8 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   }
   
   #separate the two datasets
-  data_1 <- data_s %>% filter(year %in% c(2018,2019))
-  data_2 <- data_s %>% filter(year == 2020)
+  data_1 <- data_s %>% filter(year == 2018)
+  data_2 <- data_s %>% filter(year == 2019)
   
   #get the results of the model
   model_1 <- fe_model(data_1, level = LVL)
@@ -105,9 +105,10 @@ data <- rename(data, yvar = visitors_percap)
 plot_title <- paste0("Mobility Index v Avg High pre + post 2020")
 plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)")
 
-## plot binned data for 2018/19 summer only 
+## plot binned data summer only 
 plot_title <- paste0("Mobility Index v Avg High Summer pre + post 2020")
 plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)", summer = T)
+
 
 dev.off()
 

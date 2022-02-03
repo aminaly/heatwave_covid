@@ -12,4 +12,4 @@ for(i in 1:length(all_files)) {
 
 }
 
-saveRDS(combined, "heatwaves_manual/all_temp_data_long_blockgroup_Apr2021.RDS")
+saveRDS(combined, "heatwaves_manual/all_temp_data_long_blockgroup_Jan2022.RDS")

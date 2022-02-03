@@ -19,7 +19,7 @@ rep <- as.numeric(args[1])
 #get list of all precip data files
 gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*.nc", full.names = T)
 
-#load in cencus tracts & select only those we want
+#load in census tracts & select only those we want
 block_group <- st_read("heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp")
 income <- read.csv(paste0(getwd(), "/us_census/income_county.csv"), stringsAsFactors = F, header = T)
 block_group$fips <- paste0(block_group$STATEFP, block_group$COUNTYFP)
