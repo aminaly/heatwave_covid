@@ -45,8 +45,8 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   }
   
   #separate the two datasets
-  data_1 <- data_s %>% filter(year == 2018)
-  data_2 <- data_s %>% filter(year == 2019)
+  data_1 <- data_s %>% filter(year == 2019)
+  data_2 <- data_s %>% filter(year == 2020)
   
   #get the results of the model
   model_1 <- fe_model(data_1, level = LVL)
