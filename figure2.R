@@ -136,7 +136,7 @@ plot_data_bin3 <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors
   coefs_1 <- coefs_1[grepl("xvar_bin", coefs_1$term),]
   coefs1_1 <- coefs_1[1,] %>% mutate(term = "xvar_bin1", estimate = 0, std.error = 0, statistic = 0, p.value = 0, conf.low = 0, conf.high = 0)
   coefs_1 <- rbind(coefs1_1, coefs_1)
-  coefs_1$grp <- "2018-19"
+  coefs_1$grp <- "2018"
   coefs_1 <- left_join(coefs_1, conf_1, by = "term")
   
   #bootstrap the data by doing the model however many times, getting the coefficient values (2)
@@ -152,7 +152,7 @@ plot_data_bin3 <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors
   coefs_2 <- coefs_2[grepl("xvar_bin", coefs_2$term),]
   coefs1_2 <- coefs_2[1,] %>% mutate(term = "xvar_bin1", estimate = 0, std.error = 0, statistic = 0, p.value = 0, conf.low = 0, conf.high = 0)
   coefs_2 <- rbind(coefs1_2, coefs_2)
-  coefs_2$grp <- "2020"
+  coefs_2$grp <- "2019"
   coefs_2 <- left_join(coefs_2, conf_2, by = "term")
   
   #bootstrap the data by doing the model however many times, getting the coefficient values (3)
