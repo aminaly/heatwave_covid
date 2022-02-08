@@ -115,8 +115,8 @@ plot_data_bin3 <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors
   
   #separate the three datasets
   data_1 <- data_s %>% filter(year == 2018)
-  data_2 <- data_s %>% filter(year == 2019)
-  data_3 <- data_s %>% filter(year == 2020)
+  data_2 <- data_s %>% filter(year == 2019 & census_block_group %in% unique(data_1$census_block_group))
+  data_3 <- data_s %>% filter(year == 2020 & census_block_group %in% unique(data_1$census_block_group))
   
   #get the results of the model
   model_1 <- fe_model(data_1, level = LVL)
