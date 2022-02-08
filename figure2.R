@@ -21,6 +21,11 @@ library(interactions)
 ## read in the regression data
 data <- readRDS("./heatwaves_manual/data_for_regression.rds")
 
+## remove smoke days
+smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
+                seq(as.Date("2020-09-10"), as.Date("2020-09-14"), by = 1))
+data <- data %>% filter(!(date %in% smoke_days))
+
 ## lets do some plots
 pdf(paste0("./visuals/pub_figures/fig2_", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
@@ -115,8 +120,8 @@ plot_data_bin3 <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors
   
   #separate the three datasets
   data_1 <- data_s %>% filter(year == 2018)
-  data_2 <- data_s %>% filter(year == 2019 & census_block_group %in% unique(data_1$census_block_group))
-  data_3 <- data_s %>% filter(year == 2020 & census_block_group %in% unique(data_1$census_block_group))
+  data_2 <- data_s %>% filter(year == 2019)
+  data_3 <- data_s %>% filter(year == 2020)
   
   #get the results of the model
   model_1 <- fe_model(data_1, level = LVL)
