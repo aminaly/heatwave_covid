@@ -11,9 +11,8 @@
 #SBATCH --mail-user=aminaly@stanford.edu
 #SBATCH -p diffenbaugh
 
-ml physics gdal udunits/2.2.26 netcdf/4.4.1.1 R/3.6.1 proj geos;
-module load R/3.6.1
-ml curl/7.81.0
+ml curl physics gdal udunits/2.2.26 netcdf R/3.6.1 proj geos;
+ml curl/7.54.0
 
 cd $OAK/group_members/aminaly/heatwave_covid
 let buffer=$SLURM_ARRAY_TASK_ID

@@ -23,7 +23,8 @@ data <- readRDS("./heatwaves_manual/data_for_regression.rds")
 
 ## remove smoke days
 smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
-                seq(as.Date("2020-09-10"), as.Date("2020-09-14"), by = 1))
+                seq(as.Date("2020-09-10"), as.Date("2020-09-14"), by = 1),
+                as.Date("2020-09-31"))
 data <- data %>% filter(!(date %in% smoke_days))
 
 ## lets do some plots
