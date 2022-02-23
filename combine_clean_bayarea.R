@@ -7,8 +7,6 @@ library(tidyverse)
 library(lubridate)
 library(reshape2)
 library(stringr)
-library(ggsignif)
-library(sf)
 
 #### Set universal vars ----
 
