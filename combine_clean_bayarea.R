@@ -1,0 +1,143 @@
+ifelse(dir.exists("~/Box Sync/heatwave_covid"),
+       setwd("~/Box Sync/heatwave_covid"),
+       setwd("/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid"))
+
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(reshape2)
+library(stringr)
+library(ggsignif)
+library(sf)
+
+#### Set universal vars ----
+
+# FIPS codes we care about
+included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
+today <- format(Sys.Date(), "%m_%Y")
+
+#temperature location
+temp_loc <- "heatwaves_manual/temps/bg/"
+
+#sheltering location
+movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
+
+#home devices location
+home_dev_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_home_panel_summary/"
+
+#### Combine Temperature Data ----
+
+all_files <- list.files(temp_loc, full.names = T)
+temps <- data.frame()
+
+for(i in 1:length(all_files)) {
+  
+  print(i)
+  file <- all_files[i]
+  f <- readRDS(file)
+  f <- f %>% filter(fips %in% included_fips)
+  temps <- bind_rows(temps, f)
+  
+}
+
+#### Clean Temperature Data ----
+
+#reshape by with min and max next to each other
+tm <- temps %>% dplyr::filter(measure == "tmmn")
+tx <- temps %>% dplyr::filter(measure == "tmmx")
+t <- left_join(tm, tx, by = c("date", "fips"))
+
+#Add additional columns and rename for ease
+t <- t %>% dplyr::select(date, county = county.x, fips,
+                         mean_low = mean_measure.x, 
+                         mean_high = mean_measure.y) %>%
+  mutate(fips = as.character(fips), month = month(date), year = year(date)) %>%
+  dplyr::filter(is.finite(mean_low)) %>% 
+  dplyr::filter(is.finite(mean_high)) %>% 
+  mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
+
+t$monthyear <- paste0(t$month, t$year)
+
+## Add in zscores and percentiles of temp data
+t_zs <- t %>% group_by(fips, year) %>%
+  mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
+  mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
+  mutate(p_high = 100* pnorm(z_score_high)) %>%
+  mutate(p_low = 100* pnorm(z_score_low)) %>%
+  ungroup
+
+saveRDS(t, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
+
+#### Combine Sheltering Data ----
+movement_files <- list.files(movement_loc, full.names = T, recursive = T, pattern = "*.csv.gz")
+movement <- data.frame()
+
+for(file in movement_files) {
+  
+  print(file)
+  possibleError <- tryCatch(
+    f <- read_csv(file), 
+    error = function(e) e
+  )
+  
+  if(inherits(possibleError, "error")) next
+  
+  f <- f %>% select(census_block_group = origin_census_block_group, date = date_range_start,
+                    date_range_end, completely_home_device_count, device_count,
+                    month = month(date), year = year(date))
+  f$fips <- str_sub(f$origin_census_block_group, 1,5)
+  f <- f %>% filter(fips %in% included_fips)
+  
+  movement <- bind_rows(movement, f)
+  
+}
+
+#### Combine Home Devices ----
+home_files <- list.files(home_dev_loc, full.names = T, recursive = T, pattern = "*.csv")
+home <- data.frame()
+
+for(file in home_files) {
+  
+  print(file)
+  possibleError <- tryCatch(
+    f <- read_csv(file),
+    error = function(e) e
+  )
+  
+  if(inherits(possibleError, "error")) next
+  
+  f$fips <- str_sub(f$census_block_group, 1,5)
+  f <- f %>% filter(fips %in% included_fips)
+  home <- bind_rows(home, f)
+  
+}
+
+#### Read and clean income ----
+income <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b19.csv"), stringsAsFactors = F, header = T)
+income <- na.omit(income %>% dplyr::select(census_block_group, 	median_income = B19013e1))
+income <- income %>% mutate("census_block_group" = ifelse(nchar(census_block_group) == 11, 
+                                                          paste0("0", census_block_group), census_block_group))
+income$fips <- substr(income$census_block_group, 1, 5)
+income <- income %>% mutate(income_group = ntile(median_income, 5))
+income <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips), fips)) %>% 
+  dplyr::select(fips, median_income, income_group, census_block_group)
+
+income$census_block_group <- as.character(income$census_block_group)
+
+#### Combine all data ----
+
+## combine movement and home 
+patterns <- left_join(movement, home, by = c("census_block_group", "year", "month"))
+
+## add in income
+patterns <- left_join(patterns, income,  by = c("census_block_group", "fips"))
+
+## combine above with temperature
+data <- left_join(patterns, t,  by = c("census_block_group", "fips", "date"))
+
+## final additions for regressions: add monthweek and countyyear
+data$countyyear <- paste0(data$fips, data$year)
+data$monthweek <- paste0(month(data$date, label = T), week(data$date))
+
+saveRDS(data, "./heatwaves_manual/data_for_regression_feb22.rds")
+
