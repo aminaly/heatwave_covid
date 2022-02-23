@@ -94,8 +94,7 @@ if(RUNMOV) {
     
     print(head(f))
     f <- f %>% select(census_block_group = area, date = date_range_start,
-                      stops_by_day, month = month(date), year = year(date), 
-                      distance_from_home)
+                      stops_by_day, distance_from_home)
     f$fips <- str_sub(f$census_block_group, 1,5)
     f <- f %>% filter(fips %in% included_fips)
     
@@ -104,12 +103,14 @@ if(RUNMOV) {
   }
   
   print(head(movement))
+  saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   
   #### Clean Patterns data 
   movement <- expand_integer_json(movement, "stops_by_day", index = "day",  
                                   by = c("census_block_group", "date", "state", "fips", "distance_from_home"), fun = sum)
   #rename for clarity
   movement$date <- movement$date + days(movement$day - 1) 
+  movement <- movement %>% mutate(month = month(date)) %>% mutate(year = year(date))
   
   saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   print(head(movement))
