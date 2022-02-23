@@ -16,6 +16,7 @@ today <- format(Sys.Date(), "%m_%Y")
 
 #temperature location
 temp_loc <- "heatwaves_manual/temps/bg/"
+RUNTEMP <- FALSE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
@@ -23,48 +24,54 @@ movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/rel
 #home devices location
 home_dev_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_home_panel_summary/"
 
-#### Combine Temperature Data ----
+#### Combine & Clean Temperature Data ----
 
-all_files <- list.files(temp_loc, full.names = T)
-temps <- data.frame()
-
-for(i in 1:length(all_files)) {
+if(RUNTEMP) {
   
-  print(i)
-  file <- all_files[i]
-  f <- readRDS(file)
-  f <- f %>% filter(fips %in% included_fips)
-  temps <- bind_rows(temps, f)
+  all_files <- list.files(temp_loc, full.names = T)
+  temps <- data.frame()
   
+  for(i in 1:length(all_files)) {
+    
+    print(i)
+    file <- all_files[i]
+    f <- readRDS(file)
+    f <- f %>% filter(fips %in% included_fips)
+    temps <- bind_rows(temps, f)
+    
+  }
+  
+  #### Clean Temperature Data ----
+  
+  #reshape by with min and max next to each other
+  tm <- temps %>% dplyr::filter(measure == "tmmn")
+  tx <- temps %>% dplyr::filter(measure == "tmmx")
+  t <- left_join(tm, tx, by = c("date", "fips"))
+  
+  #Add additional columns and rename for ease
+  t <- t %>% dplyr::select(date, county = county.x, fips,
+                           mean_low = mean_measure.x, 
+                           mean_high = mean_measure.y) %>%
+    mutate(fips = as.character(fips), month = month(date), year = year(date)) %>%
+    dplyr::filter(is.finite(mean_low)) %>% 
+    dplyr::filter(is.finite(mean_high)) %>% 
+    mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
+  
+  t$monthyear <- paste0(t$month, t$year)
+  
+  ## Add in zscores and percentiles of temp data
+  t_zs <- t %>% group_by(fips, year) %>%
+    mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
+    mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
+    mutate(p_high = 100* pnorm(z_score_high)) %>%
+    mutate(p_low = 100* pnorm(z_score_low)) %>%
+    ungroup
+  
+  saveRDS(t, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
+  
+} else {
+  t <- readRDS("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS")
 }
-
-#### Clean Temperature Data ----
-
-#reshape by with min and max next to each other
-tm <- temps %>% dplyr::filter(measure == "tmmn")
-tx <- temps %>% dplyr::filter(measure == "tmmx")
-t <- left_join(tm, tx, by = c("date", "fips"))
-
-#Add additional columns and rename for ease
-t <- t %>% dplyr::select(date, county = county.x, fips,
-                         mean_low = mean_measure.x, 
-                         mean_high = mean_measure.y) %>%
-  mutate(fips = as.character(fips), month = month(date), year = year(date)) %>%
-  dplyr::filter(is.finite(mean_low)) %>% 
-  dplyr::filter(is.finite(mean_high)) %>% 
-  mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
-
-t$monthyear <- paste0(t$month, t$year)
-
-## Add in zscores and percentiles of temp data
-t_zs <- t %>% group_by(fips, year) %>%
-  mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
-  mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
-  mutate(p_high = 100* pnorm(z_score_high)) %>%
-  mutate(p_low = 100* pnorm(z_score_low)) %>%
-  ungroup
-
-saveRDS(t, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
 
 #### Combine Sheltering Data ----
 movement_files <- list.files(movement_loc, full.names = T, recursive = T, pattern = "*.csv.gz")
@@ -80,6 +87,7 @@ for(file in movement_files) {
   
   if(inherits(possibleError, "error")) next
   
+  print(head(f))
   f <- f %>% select(census_block_group = origin_census_block_group, date = date_range_start,
                     date_range_end, completely_home_device_count, device_count,
                     month = month(date), year = year(date))
