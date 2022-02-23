@@ -70,7 +70,7 @@ if(RUNTEMP) {
   saveRDS(t, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
   
 } else {
-  t <- readRDS("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS")
+  t <- readRDS(paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
 }
 
 #### Combine Sheltering Data ----
