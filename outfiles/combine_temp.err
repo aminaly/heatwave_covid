@@ -1,13 +1,30 @@
+-------------------------------------------------------------------------------
+There are messages associated with the following module(s):
+-------------------------------------------------------------------------------
 
-Attaching package: ‘dplyr’
+awscli/2:
+    This module is a contribution from the Poldrack Lab. For questions
+    and support, please see https://github.com/poldracklab/lmod_modules
 
-The following objects are masked from ‘package:stats’:
+-------------------------------------------------------------------------------
 
-    filter, lag
+-------------------------------------------------------------------------------
+There are messages associated with the following module(s):
+-------------------------------------------------------------------------------
 
-The following objects are masked from ‘package:base’:
+awscli/2:
+    This module is a contribution from the Poldrack Lab. For questions
+    and support, please see https://github.com/poldracklab/lmod_modules
 
-    intersect, setdiff, setequal, union
+-------------------------------------------------------------------------------
 
-/var/spool/slurmd/job22546419/slurm_script: line 17: 430908 Killed                  Rscript ./combine_temp.R
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=22546419.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
+-------------------------------------------------------------------------------
+There are messages associated with the following module(s):
+-------------------------------------------------------------------------------
+
+awscli/2:
+    This module is a contribution from the Poldrack Lab. For questions
+    and support, please see https://github.com/poldracklab/lmod_modules
+
+-------------------------------------------------------------------------------
+
