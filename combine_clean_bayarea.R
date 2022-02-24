@@ -40,6 +40,7 @@ if(RUNTEMP) {
     f <- readRDS(file)
     f$fips <- as.character(f$fips)
     f <- f %>% filter(fips %in% included_fips)
+    print(head(f))
     temps <- bind_rows(temps, f)
     
   }
