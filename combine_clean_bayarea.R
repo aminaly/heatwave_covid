@@ -159,7 +159,7 @@ pops <- cbg_pop %>% mutate(census_block_group = as.character(poi_cbg)) %>%
 pops$fips <- str_sub(pops$census_block_group, 1,5)
 pops <- pops %>% filter(fips %in% included_fips)
 
-pop_income <- left_join(income, pops)
+pop_income <- left_join(income, pops, by = "census_block_group")
 
 #### Combine all data ----
 
