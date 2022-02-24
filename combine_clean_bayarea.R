@@ -21,7 +21,7 @@ RUNTEMP <- FALSE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
-RUNMOV <- TRUE
+RUNMOV <- FALSE
 
 #home devices location
 home_dev_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_home_panel_summary/"
@@ -105,18 +105,19 @@ if(RUNMOV) {
   print(head(movement))
   saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   
+} else {
+  movement <- readRDS(paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   #### Clean Patterns data 
   movement <- expand_integer_json(movement, "stops_by_day", index = "day",  
-                                  by = c("census_block_group", "date", "state", "fips", "distance_from_home"), fun = sum)
+                                  by = c("census_block_group", "date", "fips", "distance_from_home"), fun = sum)
   #rename for clarity
   movement$date <- movement$date + days(movement$day - 1) 
   movement <- movement %>% mutate(month = month(date)) %>% mutate(year = year(date))
   
   saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   print(head(movement))
+  saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   
-} else {
-  movement <- readRDS(paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
 }
 
 #### Combine Home Devices ----
