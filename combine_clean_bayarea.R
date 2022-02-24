@@ -157,9 +157,9 @@ pop_income <- left_join(income, pops, by = c("census_block_group", "fips"))
 
 ## combine movement and home 
 patterns <- left_join(movement, home, by = c("census_block_group", "year", "month"))
+patterns <- patterns %>% rename(fips = fips.x)
 
 ## add in income
-print(head(patterns))
 patterns <- left_join(patterns, pop_income,  by = c("census_block_group", "fips"))
 
 ## combine above with temperature
