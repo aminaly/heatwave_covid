@@ -38,9 +38,8 @@ if(RUNTEMP) {
     print(i)
     file <- all_files[i]
     f <- readRDS(file)
-    print(head(f))
+    f$fips <- as.character(f$fips)
     f <- f %>% filter(fips %in% included_fips)
-    print(head(f))
     temps <- bind_rows(temps, f)
     
   }
