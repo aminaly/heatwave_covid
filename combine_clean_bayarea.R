@@ -102,11 +102,6 @@ if(RUNMOV) {
     
   }
   
-  print(head(movement))
-  saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
-  
-} else {
-  movement <- readRDS(paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   #### Clean Patterns data 
   movement <- expand_integer_json(movement, "stops_by_day", index = "day",  
                                   by = c("census_block_group", "date", "fips", "distance_from_home"), fun = sum)
@@ -118,6 +113,11 @@ if(RUNMOV) {
   print(head(movement))
   saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
   
+  print(head(movement))
+  saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
+  
+} else {
+  movement <- readRDS(paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
 }
 
 #### Combine Home Devices ----
@@ -136,6 +136,7 @@ for(file in home_files) {
   
   f$fips <- str_sub(f$census_block_group, 1,5)
   f <- f %>% filter(fips %in% included_fips)
+  print("made it here")
   home <- bind_rows(home, f)
   
 }
