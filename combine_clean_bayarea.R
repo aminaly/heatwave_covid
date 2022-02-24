@@ -110,12 +110,7 @@ if(RUNMOV) {
   movement <- movement %>% mutate(month = month(date)) %>% mutate(year = year(date))
   
   saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
-  print(head(movement))
-  saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
-  
-  print(head(movement))
-  saveRDS(movement, paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
-  
+
 } else {
   movement <- readRDS(paste0("heatwaves_manual/bay_patterns_clean_blockgroup_", today, ".RDS"))
 }
@@ -146,10 +141,7 @@ income <- na.omit(income %>% dplyr::select(census_block_group, 	median_income = 
 income <- income %>% mutate("census_block_group" = ifelse(nchar(census_block_group) == 11, 
                                                           paste0("0", census_block_group), census_block_group))
 income$fips <- substr(income$census_block_group, 1, 5)
-income <- income %>% mutate(income_group = ntile(median_income, 5))
-income <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips), fips)) %>% 
-  dplyr::select(fips, median_income, income_group, census_block_group)
-
+income <- income %>% mutate(income_group = ntile(median_income, 5)) %>% filter(fips %in% included_fips)
 income$census_block_group <- as.character(income$census_block_group)
 
 pops <- cbg_pop %>% mutate(census_block_group = as.character(poi_cbg)) %>% 
@@ -159,7 +151,7 @@ pops <- cbg_pop %>% mutate(census_block_group = as.character(poi_cbg)) %>%
 pops$fips <- str_sub(pops$census_block_group, 1,5)
 pops <- pops %>% filter(fips %in% included_fips)
 
-pop_income <- left_join(income, pops, by = "census_block_group")
+pop_income <- left_join(income, pops, by = c("census_block_group", "fips"))
 
 #### Combine all data ----
 
@@ -167,6 +159,7 @@ pop_income <- left_join(income, pops, by = "census_block_group")
 patterns <- left_join(movement, home, by = c("census_block_group", "year", "month"))
 
 ## add in income
+print(head(patterns))
 patterns <- left_join(patterns, pop_income,  by = c("census_block_group", "fips"))
 
 ## combine above with temperature
