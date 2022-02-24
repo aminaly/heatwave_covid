@@ -160,9 +160,12 @@ patterns <- left_join(movement, home, by = c("census_block_group", "year", "mont
 patterns <- patterns %>% rename(fips = fips.x)
 
 ## add in income
+print(head(patterns))
 patterns <- left_join(patterns, pop_income,  by = c("census_block_group", "fips"))
 
 ## combine above with temperature
+print(head(patterns))
+print(head(t))
 data <- left_join(patterns, t,  by = c("census_block_group", "fips", "date"))
 
 ## final additions for regressions: add monthweek and countyyear
