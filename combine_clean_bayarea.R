@@ -152,8 +152,9 @@ income <- income %>% mutate("fips" = ifelse(nchar(fips) == 4, paste0("0", fips),
 
 income$census_block_group <- as.character(income$census_block_group)
 
-pops <- cbg_pop %>% mutate(census_block_group = as.character(census_block_group)) %>% 
-  mutate(census_block_group =  ifelse(nchar(poi_cbg) == 11, paste0("0", poi_cbg), poi_cbg)) %>% 
+pops <- cbg_pop %>% mutate(census_block_group = as.character(poi_cbg)) %>% 
+  mutate(census_block_group =  ifelse(nchar(census_block_group) == 11, 
+                                      paste0("0", census_block_group), census_block_group)) %>% 
   select(census_block_group, unweighted_pop)
 pops$fips <- str_sub(pops$census_block_group, 1,5)
 pops <- pops %>% filter(fips %in% included_fips)
