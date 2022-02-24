@@ -16,7 +16,7 @@ included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041",
 today <- format(Sys.Date(), "%m_%Y")
 
 #temperature location
-temp_loc <- "heatwaves_manual/temps/bg/"
+temp_loc <- "heatwaves_manual/temps/bg"
 RUNTEMP <- TRUE
 
 #sheltering location
@@ -51,8 +51,6 @@ if(RUNTEMP) {
   tx <- temps %>% dplyr::filter(measure == "tmmx")
   t <- left_join(tm, tx, by = c("date", "fips"))
   
-  print("reshape")
-  print(head(temps))
   #Add additional columns and rename for ease
   t <- t %>% dplyr::select(date, county = county.x, fips,
                            mean_low = mean_measure.x, 
@@ -63,9 +61,6 @@ if(RUNTEMP) {
     mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
   
   t$monthyear <- paste0(t$month, t$year)
-  
-  print("mean temps")
-  print(head(temps))
   
   ## Add in zscores and percentiles of temp data
   t_zs <- t %>% group_by(fips, year) %>%
