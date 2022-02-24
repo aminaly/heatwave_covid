@@ -17,7 +17,7 @@ today <- format(Sys.Date(), "%m_%Y")
 
 #temperature location
 temp_loc <- "heatwaves_manual/temps/bg/"
-RUNTEMP <- FALSE
+RUNTEMP <- TRUE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
@@ -43,6 +43,7 @@ if(RUNTEMP) {
     
   }
   
+  print(head(temps))
   #### Clean Temperature Data 
   
   #reshape by with min and max next to each other
@@ -50,6 +51,8 @@ if(RUNTEMP) {
   tx <- temps %>% dplyr::filter(measure == "tmmx")
   t <- left_join(tm, tx, by = c("date", "fips"))
   
+  print("reshape")
+  print(head(temps))
   #Add additional columns and rename for ease
   t <- t %>% dplyr::select(date, county = county.x, fips,
                            mean_low = mean_measure.x, 
@@ -61,6 +64,9 @@ if(RUNTEMP) {
   
   t$monthyear <- paste0(t$month, t$year)
   
+  print("mean temps")
+  print(head(temps))
+  
   ## Add in zscores and percentiles of temp data
   t_zs <- t %>% group_by(fips, year) %>%
     mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
@@ -69,7 +75,10 @@ if(RUNTEMP) {
     mutate(p_low = 100* pnorm(z_score_low)) %>%
     ungroup
   
-  saveRDS(t, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
+  print("tzs")
+  print(head(temps))
+  
+  saveRDS(t_zs, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
   
 } else {
   t <- readRDS(paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
