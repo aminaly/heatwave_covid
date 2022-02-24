@@ -38,9 +38,11 @@ if(RUNTEMP) {
     print(i)
     file <- all_files[i]
     f <- readRDS(file)
-    f$fips <- as.character(f$fips)
+    f$blockgroup <- as.character(f$blockgroup)
+    f <- f %>% mutate(census_block_group = ifelse(nchar(blockgroup) == 11, 
+                                                  paste0("0", blockgroup), blockgroup))
+    f$fips <- str_sub(f$census_block_group, 1,5)
     f <- f %>% filter(fips %in% included_fips)
-    print(head(f))
     temps <- bind_rows(temps, f)
     
   }
