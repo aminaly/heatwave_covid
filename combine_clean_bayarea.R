@@ -136,12 +136,9 @@ for(file in home_files) {
   
   f$fips <- str_sub(f$census_block_group, 1,5)
   f <- f %>% filter(fips %in% included_fips)
-  print("made it here")
   home <- bind_rows(home, f)
   
 }
-
-print(head(home))
 
 #### Read and clean Income & Population ----
 income <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b19.csv"), stringsAsFactors = F, header = T)
@@ -158,7 +155,7 @@ income$census_block_group <- as.character(income$census_block_group)
 pops <- cbg_pop %>% mutate(census_block_group = 
                              ifelse(nchar(poi_cbg) == 11, paste0("0", poi_cbg), poi_cbg)) %>% 
   select(census_block_group, unweighted_pop)
-pops <- str_sub(pops$census_block_group, 1,5)
+pops$fips <- str_sub(pops$census_block_group, 1,5)
 pops <- pops %>% filter(fips %in% included_fips)
 
 pop_income <- left_join(income, pops)
