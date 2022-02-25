@@ -38,7 +38,7 @@ if(RUNTEMP) {
     print(i)
     file <- all_files[i]
     f <- readRDS(file)
-    f <- f %>% mutate(census_block_group = as.character(f$blockgroup)) %>% select(-fips)
+    f <- f %>% mutate(census_block_group = as.character(f$blockgroup)) %>% select(-fips) %>%
       mutate(census_block_group = ifelse(nchar(census_block_group) == 11, 
                                          paste0("0", census_block_group), census_block_group))
     f$fips <- str_sub(f$census_block_group, 1,5)
