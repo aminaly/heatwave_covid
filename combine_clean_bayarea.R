@@ -17,7 +17,7 @@ today <- format(Sys.Date(), "%m_%Y")
 
 #temperature location
 temp_loc <- "heatwaves_manual/temps/bg"
-RUNTEMP <- FALSE
+RUNTEMP <- TRUE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
