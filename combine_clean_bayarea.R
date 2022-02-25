@@ -44,10 +44,10 @@ if(RUNTEMP) {
     f$fips <- str_sub(f$census_block_group, 1,5)
     f <- f %>% filter(fips %in% included_fips)
     temps <- bind_rows(temps, f)
+    print(head(f))
     
   }
   
-  print(head(temps))
   #### Clean Temperature Data 
   
   #reshape by with min and max next to each other
