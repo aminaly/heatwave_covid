@@ -38,8 +38,11 @@ if(RUNTEMP) {
     print(i)
     file <- all_files[i]
     f <- readRDS(file)
-    f <- f %>% mutate(census_block_group = as.character(f$blockgroup)) %>%
-      mutate(census_block_group = ifelse(nchar(blockgroup) == 11, paste0("0", blockgroup), blockgroup))
+    f <- f %>% mutate(census_block_group = as.character(f$blockgroup)) %>% select(-fips)
+      mutate(census_block_group = ifelse(nchar(census_block_group) == 11, 
+                                         paste0("0", census_block_group), census_block_group))
+    f$fips <- str_sub(f$census_block_group, 1,5)
+    f <- f %>% filter(fips %in% included_fips)
     temps <- bind_rows(temps, f)
     
   }
@@ -64,17 +67,13 @@ if(RUNTEMP) {
   t$monthyear <- paste0(t$month, t$year)
   
   ## Add in zscores and percentiles of temp data
-  t_zs <- t %>% group_by(fips, year) %>%
+  t <- t %>% group_by(fips, year) %>%
     mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
     mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
     mutate(p_high = 100* pnorm(z_score_high)) %>%
     mutate(p_low = 100* pnorm(z_score_low)) %>%
     ungroup
   
-  saveRDS(t_zs, paste0("heatwaves_manual/temperature_clean_blockgroup_", today, ".RDS"))
-  
-  t_zs$fips <- str_sub(f$census_block_group, 1,5)
-  t <- t_zs %>% filter(fips %in% included_fips)
 
   saveRDS(t, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
   
