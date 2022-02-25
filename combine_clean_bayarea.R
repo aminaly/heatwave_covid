@@ -17,7 +17,7 @@ today <- format(Sys.Date(), "%m_%Y")
 
 #temperature location
 temp_loc <- "heatwaves_manual/temps/bg"
-RUNTEMP <- TRUE
+RUNTEMP <- FALSE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
@@ -38,11 +38,8 @@ if(RUNTEMP) {
     print(i)
     file <- all_files[i]
     f <- readRDS(file)
-    f$blockgroup <- as.character(f$blockgroup)
-    f <- f %>% mutate(census_block_group = ifelse(nchar(blockgroup) == 11, 
-                                                  paste0("0", blockgroup), blockgroup))
-    f$fips <- str_sub(f$census_block_group, 1,5)
-    f <- f %>% filter(fips %in% included_fips)
+    f <- f %>% mutate(census_block_group = as.character(f$blockgroup)) %>%
+      mutate(census_block_group = ifelse(nchar(blockgroup) == 11, paste0("0", blockgroup), blockgroup))
     temps <- bind_rows(temps, f)
     
   }
@@ -74,10 +71,13 @@ if(RUNTEMP) {
     mutate(p_low = 100* pnorm(z_score_low)) %>%
     ungroup
   
-  print("tzs")
-  print(head(temps))
+  saveRDS(t_zs, paste0("heatwaves_manual/temperature_clean_blockgroup_", today, ".RDS"))
   
-  saveRDS(t_zs, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
+  t_zs$fips <- str_sub(f$census_block_group, 1,5)
+  t <- t_zs %>% filter(fips %in% included_fips)
+
+  saveRDS(t, paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
+  
   
 } else {
   t <- readRDS(paste0("heatwaves_manual/bay_temperature_clean_blockgroup_", today, ".RDS"))
