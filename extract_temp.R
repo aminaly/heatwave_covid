@@ -15,15 +15,15 @@ library(lubridate)
 args <- commandArgs(trailingOnly = TRUE)
 rep <- as.numeric(args[1])
 
-
 #get list of all precip data files
 gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*.nc", full.names = T)
 
 #load in census tracts & select only those we want
+included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
 block_group <- st_read("heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp")
-income <- read.csv(paste0(getwd(), "/us_census/income_county.csv"), stringsAsFactors = F, header = T)
 block_group$fips <- paste0(block_group$STATEFP, block_group$COUNTYFP)
-block_group <- block_group %>% filter(fips %in% income$fips)
+block_group <- block_group %>% filter(fips %in% included_fips)
+st_crs(block_group) <- 4326 #currently NAD83, but virtually the same 
 
 # Run through temperature brick and extract over the buffers
 all_data <- c()
@@ -40,22 +40,22 @@ for(j in 1:length(names(file))) {
   nms <- as.numeric(substring(as.character(names(file[[j]])),2))
   temp$date <- rep(as.Date(nms, origin= "1900-01-01"), nrow(block_group))
   temp <- as.data.frame(temp)
-  temp$county <- block_group$NAME
-  temp$blockgroup <- block_group$GEOID
+  temp$county <- block_group$COUNTYFP
+  temp$census_block_group <- block_group$GEOID
   temp$fips <- block_group$fips
   temp$measure <- rep(substring(i, 26, 29), nrow(block_group))
+  temp$year <- year(temp$date)
   
-  velox_obj <- velox(file[[j]])
-  temp_measure <- velox_obj$extract(sp = block_group$geometry, small = T)
   
-  temp$mean_measure <- lapply(temp_measure, function(x){mean(as.numeric(x), na.rm = T)}) %>% unlist()  
-  temp$max_measure <- lapply(temp_measure, function(x){max(as.numeric(x), na.rm = T)}) %>% unlist()
+  extracted_vals <-  extract(file[[1]], block_group[1:10,], na.rm = T)
+
+  temp$mean_measure <- lapply(extracted_vals, function(x){mean(as.numeric(x), na.rm = T)}) %>% unlist()  
+  temp$max_measure <- lapply(extracted_vals, function(x){max(as.numeric(x), na.rm = T)}) %>% unlist()
   
   all_data <- bind_rows(all_data, temp)
   
 }
   
-
 #save this out to make my life easier
-saveRDS(all_data, paste0("./heatwaves_manual/temps/bg/", rep, "_temperature_data.rds"))
+saveRDS(all_data, file_name)
 
