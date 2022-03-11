@@ -7,7 +7,6 @@ library(dplyr)
 library(stringr)
 library(sf)
 library(raster)
-library(velox)
 library(lfe)
 library(lubridate)
 

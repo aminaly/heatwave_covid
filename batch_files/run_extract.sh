@@ -11,8 +11,8 @@
 #SBATCH --mail-user=aminaly@stanford.edu
 #SBATCH -p diffenbaugh
 
-ml system math devel sqlite/3.18.0 gcc/6.3.0
-ml physics proj/4.9.3 geos gdal/2.2.1 udunits/2.2.26 curl/7.54.0 netcdf/4.4.1.1 R/3.6.1;
+ml system math devel sqlite gcc
+ml physics proj geos gdal udunits curl netcdf R;
 
 cd $OAK/group_members/aminaly/heatwave_covid
 let buffer=$SLURM_ARRAY_TASK_ID
