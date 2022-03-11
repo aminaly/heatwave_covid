@@ -25,6 +25,8 @@ block_group$fips <- paste0(block_group$STATEFP, block_group$COUNTYFP)
 block_group <- block_group %>% filter(fips %in% included_fips)
 st_crs(block_group) <- 4326 #currently NAD83, but virtually the same 
 
+file_name <- paste0("./heatwaves_manual/temps/bg/", rep, "_temperature_data.rds")
+
 # Run through temperature brick and extract over the buffers
 all_data <- c()
 
