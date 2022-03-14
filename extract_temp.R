@@ -48,7 +48,7 @@ for(j in 1:length(names(file))) {
   temp$year <- year(temp$date)
   
   
-  extracted_vals <-  extract(file[[1]], block_group[1:10,], na.rm = T)
+  extracted_vals <-  extract(file[[1]], block_group, na.rm = T)
 
   temp$mean_measure <- lapply(extracted_vals, function(x){mean(as.numeric(x), na.rm = T)}) %>% unlist()  
   temp$max_measure <- lapply(extracted_vals, function(x){max(as.numeric(x), na.rm = T)}) %>% unlist()
