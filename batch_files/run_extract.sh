@@ -13,6 +13,7 @@
 
 ml system math devel sqlite gcc
 ml physics proj geos gdal udunits curl netcdf R/4.1.2;
+ml gcc/9.1.0
 
 cd $OAK/group_members/aminaly/heatwave_covid
 let buffer=$SLURM_ARRAY_TASK_ID
