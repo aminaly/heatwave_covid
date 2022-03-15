@@ -9,6 +9,7 @@ library(sf)
 library(raster)
 library(lfe)
 library(lubridate)
+library(exactextractr)
 
 ## pick up args from commandline/sbatch
 args <- commandArgs(trailingOnly = TRUE)
@@ -48,10 +49,10 @@ for(j in 1:length(names(file))) {
   temp$year <- year(temp$date)
   
   
-  extracted_vals <-  extract(file[[1]], block_group, na.rm = T)
+  extracted_vals <-  exact_extract(file[[j]], block_group)
 
-  temp$mean_measure <- lapply(extracted_vals, function(x){mean(as.numeric(x), na.rm = T)}) %>% unlist()  
-  temp$max_measure <- lapply(extracted_vals, function(x){max(as.numeric(x), na.rm = T)}) %>% unlist()
+  temp$mean_measure <- lapply(extracted_vals, function(x){mean(as.numeric(x$value), na.rm = T)}) %>% unlist()  
+  temp$max_measure <- lapply(extracted_vals, function(x){max(as.numeric(x$value), na.rm = T)}) %>% unlist()
   
   all_data <- bind_rows(all_data, temp)
   
