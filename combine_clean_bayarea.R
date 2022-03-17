@@ -31,7 +31,7 @@ home_dev_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/rel
 if(RUNTEMP) {
   
   all_files <- list.files(temp_loc, full.names = T)
-  temps <- data.frame()
+  t <- data.frame()
   
   for(i in 1:length(all_files)) {
     
@@ -39,35 +39,28 @@ if(RUNTEMP) {
     file <- all_files[i]
     f <- readRDS(file)
     f <- f %>% filter(fips %in% included_fips)
-    temps <- bind_rows(temps, f)
-    print(head(f))
-    
+    t <- bind_rows(t, f)
+
   }
   
   #### Clean Temperature Data 
   
-  #reshape by with min and max next to each other
-  tm <- temps %>% dplyr::filter(measure == "tmmn")
-  tx <- temps %>% dplyr::filter(measure == "tmmx")
-  t <- left_join(tm, tx, by = c("date", "fips"))
-  
+  #for now, select just the tx
+  t <- t %>% dplyr::filter(measure == "tmmx")
+
   #Add additional columns and rename for ease
-  t <- t %>% dplyr::select(date, county = county.x, fips,
-                           mean_low = mean_measure.x, 
-                           mean_high = mean_measure.y) %>%
+  t <- t %>% dplyr::select(date, county, fips,
+                           mean_high = mean_measure) %>%
     mutate(fips = as.character(fips), month = month(date), year = year(date)) %>%
-    dplyr::filter(is.finite(mean_low)) %>% 
     dplyr::filter(is.finite(mean_high)) %>% 
-    mutate(mean_low_c = mean_low-273.15, mean_high_c = mean_high-273.15)
+    mutate(mean_high_c = mean_high-273.15)
   
   t$monthyear <- paste0(t$month, t$year)
   
   ## Add in zscores and percentiles of temp data
   t <- t %>% group_by(fips, year) %>%
     mutate(z_score_high = (mean_high - mean(mean_high)) / sd(mean_high)) %>% 
-    mutate(z_score_low = (mean_low - mean(mean_low)) / sd(mean_low)) %>% 
     mutate(p_high = 100* pnorm(z_score_high)) %>%
-    mutate(p_low = 100* pnorm(z_score_low)) %>%
     ungroup
   
 
