@@ -21,7 +21,7 @@ RUNTEMP <- TRUE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
-RUNMOV <- FALSE
+RUNMOV <- TRUE
 
 #home devices location
 home_dev_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_home_panel_summary/"
