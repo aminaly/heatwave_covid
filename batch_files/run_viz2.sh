@@ -10,9 +10,9 @@
 #SBATCH --mail-user=aminaly@stanford.edu
 #SBATCH -p diffenbaugh
 
-ml physics gdal udunits/2.2.26 netcdf/4.4.1.1 R/3.6.1 proj geos;
-module load R/3.6.1
-ml curl/7.81.0
+ml system math devel sqlite gcc
+ml physics proj geos gdal udunits curl netcdf R/4.1.2;
+ml gcc/9.1.0
 
 cd $OAK/group_members/aminaly/heatwave_covid
 Rscript ./figure2.R

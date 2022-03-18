@@ -17,11 +17,11 @@ today <- format(Sys.Date(), "%m_%Y")
 
 #temperature location
 temp_loc <- "heatwaves_manual/temps/bg"
-RUNTEMP <- TRUE
+RUNTEMP <- FALSE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
-RUNMOV <- TRUE
+RUNMOV <- FALSE
 
 #home devices location
 home_dev_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_home_panel_summary/"
@@ -157,15 +157,19 @@ patterns <- left_join(movement, home, by = c("census_block_group", "fips", "year
 ## add in income
 print(head(patterns))
 patterns <- left_join(patterns, pop_income,  by = c("census_block_group", "fips"))
+patterns <- patterns %>% mutate()
 
 ## combine above with temperature
 print(head(patterns))
 print(head(t))
-data <- left_join(patterns, t,  by = c("census_block_group", "fips", "date"))
+patterns <- patterns %>% mutate(date = as.Date(date, format = "%Y-%mm-%dd"))
+t <- t %>% mutate(date = as.Date(date, format = "%Y-%mm-%dd"))
+data <- left_join(patterns, t,  by = c("census_block_group", "fips", "date", "month", "year"))
 
 ## final additions for regressions: add monthweek and countyyear
 data$countyyear <- paste0(data$fips, data$year)
 data$monthweek <- paste0(month(data$date, label = T), week(data$date))
 
+saveRDS(patterns, paste0("./heatwaves_manual/data_for_regression_patternsonly", today, ".RDS"))
 saveRDS(data, paste0("./heatwaves_manual/data_for_regression_", today, ".RDS"))
 

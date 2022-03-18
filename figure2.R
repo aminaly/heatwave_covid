@@ -19,7 +19,7 @@ library(SafeGraphR)
 library(interactions)
 
 ## read in the regression data
-data <- readRDS("./heatwaves_manual/data_for_regression.rds")
+data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
 
 ## remove smoke days
 smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
