@@ -49,7 +49,7 @@ if(RUNTEMP) {
   t <- t %>% dplyr::filter(measure == "tmmx")
 
   #Add additional columns and rename for ease
-  t <- t %>% dplyr::select(date, county, fips,
+  t <- t %>% dplyr::select(date, county, fips, census_block_group
                            mean_high = mean_measure) %>%
     mutate(fips = as.character(fips), month = month(date), year = year(date)) %>%
     dplyr::filter(is.finite(mean_high)) %>% 
