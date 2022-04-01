@@ -20,7 +20,9 @@ library(interactions)
 
 ## read in the regression data
 data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
+unique(data)
 
+data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing)
 ## remove smoke days
 smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
                 seq(as.Date("2020-09-10"), as.Date("2020-09-14"), by = 1),
