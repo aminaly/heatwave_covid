@@ -18,7 +18,7 @@ library(interactions)
 library(sf)
 
 ######## Read in datasets ######## 
-temp_mobility_data <- read_rds("./heatwaves_manual/data_for_regression.rds")
+temp_mobility_data <- read_rds("./heatwaves_manual/data_for_regression_03_2022.RDS")
 cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp", stringsAsFactors = F) 
 
 temp_mobility_data <- temp_mobility_data %>% filter(!is.na(visitors_percap))
