@@ -193,7 +193,7 @@ plot_data_bin3 <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors
   
 }
 
-plot_data_bin3 <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", summer = F) {
+plot_data_bin4 <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", summer = F) {
   
   #create the bins
   LVL <- "bin"
