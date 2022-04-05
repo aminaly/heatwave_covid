@@ -45,6 +45,5 @@ The following object is masked from ‘package:dplyr’:
 
     combine
 
-Error in plot_data_bin4(data, plot_title, xlab = "high_temp (0-40C)") : 
-  could not find function "plot_data_bin4"
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
+There were 50 or more warnings (use warnings() to see the first 50)
