@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=runViz2
-#SBATCH --nodes=3
+#SBATCH --nodes=1
 #SBATCH --array=1-5
 #SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz2.err
 #SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz2.out
