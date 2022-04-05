@@ -18,12 +18,18 @@ library(wesanderson)
 library(SafeGraphR)
 library(interactions)
 
+## pick up args from commandline/sbatch
+args <- commandArgs(trailingOnly = TRUE)
+ig <- as.numeric(args[1])
+
 ## read in the regression data
 data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
 unique(data)
 
 data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing) %>%
   filter(!is.na(visitors_percap) & is.finite(visitors_percap))
+
+data <- data %>% filter(income_group == ig)
 
 ## remove smoke days
 smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
@@ -32,7 +38,7 @@ smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
 data <- data %>% filter(!(date %in% smoke_days))
 
 ## lets do some plots
-pdf(paste0("./visuals/pub_figures/fig2_", Sys.Date(), ".pdf"))
+pdf(paste0("./visuals/pub_figures/fig2_incomegroup", ig, "_", Sys.Date(), ".pdf"))
 ##Finalize datasets for regressions & run
 plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
      main = title)
