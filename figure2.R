@@ -313,11 +313,11 @@ data <- rename(data, xvar = mean_high_c)
 data <- rename(data, yvar = visitors_percap)
 
 ## plot binned data for full year
-plot_title <- paste0("Mobility Index v Avg High pre + post 2020")
+plot_title <- paste0("Mobility Index v Avg High Income Group ", ig)
 plot_data_bin4(data, plot_title, xlab = "high_temp (0-40C)")
 
 ## plot binned data summer only 
-plot_title <- paste0("Mobility Index v Avg High Summer pre + post 2020")
+plot_title <- paste0("Mobility Index v Avg High Summer Income Group ", ig)
 plot_data_bin4(data, plot_title, xlab = "high_temp (0-40C)", summer = T)
 
 
