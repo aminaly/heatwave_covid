@@ -17,11 +17,11 @@ today <- format(Sys.Date(), "%m_%Y")
 
 #temperature location
 temp_loc <- "heatwaves_manual/temps/bg"
-RUNTEMP <- TRUE
+RUNTEMP <- FALSE
 
 #sheltering location
 movement_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_patterns/"
-RUNMOV <- FALSE
+RUNMOV <- TRUE
 
 #home devices location
 home_dev_loc <- "heatwaves_manual/safegraph/neighborhood-patterns/2022/02/09/release-2021-07-01/neighborhood_home_panel_summary/"
@@ -90,7 +90,8 @@ if(RUNMOV) {
     
     print(head(f))
     f <- f %>% select(census_block_group = area, date = date_range_start,
-                      stops_by_day, distance_from_home)
+                      stops_by_day, distance_from_home, device_home_areas,
+                      median_dwell)
     f$fips <- str_sub(f$census_block_group, 1,5)
     f <- f %>% filter(fips %in% included_fips)
     

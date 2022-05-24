@@ -24,7 +24,7 @@ ig <- as.numeric(args[1])
 
 ## read in the regression data
 data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
-unique(data)
+data <- unique(data)
 
 data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing) %>%
   filter(!is.na(visitors_percap) & is.finite(visitors_percap))
