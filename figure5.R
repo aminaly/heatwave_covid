@@ -25,11 +25,13 @@ included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041",
 args <- commandArgs(trailingOnly = TRUE)
 arg <- as.numeric(args[1])
 
-## read in the regression data
+## read in and adjust the regression data
 data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
 data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing) %>%
   filter(!is.na(visitors_percap) & is.finite(visitors_percap))
 td <- format(Sys.Date(), "%m_%d_%Y")
+data <- rename(data, xvar = mean_high_c)
+data <- rename(data, yvar = visitors_percap)
 
 #### remove smoke days ----
 smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
@@ -90,11 +92,6 @@ data <- data %>% filter(!is.na(maxdemo)) %>% mutate(year = as.factor(year))
 
 #### lets do some plots ----
 pdf(paste0("./visuals/pub_figures/fig5_demographic_", td, ".pdf"))
-##Finalize datasets for regressions & run
-plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n',
-     main = title)
-text(x = 0.5, y = 0.5, paste(timestamp(), "\n Bay Area Data Overview"),
-     cex = 1.5, col = "black")
 
 plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", summer = F) {
   
