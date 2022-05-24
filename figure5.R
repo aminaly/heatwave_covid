@@ -30,8 +30,6 @@ data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
 data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing) %>%
   filter(!is.na(visitors_percap) & is.finite(visitors_percap))
 td <- format(Sys.Date(), "%m_%d_%Y")
-data <- rename(data, xvar = mean_high_c)
-data <- rename(data, yvar = visitors_percap)
 
 #### remove smoke days ----
 smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
@@ -165,6 +163,8 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
 #### Loop through each demographic and plot summer and non summer ----
 demo <- unique(data$maxdemo)[arg]
 data_demo <- data %>% filter(maxdemo == demo)
+data <- rename(data, xvar = mean_high_c)
+data <- rename(data, yvar = visitors_percap)
 
 ## plot binned data for full year
 plot_title <- paste0("Mobility Index v Avg High Year ", demo)
