@@ -21,6 +21,9 @@ library(interactions)
 ## global vars
 included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
 
+## pick up args from commandline/sbatch
+args <- commandArgs(trailingOnly = TRUE)
+arg <- as.numeric(args[1])
 
 ## read in the regression data
 data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
@@ -163,17 +166,16 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
 }
 
 #### Loop through each demographic and plot summer and non summer ----
-for(demo in unique(data$maxdemo)) {
-  
-  ## plot binned data for full year
-  plot_title <- paste0("Mobility Index v Avg High Year ", demo)
-  plot_data_bin4(data, plot_title, xlab = "high_temp (0-40C)")
-  
-  ## plot binned data summer only 
-  plot_title <- paste0("Mobility Index v Avg High Summer Year ", demo)
-  plot_data_bin4(data, plot_title, xlab = "high_temp (0-40C)", summer = T)
+demo <- unique(data$maxdemo)[arg]
+data_demo <- data %>% filter(maxdemo == demo)
 
-}
+## plot binned data for full year
+plot_title <- paste0("Mobility Index v Avg High Year ", demo)
+plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)")
+
+## plot binned data summer only 
+plot_title <- paste0("Mobility Index v Avg High Summer Year ", demo)
+plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)", summer = T)
 
 dev.off()
 
