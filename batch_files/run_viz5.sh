@@ -3,9 +3,10 @@
 #SBATCH --nodes=1
 #SBATCH --array=1-4
 #SBATCH --error=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz5.err
+#SBATCH --output=/oak/stanford/groups/omramom/group_members/aminaly/heatwave_covid/outfiles/runViz5.out
 #SBATCH --time=23:00:00
 #SBATCH --ntasks-per-node=1
-#SBATCH --mem-per-cpu=100GB
+#SBATCH --mem-per-cpu=120GB
 #SBATCH --mail-type=END,FAIL 
 #SBATCH --mail-user=aminaly@stanford.edu
 #SBATCH -p diffenbaugh

@@ -89,8 +89,6 @@ data <- left_join(data, demo %>% select(census_block_group, fips, maxdemo), by =
 data <- data %>% filter(!is.na(maxdemo)) %>% mutate(year = as.factor(year))
 
 #### lets do some plots ----
-pdf(paste0("./visuals/pub_figures/fig5_demographic_", td, ".pdf"))
-
 plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", summer = F) {
   
   #create the bins
@@ -164,6 +162,8 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
 demo <- unique(data$maxdemo)[arg]
 data_demo <- data %>% filter(maxdemo == demo)
 data <- data_demo %>% mutate(xvar = mean_high - 273.15, yvar = visitors_percap)
+
+pdf(paste0("./visuals/pub_figures/fig5_demographic_",demo, "_", td, ".pdf"))
 
 ## plot binned data for full year
 plot_title <- paste0("Mobility Index v Avg High Year ", demo)
