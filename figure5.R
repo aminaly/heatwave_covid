@@ -159,12 +159,12 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   
 }
 
-#### Loop through each demographic and plot summer and non summer ----
-demo <- unique(data$maxdemo)[arg]
-data_demo <- data %>% filter(maxdemo == demo)
+#### plot summer and non summer ----
+#demo <- unique(data$maxdemo)[arg]
+#data_demo <- data %>% filter(maxdemo == demo)
 data <- data_demo %>% mutate(xvar = mean_high - 273.15, yvar = visitors_percap)
 
-pdf(paste0("./visuals/pub_figures/fig5_demographic_",demo, "_", td, ".pdf"))
+pdf(paste0("./visuals/pub_figures/fig5_demographic_",interacted, "_", td, ".pdf"))
 
 ## plot binned data for full year
 plot_title <- paste0("Mobility Index v Avg High Year ", demo)
