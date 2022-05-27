@@ -27,7 +27,8 @@ arg <- as.numeric(args[1])
 
 ## read in and adjust the regression data
 data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
-data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing) %>%
+data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing,
+                        countymonth = paste0(fips,month)) %>%
   filter(!is.na(visitors_percap) & is.finite(visitors_percap))
 td <- format(Sys.Date(), "%m_%d_%Y")
 
@@ -113,7 +114,7 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   model_2 <- fe_model(data_2, level = LVL)
   
   #bootstrap the data by doing the model however many times, getting the coefficient values (1)
-  boots_1 <- bootstrap_data(data_1, short=F, level= LVL)
+  boots_1 <- bootstrap_data(data_1, short=T, level= LVL)
   boots_1 <- boots_1[-1,]
   boots_1 <- as_tibble(boots_1) %>% mutate(xvar_bin1 = 0) %>% relocate(xvar_bin1)
   conf_1 <- apply(boots_1,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 
@@ -129,7 +130,7 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
   coefs_1 <- left_join(coefs_1, conf_1, by = "term")
   
   #bootstrap the data by doing the model however many times, getting the coefficient values (2)
-  boots_2 <- bootstrap_data(data_2, short=F, level= LVL)
+  boots_2 <- bootstrap_data(data_2, short=T, level= LVL)
   boots_2 <- boots_2[-1,]
   boots_2 <- as_tibble(boots_2) %>% mutate(xvar_bin1 = 0) %>% relocate(xvar_bin1)
   conf_2 <- apply(boots_2,2,function(x) quantile(x,probs=c(0.05,0.5,0.95), na.rm = T)) 

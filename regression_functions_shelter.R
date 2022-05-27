@@ -34,9 +34,9 @@ fe_model <- function(dta, level, interact=F) {
     
   } else if(level == "bin") {
       dta <- na.omit(dta, cols=c("xvar_bin", "yvar"))
-      mod <- felm(yvar ~ xvar_bin | census_block_group + monthweek, data=dta)
-      # mod <- felm(yvar ~ xvar_bin + 
-      #               as.factor(county)*year | census_block_group + monthweek | 0 | census_block_group + countyyear, data=dta)
+      #mod <- felm(yvar ~ xvar_bin | census_block_group + monthweek, data=dta)
+      mod <- felm(yvar ~ xvar_bin + 
+                     as.factor(county)*month | census_block_group + monthweek | 0 | census_block_group + countymonth, data=dta)
     
   } else if (level > 1) {
     mod <- felm(yvar ~ poly(xvar,level,raw=T) + 
