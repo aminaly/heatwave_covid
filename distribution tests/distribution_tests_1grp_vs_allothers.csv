@@ -1,0 +1,37 @@
+All data only includes days where at least one county experienced temperature over 34 degrees ,,,,
+Compare this income group to all others combined ,,,,
+,,,,
+wilcox p value,ks pvalue,income_grp,year,
+0,0,5,2021,
+0,0,4,2021,
+0.002,0,3,2021,
+0.712,0,2,2021,
+0.026,0,1,2021,
+0,0,5,2020,
+0,0,4,2020,
+0,0,3,2020,
+0,0,2,2020,
+0,0,1,2020,
+,,,,
+Each income group compared to every other income group,,,,
+wilcox p value,ks pvalue,income_grp,comparison_group,year
+0,0,5,4,2021
+0.02,0,5,3,2021
+0,0,5,2,2021
+0.003,0,5,1,2021
+0,0,4,3,2021
+0,0,4,2,2021
+0,0,4,1,2021
+0.039,0,3,2,2021
+0.758,0,3,1,2021
+0.086,0,2,1,2021
+0,0,5,4,2020
+0,0,5,3,2020
+0,0,5,2,2020
+0,0,5,1,2020
+0,0,4,3,2020
+0,0,4,2,2020
+0,0,4,1,2020
+0.004,0,3,2,2020
+0.136,0,3,1,2020
+0,0,2,1,2020

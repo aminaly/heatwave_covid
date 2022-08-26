@@ -26,26 +26,6 @@ included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041",
 data <- readRDS("./heatwaves_manual/data_with_demo_05_2022.RDS")
 data <- data %>% filter(!is.na(unweighted_pop))
 td <- format(Sys.Date(), "%m_%d_%Y")
-
-#### add in demographic data (race) ----
-race <- read_csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b02.csv"))
-latinx <- read_csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b03.csv"))
-
-race <- race %>% mutate(fips = substr(census_block_group, 1, 5)) %>%
-  filter(fips %in% included_fips) %>%
-  select(census_block_group, fips, white = B02001e2, black = B02001e3, native = B02001e4, asian = B02001e5,
-         pacificisld = B02001e6, other = B02001e7, two_or_more = B02001e8)
-
-latinx <- latinx %>% mutate(fips = substr(census_block_group, 1, 5)) %>%
-  filter(fips %in% included_fips) %>% 
-  select(census_block_group, fips, not_latinx = B03003e2, latinx = B03003e3)
-
-race <- left_join(race, latinx, by = c("census_block_group", "fips"))
-
-demo <- left_join(data, race, by = c("census_block_group", "fips"))
-
-pdf(paste0("./visuals/pub_figures/fig6_temp", td, ".pdf"))
-
 ys <- c(2020, 2021)
 
 #### plots ----
@@ -56,176 +36,64 @@ income <- income %>% arrange(median_income) %>% mutate(cum_population = cumsum(u
   mutate(income_group_pop = ntile(median_income, 5)) %>% select(census_block_group, income_group_pop)
 data <- left_join(data, income, by = "census_block_group")
 
-data_subset <- data %>% filter(mean_high_c >= 34 & year %in% ys) %>% mutate(minority = ifelse(maxdemo %in% c("p_white", "p_asian"), FALSE, TRUE))
+hotdays <- data %>% group_by(date) %>% 
+  summarize(max_temp = max(mean_high_c, na.rm = T)) %>% 
+  filter(max_temp >= 34) %>% pull(date)
 
-results <- c()
+data_subset <- data %>% filter(date %in% hotdays & year %in% ys & !is.na(visitors_percap) & !is.na(median_income)) %>% mutate(income_group_pop = as.factor(income_group_pop))
+data_all <- data %>% filter(year %in% ys) %>% mutate(hotday = ifelse(date %in% hotdays, T, F))
 
-for(yr in 2020:2021) {
-  
-  for(income_group in 1:5) {
-    
-    print(j)
-    ds <- data_subset %>% filter(year == yr & income_group_pop == income_group)
-    
-    for(quantile in quantiles) {
-      
-      qr.b <- boot.rq(ds$mean_high_c, ds$visitors_percap, tau = quantile, R = 1000)
-      conf <- t(apply(qr.b$B, 2, quantile, c(0.05, 0.5, 0.95)))
-      
-      row <- cbind(year = yr, quant = quantile, group = income_group, lower = conf[,1], value = conf[,2], upper = conf[,3])
-      results <- rbind(results, row)
-    }
-  }
-  
+
+run_model <- function(dta, xvar, yvar) {
+  mod1 <- felm(xvar ~ poly(yvar, 2, raw = T) | county + monthweek,  data = data_subset)
+  mod2 <- felm(xvar ~ yvar | county + monthweek,  data = data_subset)
+  return(list(mod1, mod2))
 }
 
-
-for(j in 1:5) {
-  
-  print(j)
-  
-  quant_reg_2020 <- summary(rq(visitors_percap ~ mean_high_c, quantiles,
-                               data = data_subset %>% filter(year == 2020 & income_group_pop == j)), se = "boot", cov=TRUE)
-
-  quant_reg_2021 <- summary(rq(visitors_percap ~ mean_high_c, quantiles,
-                               data = data_subset %>% filter(year == 2021 & income_group_pop == j)), cov=TRUE)
-
-  name <- paste("income", j, "2020_", sep = "_")
-  mods <- append(mods, list(name = quant_reg_2020))
-  
-  name <- paste("income", j, "2021", sep = "_")
-  mods <- append(mods, list(name = quant_reg_2021))
-  
-  for(i in 1:length(quantiles)) {
-    
-    year <- 2020
-    quant <- quant_reg_2020[[i]]$tau
-    coefs <- quant_reg_2020[[i]]$coefficients
-    
-    results <- rbind(results, cbind(year, quant, group = j, coefs))
-    
-    year <- 2021
-    quant <- quant_reg_2021[[i]]$tau
-    coefs <- quant_reg_2021[[i]]$coefficients
-    
-    results <- rbind(results, cbind(year, quant, group = j, coefs))
-    
-  }
-  
-  
-}
-
-quant_reg_2020 <- summary(rq(visitors_percap ~ mean_high_c, quantiles,
-                             data = data_subset %>% filter(year == 2020)), se = "boot")
-quant_reg_2021 <- summary(rq(visitors_percap ~ mean_high_c, quantiles,
-                             data = data_subset %>% filter(year == 2021)), se = "boot")
- 
-for(i in 1:3) {
-  j <- 6
-  year <- 2020
-  quant <- quant_reg_2020[[i]]$tau
-  coefs <- quant_reg_2020[[i]]$coefficients
-  
-  results <- rbind(results, cbind(year, quant, group = j, coefs))
-  
-  year <- 2021
-  quant <- quant_reg_2021[[i]]$tau
-  coefs <- quant_reg_2021[[i]]$coefficients
-  
-  results <- rbind(results, cbind(year, quant, group = j, coefs))
-  
-}
+model_income_bin <- felm(visitors_percap ~ income_group_pop | county + monthweek,  data = data_subset)
 
 
-write.csv(results, "quantile_regression_bydemo_income_popweighted_all.csv")
+model_income_cont <- felm(visitors_percap ~ median_income | county + monthweek,  data = data_subset)
+model_income_cont_quad <- felm(visitors_percap ~ poly(median_income, 2, raw = T) | county + monthweek,  data = data_subset)
 
 
-results <- as.data.frame(results)
-results <- results %>% rename(stderr = `Std. Error`, tval = `t value`) %>%
-  mutate(me = tval * stderr) %>% mutate(lb = Value - me, ub = Value + me)
-results$res <- ifelse(grepl("mean_high_c", row.names(results)), "coef", "intercept")
 
-pdf(paste0("./visuals/pub_figures/fig7_coefs", td, ".pdf"))
-ggplot(data = results %>% filter(res == "coef"), 
-       aes(x = quant, y = Value, group = year, color = year, ymin = lb, ymax = ub)) +
-  geom_point(position = position_dodge2(2)) +
-  geom_errorbar(width = 2, position = position_dodge2(2)) + 
-  geom_hline(yintercept=0, linetype="dashed", 
-             color = "red", size=1) +
-  facet_wrap( ~ group) +
-  theme_bw()
-dev.off()
+pdf(paste0("./visuals/pub_figures/view", td, ".pdf"))
 
-## plot the results
-td <- format(Sys.Date(), "%m_%d_%Y")
-pdf(paste0("./visuals/pub_figures/fig6_temp_income", td, ".pdf"))
+##############
+x <- as.data.frame(c(11000:250000))
+names(x) <- c("x")
+int <- tidy(model_income_cont, conf.int = T)
+x <- x %>% mutate(ycont = x * int$estimate, high = x * int$conf.high, low = x * int$conf.low) %>%
+  mutate(ycont = ycont - ycont[77001], high = high - high[77001], low = low[77001] )
 
-ys <- c(2020, 2021)
-
-ggplot(data = data_subset, aes(mean_high_c, visitors_percap, group = year)) +
-  geom_quantile(aes(linetype = year, color = ..quantile..), quantiles =  c(.25, .5, .75, .95)) +
-  labs(title = "temp > 34") + 
+ggplot(x, aes(x, y_cont)) +
+  geom_ribbon(data = x, aes(ymin = low, ymax = high)) +
+  #geom_point(aes(x, y_cont)) +
   theme_bw()
 
-ggplot(data = data_subset, aes(mean_high_c, visitors_percap, group = year))+
-  geom_quantile(aes(linetype = year, color = ..quantile..), quantiles =  c(.25, .5, .75, .95)) +
-  labs(title = "MI > 99th% temp > 34") + 
-  facet_wrap( ~ income_group_pop) +
+############## 
+x <- as.data.frame(c(11000:250000))
+names(x) <- c("x")
+int <- tidy(model_income_cont_quad, conf.int = T)
+x <- x %>% mutate(ycont = x * int$estimate[1] + x^2*int$estimate[2], 
+                  high = x * int$conf.high[1] + x^2*int$conf.high[2], 
+                  low = x * int$conf.low[1] + x^2*int$conf.low[2]) %>%
+  mutate(ycont = ycont - ycont[77001], high = high - high[77001], low = low[77001] )
+
+ggplot(x, aes(x, y_cont)) +
+  geom_ribbon(data = x, aes(ymin = low, ymax = high)) +
+  #geom_point(aes(x, y_cont)) +
+  theme_bw()
+
+############## 
+coef <- tidy(model_income_bin, conf.int = T)
+coef <- rbind(c("income_group_pop1", 0, 0, 0, 0, 0, 0), coef)
+
+ggplot(coef, aes(term, estimate)) +
+  geom_ribbon(coef, aes(ymin = conf.low, ymax = conf.high)) +
+  geom_point(data = coef, aes(term, estimate))+ 
+  geom_line(data = coef, aes(term, estimate)) +
   theme_bw()
 
 dev.off()
-
-results_minority <- c()
-
-for(j in unique(data_subset$minority)) {
-  
-  print(j)
-  
-  quant_reg_2020 <- summary(rq(visitors_percap ~ mean_high_c, quantiles,
-                               data = data_subset %>% filter(year == 2020 & minority == j)), se = "boot")
-  quant_reg_2021 <- summary(rq(visitors_percap ~ mean_high_c, quantiles,
-                               data = data_subset %>% filter(year == 2021 & minority == j)), se = "boot")
-  
-  for(i in 1:length(quantiles)) {
-    
-    year <- 2020
-    quant <- quant_reg_2020[[i]]$tau
-    coefs <- quant_reg_2020[[i]]$coefficients
-    
-    results_minority <- rbind(results_minority, cbind(year, quant, group = j, coefs))
-    
-    year <- 2021
-    quant <- quant_reg_2021[[i]]$tau
-    coefs <- quant_reg_2021[[i]]$coefficients
-    
-    results_minority <- rbind(results_minority, cbind(year, quant, group = j, coefs))
-    
-  }
-  
-  
-}
-
-write.csv(results_minority, "quantile_regression_minority.csv")
-
-#### historgram of demographics within income group ----
-race <- left_join(race, data %>% select(census_block_group, unweighted_pop, income_group_pop), by = "census_block_group")
-race <- unique(race)
-racem <- melt(race, id = c("census_block_group", "fips", "unweighted_pop", "income_group_pop"))
-racem <- racem %>% group_by(income_group_pop, variable) %>% summarize(pop = sum(value, na.rm = T))
-pdf(paste0("./visuals/pub_figures/fig6_demo", td, ".pdf"))
-ggplot(data = racem %>% filter(!is.na(income_group_pop) & !variable %in% c("not_latinx", "latinx")), aes(x = variable, y = pop))+
-  geom_bar(stat="identity", aes(fill = variable)) +
-  labs(title = "Demographic by income group") + 
-  facet_wrap( ~ income_group_pop) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45))
-
-ggplot(data = racem %>% filter(!is.na(income_group_pop) & variable %in% c("not_latinx", "latinx")), aes(x = variable, y = pop))+
-  geom_bar(stat="identity", aes(fill = variable)) +
-  labs(title = "Hispanic/Latinx by income group") + 
-  facet_wrap( ~ income_group_pop) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45)) 
-dev.off()
-
-

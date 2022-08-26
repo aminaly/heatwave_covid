@@ -26,11 +26,9 @@ args <- commandArgs(trailingOnly = TRUE)
 arg <- as.numeric(args[1])
 
 ## read in and adjust the regression data
-data <- readRDS("./heatwaves_manual/data_for_regression_03_2022.RDS")
-data <- data %>% mutate(visitors_percap = (stops_by_day - number_devices_residing)/ number_devices_residing,
-                        countymonth = paste0(fips,month)) %>%
-  filter(!is.na(visitors_percap) & is.finite(visitors_percap))
+data <- readRDS("./heatwaves_manual/data_with_demo_05_2022.RDS")
 td <- format(Sys.Date(), "%m_%d_%Y")
+data <- data %>% filter(!is.na(maxdemo)) %>% mutate(year = as.factor(year))
 
 #### remove smoke days ----
 smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
@@ -38,56 +36,6 @@ smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
                 as.Date("2020-08-31", format = "%Y-%m-%d"))
 data <- data %>% filter(!(date %in% smoke_days))
 
-#### pull in metadata for labels ----
-metadata <- read_csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/metadata/cbg_field_descriptions.csv"))
-
-#### add in income and population data ----
-income <- read.csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b19.csv"), stringsAsFactors = F, header = T)
-income <- na.omit(income %>% dplyr::select(census_block_group, 	median_income = B19013e1))
-income <- income %>% mutate("census_block_group" = ifelse(nchar(census_block_group) == 11, 
-                                                          paste0("0", census_block_group), census_block_group))
-income$fips <- substr(income$census_block_group, 1, 5)
-income <- income %>% mutate(income_group = ntile(median_income, 5)) %>% filter(fips %in% included_fips)
-income$census_block_group <- as.character(income$census_block_group)
-
-pops <- cbg_pop %>% mutate(census_block_group = as.character(poi_cbg)) %>% 
-  mutate(census_block_group =  ifelse(nchar(census_block_group) == 11, 
-                                      paste0("0", census_block_group), census_block_group)) %>% 
-  select(census_block_group, unweighted_pop)
-pops$fips <- str_sub(pops$census_block_group, 1,5)
-pops <- pops %>% filter(fips %in% included_fips)
-
-pop_income <- left_join(income, pops, by = c("census_block_group", "fips"))
-
-#### add in demographic data (race) ----
-race <- read_csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b02.csv"))
-latinx <- read_csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b03.csv"))
-
-race <- race %>% mutate(fips = substr(census_block_group, 1, 5)) %>%
-  filter(fips %in% included_fips) %>%
-  select(census_block_group, fips, white = B02001e2, black = B02001e3, native = B02001e4, asian = B02001e5,
-         pacificisld = B02001e6, other = B02001e7, two_or_more = B02001e8)
-
-latinx <- latinx %>% mutate(fips = substr(census_block_group, 1, 5)) %>%
-  filter(fips %in% included_fips) %>% 
-  select(census_block_group, fips, not_latinx = B03003e2, latinx = B03003e3)
-
-race <- left_join(race, latinx, by = c("census_block_group", "fips"))
-
-demo <- left_join(pop_income, race, by = c("census_block_group", "fips"))
-
-demo <- demo  %>%
-  mutate(p_white = white/unweighted_pop, p_black = black/unweighted_pop, p_latinx = latinx/unweighted_pop, p_asian = asian/unweighted_pop,
-         p_native = native/unweighted_pop, p_two_or_more = two_or_more/unweighted_pop) %>%
-  select(p_white, p_black, p_latinx, p_asian, p_native, p_two_or_more, census_block_group, fips)
-
-demo$maxdemo <- colnames(demo[,1:6])[max.col(demo[,1:6])]
-
-### combine with data  ----
-
-data <- data %>% mutate(monthday = yday(date), hot = ifelse(mean_high_c >= 34, "Hot Day", "Regular Day"))
-data <- left_join(data, demo %>% select(census_block_group, fips, maxdemo), by = c("census_block_group", "fips"))
-data <- data %>% filter(!is.na(maxdemo)) %>% mutate(year = as.factor(year))
 
 #### lets do some plots ----
 plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors / Home Devices", summer = F) {
@@ -164,16 +112,35 @@ plot_data_bin <- function(data, plot_title, xlab="Temp (C)", ylab = "# Visitors 
 #data_demo <- data %>% filter(maxdemo == demo)
 data <- data_demo %>% mutate(xvar = mean_high - 273.15, yvar = visitors_percap)
 
-pdf(paste0("./visuals/pub_figures/fig5_demographic_",interacted, "_", td, ".pdf"))
 
-## plot binned data for full year
-plot_title <- paste0("Mobility Index v Avg High Year ", demo)
-plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)")
+pdf(paste0("./visuals/pub_figures/fig6_temp", td, ".pdf"))
 
-## plot binned data summer only 
-plot_title <- paste0("Mobility Index v Avg High Summer Year ", demo)
-plot_data_bin(data, plot_title, xlab = "high_temp (0-40C)", summer = T)
+ggplot(data = data %>% filter(mean_high_c >= 34 & visitors_percap > quantile(visitors_percap, .95)), 
+       aes(mean_high_c, visitors_percap, group = year))+
+  geom_point(aes(color = year)) +
+  labs(title = "MI > 95th% temp > 34") + 
+  theme_bw()
+
+ggplot(data = data %>% filter(mean_high_c >= 34 & visitors_percap > quantile(visitors_percap, .95)), 
+       aes(mean_high_c, visitors_percap, group = maxdemo))+
+  geom_point(aes(color = maxdemo)) +
+  labs(title = "MI > 95th% temp > 34") + 
+  theme_bw()
+
+ggplot(data = data %>% filter(mean_high_c >= 34 & visitors_percap < quantile(visitors_percap, .95)), 
+       aes(mean_high_c, visitors_percap, group = year))+
+  geom_point(aes(color = year)) +
+  labs(title = "MI < 95th% temp > 34") + 
+  theme_bw()
+
+ggplot(data = data %>% filter(mean_high_c >= 34 & visitors_percap < quantile(visitors_percap, .95)), 
+       aes(mean_high_c, visitors_percap, group = maxdemo))+
+  geom_point(aes(color = maxdemo)) +
+  labs(title = "MI < 95th% temp > 34") + 
+  theme_bw()
 
 dev.off()
+  
+  
 
 
