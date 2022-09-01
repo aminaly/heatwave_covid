@@ -28,72 +28,107 @@ data <- data %>% filter(!is.na(unweighted_pop))
 td <- format(Sys.Date(), "%m_%d_%Y")
 ys <- c(2020, 2021)
 
-#### plots ----
-quantiles <- c(.25, .5, .75, .95)
+#### data cleaning ----
+## remove smoke days
+smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
+                seq(as.Date("2020-09-10"), as.Date("2020-09-14"), by = 1),
+                as.Date("2020-08-31", format = "%Y-%m-%d"))
+data <- data %>% filter(!(date %in% smoke_days))
 
+quantiles <- c(.05, .5, .95)
+
+## add in income
 income <- unique(data %>% select(census_block_group, median_income, unweighted_pop))
 income <- income %>% arrange(median_income) %>% mutate(cum_population = cumsum(unweighted_pop)) %>% 
   mutate(income_group_pop = ntile(median_income, 5)) %>% select(census_block_group, income_group_pop)
 data <- left_join(data, income, by = "census_block_group")
 
+## add in race
+race <- read_csv(paste0(getwd(), "/heatwaves_manual/safegraph_open_census_data/data/cbg_b02.csv"))
+race <- race %>% mutate(fips = substr(census_block_group, 1, 5)) %>%
+  filter(fips %in% included_fips) %>%
+  select(census_block_group, fips, white = B02001e2, black = B02001e3, native = B02001e4, asian = B02001e5,
+         pacificisld = B02001e6, other = B02001e7, two_or_more = B02001e8) %>%
+  group_by(census_block_group, white, asian) %>%
+  summarise(total = sum(white, black, native, asian, pacificisld, other, two_or_more)) %>%
+  mutate(p_white = white/total, p_white_asian = (white + asian)/ total) %>% 
+  mutate(p_minority = 1 - p_white, p_non_white_asian = 1 - p_white_asian)
+data <- left_join(data, race, by = "census_block_group")
+
+## mark days where one or more county is >34
 hotdays <- data %>% group_by(date) %>% 
   summarize(max_temp = max(mean_high_c, na.rm = T)) %>% 
   filter(max_temp >= 34) %>% pull(date)
 
-data_subset <- data %>% filter(date %in% hotdays & year %in% ys & !is.na(visitors_percap) & !is.na(median_income)) %>% mutate(income_group_pop = as.factor(income_group_pop))
-data_all <- data %>% filter(year %in% ys) %>% mutate(hotday = ifelse(date %in% hotdays, T, F))
+data_subset <- data %>% filter(date %in% hotdays & year %in% ys & !is.na(visitors_percap) & !is.na(median_income)) %>% 
+  mutate(income_group_pop = as.factor(income_group_pop))
 
+income <- unique(data %>% select(census_block_group, median_income, unweighted_pop))
+income <- income %>% arrange(median_income) %>% mutate(cum_population = cumsum(unweighted_pop)) %>% 
+  mutate(income_group_pop_10 = ntile(median_income, 6)) %>% select(census_block_group, income_group_pop_10)
+data_subset <- left_join(data_subset, income, by = "census_block_group")
 
-run_model <- function(dta, xvar, yvar) {
-  mod1 <- felm(xvar ~ poly(yvar, 2, raw = T) | county + monthweek,  data = data_subset)
-  mod2 <- felm(xvar ~ yvar | county + monthweek,  data = data_subset)
-  return(list(mod1, mod2))
+## get total number of counties experiencing extreme temperatures
+a <- data_subset %>% filter(mean_high_c >= 34) %>% count(date, region)
+data_subset <- left_join(data_subset, a, by = "date")
+
+#### make some figs ----
+pdf(paste0("./visuals/pub_figures/view", td, ".pdf"))s
+
+## bootstrap median income linear
+coefs <- c()
+for(i in 1:100) {
+  samp <- sample(1:nrow(data_subset), nrow(data_subset), replace = T)
+  ds <- data_subset[samp,]
+  m <- felm(visitors_percap ~ median_income | county + monthweek, data = ds)
+  coefs <- rbind(m$coefficients, coefs)
 }
 
-model_income_bin <- felm(visitors_percap ~ income_group_pop | county + monthweek,  data = data_subset)
+quants <- c(.05, .5, .95)
+coefs <- quantile(coefs, quants)
+plot_data <- as.data.frame(x = 11000:350000)
+colnames(plot_data) <- c("x")
+plot_data <- plot_data %>% mutate(y = (x * coefs[2]), 
+                                  upper = (x * coefs[3]),
+                                  lower = (x * coefs[1])) #subtracting median of all income
+plot_data <- plot_data %>% mutate(y = y - plot_data[,2][x = 88000],
+                                  uppper = upper - plot_data[,3][x=88000],
+                                  lower = lower - plot_data[,4][x=88000])
+plot_title = "felm(visitors_percap ~ median_income | county + monthweek)"
 
-
-model_income_cont <- felm(visitors_percap ~ median_income | county + monthweek,  data = data_subset)
-model_income_cont_quad <- felm(visitors_percap ~ poly(median_income, 2, raw = T) | county + monthweek,  data = data_subset)
-
-
-
-pdf(paste0("./visuals/pub_figures/view", td, ".pdf"))
-
-##############
-x <- as.data.frame(c(11000:250000))
-names(x) <- c("x")
-int <- tidy(model_income_cont, conf.int = T)
-x <- x %>% mutate(ycont = x * int$estimate, high = x * int$conf.high, low = x * int$conf.low) %>%
-  mutate(ycont = ycont - ycont[77001], high = high - high[77001], low = low[77001] )
-
-ggplot(x, aes(x, y_cont)) +
-  geom_ribbon(data = x, aes(ymin = low, ymax = high)) +
-  #geom_point(aes(x, y_cont)) +
+ggplot(data = plot_data, aes(x, y))+
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25) +
+  geom_line(data = plot_data, aes(x, y))+ 
+  labs(title = plot_title) +
+  theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw()
 
-############## 
-x <- as.data.frame(c(11000:250000))
-names(x) <- c("x")
-int <- tidy(model_income_cont_quad, conf.int = T)
-x <- x %>% mutate(ycont = x * int$estimate[1] + x^2*int$estimate[2], 
-                  high = x * int$conf.high[1] + x^2*int$conf.high[2], 
-                  low = x * int$conf.low[1] + x^2*int$conf.low[2]) %>%
-  mutate(ycont = ycont - ycont[77001], high = high - high[77001], low = low[77001] )
+## bootstrap # hot counties linear
+coefs <- c()
+for(i in 1:10) {
+  samp <- sample(1:nrow(data_subset), nrow(data_subset), replace = T)
+  ds <- data_subset[samp,]
+  m <- felm(visitors_percap ~ n | census_block_group + monthweek, data = ds)
+  coefs <- rbind(m$coefficients, coefs)
+}
 
-ggplot(x, aes(x, y_cont)) +
-  geom_ribbon(data = x, aes(ymin = low, ymax = high)) +
-  #geom_point(aes(x, y_cont)) +
-  theme_bw()
+quants <- c(.05, .5, .95)
+coefs <- quantile(coefs, quants)
+plot_data <- as.data.frame(x = 11000:350000)
+colnames(plot_data) <- c("x")
+plot_data <- plot_data %>% mutate(y = (x * coefs[2]), 
+                                  upper = (x * coefs[3]),
+                                  lower = (x * coefs[1])) #subtracting median of all income
+plot_data <- plot_data %>% mutate(y = y - plot_data[,2][x = 88000],
+                                  uppper = upper - plot_data[,3][x=88000],
+                                  lower = lower - plot_data[,4][x=88000])
+plot_title = "visitors_percap ~ n | census_block_group + monthweek"
 
-############## 
-coef <- tidy(model_income_bin, conf.int = T)
-coef <- rbind(c("income_group_pop1", 0, 0, 0, 0, 0, 0), coef)
-
-ggplot(coef, aes(term, estimate)) +
-  geom_ribbon(coef, aes(ymin = conf.low, ymax = conf.high)) +
-  geom_point(data = coef, aes(term, estimate))+ 
-  geom_line(data = coef, aes(term, estimate)) +
+ggplot(data = plot_data, aes(x, y))+
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25) +
+  geom_line(data = plot_data, aes(x, y))+ 
+  labs(title = plot_title) +
+  theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw()
 
 dev.off()

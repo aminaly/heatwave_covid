@@ -790,10 +790,6 @@ dev.off()
 ## boxplot of demographics
 
 
-
-
-
-
 ggplot(data = dd_d, aes(x = as.Date(yday(date), "1970-01-01"), y=visitors_percap, group=year)) + 
   geom_line(aes(color = year)) +
   scale_x_date(date_breaks="months", date_labels="%b") +

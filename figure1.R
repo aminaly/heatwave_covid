@@ -16,6 +16,7 @@ library(wesanderson)
 library(SafeGraphR)
 library(interactions)
 library(sf)
+library(gridExtra)
 
 ######## Read in datasets ######## 
 data <- readRDS("./heatwaves_manual/data_with_demo_05_2022.RDS")
@@ -23,7 +24,7 @@ cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_5
 td <- format(Sys.Date(), "%m_%d_%Y")
 
 data <- data %>% filter(!is.na(visitors_percap), !is.na(income_group_pop))
-
+data_all <- data
 ## add income 
 income <- unique(data %>% select(census_block_group, median_income, unweighted_pop))
 income <- income %>% arrange(median_income) %>% mutate(cum_population = cumsum(unweighted_pop)) %>% 
@@ -49,7 +50,6 @@ temp_mobility_sum_hot <- data %>% filter(month %in% c(5,6,7,8,9) & date %in% hot
   group_by(year, census_block_group) %>%
   summarize(visitors_percap = mean(visitors_percap, na.rm = T))
 temp_mobility_cbg <- merge(cbg, temp_mobility_sum, by = "census_block_group")
-
 
 ##pull out each year, join, and find the difference
 cast_temp <- dcast(temp_mobility_sum, census_block_group ~ year)
@@ -99,9 +99,10 @@ dev.off()
 
 #### Temperatures ----
 
-pdf(paste0("./visuals/pub_figures/fig2_temperatures_", td, ".pdf"))
+pdf(paste0("./visuals/pub_figures/fig2_timelines_", td, ".pdf"), paper = "USr")
 
 ### bar chart of temperatures 2020 - 2021
+data_all <- data
 data <- data %>% filter(!is.na(income_group_pop) & !is.na(maxdemo) & date %in% hotdays)
 
 data_byday <- data %>% 
@@ -109,9 +110,26 @@ data_byday <- data %>%
   group_by(date) %>% 
   summarize(avg_temp = mean(mean_high_c, na.rm = T))
 
-ggplot(data = data_byday, aes(x=date, y = avg_temp)) +
+data_byday_all <- data_all %>% 
+  filter(year %in% c(2020:2021)) %>%
+  group_by(date, income_group_pop) %>% 
+  summarize(avg_temp = mean(mean_high_c, na.rm = T),
+            avg_mobility = mean(visitors_percap, na.rm = T))
+
+temp <- ggplot(data = data_byday_all, aes(x=date, y = avg_temp)) +
   geom_line(alpha=0.5, position="identity") + 
+  geom_point(data = data_byday, alpha=0.5, aes(x = date, y = avg_temp), color = "tomato") +
+  labs(x = "Date", y = "Average Daily Temperature") +
   theme_bw()
+
+mobility <- ggplot(data = data_byday_all %>% filter(!is.na(income_group_pop)), aes(x=date, y = avg_mobility, group = income_group_pop)) +
+  geom_smooth(aes(group=income_group_pop, color=as.factor(income_group_pop))) +
+  labs(x = "Date", y = "Average Mobility", color = "Income Group") +
+  theme_bw()
+
+grid.arrange(temp, mobility, nrow = 2)
+
+dev.off()
 
 data_byday_income <- data %>% 
   filter(year %in% c(2020:2021)) %>%
@@ -122,13 +140,13 @@ data_byday_income <- data %>%
 ggplot(data = data_byday_income, aes(avg_temp)) +
   geom_histogram(alpha=0.5) + 
   facet_wrap( ~ income_group_pop) +
-  labs(title = "range of avg 'hot day' temperatures by income group") +
+  labs(title = "range of avg temperatures by income group  \n when at least one county >= 34") +
   theme_bw()
 
 ggplot(data = data_byday_income, aes(avg_percentile)) +
   geom_histogram(alpha=0.5) + 
   facet_wrap( ~ income_group_pop) +
-  labs(title = "range of percentile 'hot day' temperatures by income group") +
+  labs(title = "range of percentile of temps by income group \n when at least one county >= 34") +
   theme_bw()
 
 data_byday_race <- data %>% 
@@ -140,12 +158,13 @@ data_byday_race <- data %>%
 ggplot(data = data_byday_race, aes(avg_temp)) +
   geom_histogram(alpha=0.5) + 
   facet_wrap( ~ maxdemo) +
-  labs(title = "range of percentile 'hot day' temperatures ") +
+  labs(title = "range of percentile of temps by demographic \n when at least one county >= 34") +
   theme_bw()
 
 ggplot(data = data_byday_race, aes(avg_percentile)) +
   geom_histogram(alpha=0.5) + 
   facet_wrap( ~ maxdemo) +
+  labs(title = "range of percentile of temps by demographic \n when at least one county >= 34") +
   theme_bw()
 
 ## on a map
@@ -210,8 +229,8 @@ data_cbg <- merge(data_cbg, cbg, by = "census_block_group")
 
 ggplot(data = data_cbg, aes(geometry = geometry)) +
   ggtitle("Income Distribution") +
-  geom_sf(data = data_cbg, size = 0.002, aes(fill = income_group_pop)) +
-  scale_fill_continuous(na.value = "grey") +
+  geom_sf(data = data_cbg, size = 0.002, aes(fill = as.factor(income_group_pop))) +
+  scale_fill_discrete(na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
