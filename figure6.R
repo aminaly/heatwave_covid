@@ -75,7 +75,7 @@ data_subset <- left_join(data_subset, a, by = "date")
 #### make some figs ----
 pdf(paste0("./visuals/pub_figures/view", td, ".pdf"))
 
-## bootstrap median income linear
+#### bootstrap median income linear ----
 coefs <- c()
 for(i in 1:1000) {
   samp <- sample(1:nrow(data_subset), nrow(data_subset), replace = T)
@@ -88,12 +88,15 @@ quants <- c(.05, .5, .95)
 coefs <- quantile(coefs, quants)
 plot_data <- as.data.frame(x = 11000:350000)
 colnames(plot_data) <- c("x")
-plot_data <- plot_data %>% mutate(y = (x * coefs[2]), 
-                                  upper = (x * coefs[3]),
-                                  lower = (x * coefs[1])) #subtracting median of all income
-plot_data <- plot_data %>% mutate(y = y - plot_data[,2][x = 88000],
-                                  uppper = upper - plot_data[,3][x=88000],
-                                  lower = lower - plot_data[,4][x=88000])
+
+y <- plot_data$x * coefs[2]
+plot_data$y <- y - y[x=77001]
+
+upper <- plot_data$x * coefs[3]
+plot_data$upper <- upper - upper[x=77001]
+
+lower <- plot_data$x * coefs[1]
+plot_data$lower <- lower - lower[x=77001]
 plot_title = "felm(visitors_percap ~ median_income | county + monthweek)"
 
 ggplot(data = plot_data, aes(x, y))+
@@ -103,31 +106,50 @@ ggplot(data = plot_data, aes(x, y))+
   theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw()
 
-## bootstrap # hot counties linear
+#### bootstrap # hot counties linear ----
 coefs <- c()
-for(i in 1:1000) {
+for(i in 1:10) {
   samp <- sample(1:nrow(data_subset), nrow(data_subset), replace = T)
   ds <- data_subset[samp,]
-  m <- felm(visitors_percap ~ n | census_block_group + monthweek, data = ds)
-  coefs <- rbind(m$coefficients, coefs)
+  m <- felm(visitors_percap ~ poly(n, 2, raw = T) | census_block_group + monthweek, data = ds)
+  coefs <- cbind(m$coefficients, coefs)
 }
 
 quants <- c(.05, .5, .95)
-coefs <- quantile(coefs, quants)
-plot_data <- as.data.frame(x = 11000:350000)
+coefs_1 <- quantile(coefs[1,], quants)
+coefs_2 <- quantile(coefs[2,], quants)
+plot_data <- as.data.frame(x = 1:4700)
 colnames(plot_data) <- c("x")
-plot_data <- plot_data %>% mutate(y = (x * coefs[2]), 
-                                  upper = (x * coefs[3]),
-                                  lower = (x * coefs[1])) #subtracting median of all income
-plot_data <- plot_data %>% mutate(y = y - plot_data[,2][x = 88000],
-                                  uppper = upper - plot_data[,3][x=88000],
-                                  lower = lower - plot_data[,4][x=88000])
-plot_title = "visitors_percap ~ n | census_block_group + monthweek"
+
+y <- plot_data$x*coefs_1[2] + plot_data$x^2*coefs_2[2]  
+plot_data$y <- y - y[x=740]
+
+upper <- plot_data$x*coefs_1[3] + plot_data$x^2*coefs_2[3]
+plot_data$upper <- upper - upper[x=740]
+
+lower <- plot_data$x*coefs_1[1] + plot_data$x^2*coefs_2[1]
+plot_data$lower <- lower - lower[x=740]
+
+plot_title = "MI change as number of CBGs with temps > 34 increases  
+visitors_percap ~ poly(n, 2, raw = T) | census_block_group + monthweek"
 
 ggplot(data = plot_data, aes(x, y))+
   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25) +
   geom_line(data = plot_data, aes(x, y))+ 
-  labs(title = plot_title) +
+  labs(title = plot_title, x = "num CBGs >= 34C", y = "unit change in MI") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+#### binned n ----
+
+data_subset <- data_subset %>% mutate(n_bin = ntile(n, 6))
+m <- felm(visitors_percap ~ as.factor(n_bin) | census_block_group + monthweek, data=data_subset)
+
+m <- as.data.frame(cbind(x = 1:6, y = c(0, m$coefficients)))
+
+## plot both the 2018-19 and 2020 data
+ggplot(data = m, aes(x, y))+
+  geom_point(data = m, aes(x, y))+ 
   theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw()
 
