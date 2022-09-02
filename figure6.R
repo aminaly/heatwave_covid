@@ -73,7 +73,7 @@ a <- data_subset %>% filter(mean_high_c >= 34) %>% count(date, region)
 data_subset <- left_join(data_subset, a, by = "date")
 
 #### make some figs ----
-pdf(paste0("./visuals/pub_figures/view", td, ".pdf"))s
+pdf(paste0("./visuals/pub_figures/view", td, ".pdf"))
 
 ## bootstrap median income linear
 coefs <- c()
