@@ -108,7 +108,7 @@ ggplot(data = plot_data, aes(x, y))+
 
 #### bootstrap # hot counties linear ----
 coefs <- c()
-for(i in 1:10) {
+for(i in 1:1000) {
   samp <- sample(1:nrow(data_subset), nrow(data_subset), replace = T)
   ds <- data_subset[samp,]
   m <- felm(visitors_percap ~ poly(n, 2, raw = T) | census_block_group + monthweek, data = ds)
