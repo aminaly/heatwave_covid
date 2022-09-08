@@ -60,7 +60,7 @@ hotdays <- data %>% group_by(date) %>%
   summarize(max_temp = max(mean_high_c, na.rm = T)) %>% 
   filter(max_temp >= 34) %>% pull(date)
 data_subset <- data %>% filter(date %in% hotdays & year %in% ys) %>% mutate(minority = ifelse(maxdemo %in% c("p_white", "p_asian"), FALSE, TRUE))
-
+data_all <- data %>% filter(year %in% ys) %>% mutate(hotday = ifelse(date %in% hotdays, T, F))
 results <- c()
 
 for(yr in 2020:2021) {
@@ -211,33 +211,46 @@ for(yr in 2020:2021) {
 
 pdf(paste0("./visuals/pub_figures/fig8_dist", td, ".pdf"))
 
-ggplot(data = data_subset %>% filter(visitors_percap <= 4.5), 
+ggplot(data = data_subset %>% filter(visitors_percap <= 20), 
        aes(x = visitors_percap, group = as.factor(income_group_pop),
-           fill = as_factor(income_group_pop), alpha=0.2)) +
-  geom_density() +
+           color = as_factor(income_group_pop), alpha=0.2)) +
+  geom_density(size=.75) +
   ggtitle("Distribution of MI when temp >= 34 MI <= 4.5 (95th percentile)") +   
   facet_wrap( ~ year, nrow = 2) +
   theme_bw()
-ggplot(data = data_subset %>% filter(visitors_percap > 4.5 & visitors_percap < 20), 
+
+ggplot(data = data_subset %>% filter(visitors_percap > 4.5 & visitors_percap < 6.75), 
        aes(x = visitors_percap, group = as.factor(income_group_pop),
-           fill = as_factor(income_group_pop), alpha=0.2)) +
-  geom_density() +
+           color = as_factor(income_group_pop), alpha=0.2)) +
+  geom_density(size=.75) +
   ggtitle("Distribution of MI when temp >= 34 MI > 4.5 (95th percentile) \n & < 20 (99.9th percentile)") +   
   facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 ggplot(data = data_subset %>% filter(visitors_percap > 6.75 & visitors_percap < 20), 
        aes(x = visitors_percap, group = as.factor(income_group_pop),
-           fill = as_factor(income_group_pop), alpha=0.2)) +
-  geom_density() +
+           color = as_factor(income_group_pop), alpha=0.2)) +
+  geom_density(size=.75) +
   ggtitle("Distribution of MI when temp >= 34 MI > 6.75 (97.5th percentile) \n & < 20 (99.9th percentile)") +   
   facet_wrap( ~ year, nrow = 2) +
   theme_bw()
-ggplot(data = data_subset, 
+
+ggplot(data = data_subset %>% filter(visitors_percap >= 20), 
        aes(x = visitors_percap, group = as.factor(income_group_pop),
-           fill = as_factor(income_group_pop), alpha=0.2)) +
-  geom_density() +
-  ggtitle("Distribution of MI when temp >= 34") +   
+           color = as_factor(income_group_pop), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Distribution of MI when temp >= 34 MI >= 20 (99.9th percentile)") +   
   facet_wrap( ~ year, nrow = 2) +
+  theme_bw()
+
+ggplot(data = data_subset, 
+       aes(x = visitors_percap, group = as.factor(year),
+           color = as_factor(year), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Distribution of MI when temp >= 34") +  
+  geom_vline(xintercept = 4.5) +
+  geom_vline(xintercept = 6.75) + 
+  geom_vline(xintercept = 20) +
+  #facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 
 dev.off()
@@ -265,6 +278,20 @@ ggplot(data = temp_mobility_data_byday, aes(x=date, y = avg_visitors,
                                             group = as.factor(income_group_pop), 
                                             color = as.factor(income_group_pop))) +
   geom_smooth(alpha=0.2, position="identity", show.legend = FALSE) + 
+  theme_bw()
+
+dev.off()
+
+data_all_95 <- data_all %>% filter(visitors_percap <= 4.23)
+data_subset <- data_all_95 %>% group_by(income_group_pop, visitors_percap) %>%
+  summarise(percgroup = ntile(visitors_percap, 4)) %>% ungroup()
+pdf(paste0("./visuals/pub_figures/fig10_race", td, ".pdf"))
+ggplot(data = data_subset, aes(x=as.factor(percgroup), y = visitors_percap, 
+                                            group = as.factor(percgroup), 
+                                            color = as.factor(percgroup))) +
+  geom_boxplot(outlier.colour="black", outlier.shape=16,
+               outlier.size=2, notch=FALSE) + 
+  facet_wrap( ~ income_group_pop, nrow = 2) +
   theme_bw()
 
 dev.off()
