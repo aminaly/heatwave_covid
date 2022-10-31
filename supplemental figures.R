@@ -67,4 +67,57 @@ ggplot(data = racem_h, aes(x = variable, y = pop, group = variable))+
   facet_wrap( ~ income_group_pop) +
   theme(axis.text.x=element_text(angle=90,hjust=1))
 
+#### mobility by income group 2020 and 2021 ----
+temp_mobility_data_byday <- data %>% filter(year %in% c(2020, 2021)) %>%
+  group_by(date, income_group_pop, year, monthday) %>% 
+  summarize(avg_temp = mean(mean_high_c, na.rm = T), 
+            avg_visitors = mean(visitors_percap, na.rm = T))
+
+ggplot(data = temp_mobility_data_byday, aes(x=date, y = avg_visitors, 
+                                            group = as.factor(income_group_pop), 
+                                            color = as.factor(income_group_pop))) +
+  geom_smooth(alpha=0.2, position="identity", show.legend = FALSE) + 
+  theme_bw()
+
+#### mobility distribution by race ----
+
+data_all_95 <- data_all %>% filter(visitors_percap <= 4.23)
+data_subset <- data_all_95 %>% group_by(income_group_pop, visitors_percap) %>%
+  summarise(percgroup = ntile(visitors_percap, 4)) %>% ungroup()
+ggplot(data = data_subset, aes(x=as.factor(percgroup), y = visitors_percap, 
+                               group = as.factor(percgroup), 
+                               color = as.factor(percgroup))) +
+  geom_boxplot(outlier.colour="black", outlier.shape=16,
+               outlier.size=2, notch=FALSE) + 
+  facet_wrap( ~ income_group_pop, nrow = 2) +
+  theme_bw()
+
+#### distribution of MI values by income group 2021 - 2020 ----
+
+ggplot(data = cast_temp_income, aes(diff_cut, group = income_group_pop, fill = income_group_pop)) +
+  geom_bar(position = position_dodge()) + 
+  facet_wrap( ~ income_group_pop, nrow = 2) +
+  labs(x = "Diff in MI 2021-2020", y = "Number of Instances a CBG appears",
+       title = "frequency of 2021-2020 MI values \n at least one county has temp >= 34") +
+  theme(axis.text.x=element_text(angle=90,hjust=1))
+
+ggplot(data = cast_temp_income, aes(diff_cut, group = income_group_pop, fill = income_group_pop)) +
+  geom_bar(position=position_dodge()) + 
+  labs(x = "Diff in MI 2021-2020", y = "Number of Instances a CBG appears",
+       title = "frequency of 2021-2020 MI values \n at least one county has temp >= 34") +
+  theme_bw()
+
+dev.off()
+
+pdf(paste0("./visuals/pub_figures/sup2_", td, ".pdf"))
+
+ggplot(data = data %>% filter(year %in% c(2020, 2021)), 
+       aes(x = visitors_percap, group = as.factor(year),
+           color = as_factor(year), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Distribution of Mobility Index: All Days") +  
+  geom_vline(xintercept = 4.5) +
+  #facet_wrap( ~ year, nrow = 2) +
+  theme_bw()
+
 dev.off()

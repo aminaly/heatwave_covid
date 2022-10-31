@@ -23,8 +23,6 @@ data <- readRDS("./heatwaves_manual/data_with_demo_05_2022.RDS")
 cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp", stringsAsFactors = F) 
 td <- format(Sys.Date(), "%m_%d_%Y")
 
-data <- data %>% filter(!is.na(visitors_percap), !is.na(income_group_pop))
-data_all <- data
 ## add income 
 income <- unique(data %>% select(census_block_group, median_income, unweighted_pop))
 income <- income %>% arrange(median_income) %>% mutate(cum_population = cumsum(unweighted_pop)) %>% 
@@ -46,7 +44,7 @@ hotdays <- data %>% group_by(date) %>%
   summarize(max_temp = max(mean_high_c, na.rm = T)) %>% 
   filter(max_temp >= 34) %>% pull(date)
 
-temp_mobility_sum_hot <- data %>% filter(month %in% c(5,6,7,8,9) & date %in% hotdays) %>% 
+temp_mobility_sum_hot <- data %>% filter(date %in% hotdays) %>% 
   group_by(year, census_block_group) %>%
   summarize(visitors_percap = mean(visitors_percap, na.rm = T))
 temp_mobility_cbg <- merge(cbg, temp_mobility_sum, by = "census_block_group")
@@ -72,49 +70,49 @@ pdf(paste0("./visuals/pub_figures/fig1_", td, ".pdf"))
 #### Map of mobility difference between 2020 and 2021 ----
 ggplot(data = cast_temp) +
   ggtitle("Bay Area Summer Mobility Difference 2021 - 2020") +
-  geom_sf(data = cast_temp, size = 0.002, aes(fill = diff_cut)) +
+  geom_sf(data = cast_temp, size = 0.002, aes(fill = as.factor(diff_sign))) +
   scale_fill_brewer(palette = "RdBu", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
 ggplot(data = cast_temp_high) +
   ggtitle("Bay Area Summer Mobility Difference 2021 - 2020 \n temp >= 34 in at least one county") +
-  geom_sf(data = cast_temp_high, size = 0.002, aes(fill = diff_cut)) +
+  geom_sf(data = cast_temp_high, size = 0.002, aes(fill = as.factor(diff_sign))) +
   scale_fill_brewer(palette = "RdBu", direction = -1, na.value = "grey") +
   labs(colour="Mobility Metric") +
   theme_bw()
 
-### line plot of average visitors per cap each daily
-ggplot(data=data_nona, aes(x=date, y=visitors_percap, group=income_group)) +
-  geom_smooth(aes(group=income_group, color=as.factor(income_group))) +
-  ggtitle("Mobility Full Timeline") + ylab("# Visitors / Home Devices") + xlab("Date") +
-  scale_fill_gradient(low = "darkorange", high = "darkgreen") +
-  scale_x_date() +
-  theme(text = element_text(size = 15)) +
-  labs(colour="$$ Grp (5 High)") +
+ggplot(data = cast_temp) +
+  ggtitle("Bay Area Summer Mobility Difference 2021 - 2020") +
+  geom_sf(data = cast_temp, size = 0.002, aes(fill = as.factor(diff_cut))) +
+  scale_fill_brewer(palette = "RdBu", direction = -1, na.value = "grey") +
+  labs(colour="Mobility Metric") +
   theme_bw()
 
-
-dev.off()
+ggplot(data = cast_temp_high) +
+  ggtitle("Bay Area Summer Mobility Difference 2021 - 2020 \n temp >= 34 in at least one county") +
+  geom_sf(data = cast_temp_high, size = 0.002, aes(fill = as.factor(diff_cut))) +
+  scale_fill_brewer(palette = "RdBu", direction = -1, na.value = "grey") +
+  labs(colour="Mobility Metric") +
+  theme_bw()
 
 #### Temperatures ----
 
-pdf(paste0("./visuals/pub_figures/fig2_timelines_", td, ".pdf"), paper = "USr")
+### line  chart of temperatures 2020 - 2021
 
-### bar chart of temperatures 2020 - 2021
-data_all <- data
-data <- data %>% filter(!is.na(income_group_pop) & !is.na(maxdemo) & date %in% hotdays)
+data_sub <- data %>% filter(!is.na(income_group_pop) & !is.na(maxdemo) & date %in% hotdays)
 
-data_byday <- data %>% 
+data_byday <- data_sub %>% 
   filter(year %in% c(2020:2021)) %>%
   group_by(date) %>% 
   summarize(avg_temp = mean(mean_high_c, na.rm = T))
 
-data_byday_all <- data_all %>% 
+data_byday_all <- data %>% 
   filter(year %in% c(2020:2021)) %>%
   group_by(date, income_group_pop) %>% 
   summarize(avg_temp = mean(mean_high_c, na.rm = T),
-            avg_mobility = mean(visitors_percap, na.rm = T))
+            avg_mobility = mean(visitors_percap, na.rm = T)) %>% 
+  filter(!date %in% seq(as.Date("2021-10-28"), by = "day", length.out = 3))
 
 temp <- ggplot(data = data_byday_all, aes(x=date, y = avg_temp)) +
   geom_line(alpha=0.5, position="identity") + 
@@ -128,8 +126,6 @@ mobility <- ggplot(data = data_byday_all %>% filter(!is.na(income_group_pop)), a
   theme_bw()
 
 grid.arrange(temp, mobility, nrow = 2)
-
-dev.off()
 
 data_byday_income <- data %>% 
   filter(year %in% c(2020:2021)) %>%
@@ -226,7 +222,6 @@ data_cbg <- data %>%
 
 data_cbg <- merge(data_cbg, cbg, by = "census_block_group")
 
-
 ggplot(data = data_cbg, aes(geometry = geometry)) +
   ggtitle("Income Distribution") +
   geom_sf(data = data_cbg, size = 0.002, aes(fill = as.factor(income_group_pop))) +
@@ -248,7 +243,6 @@ cast_temp_income <-  left_join(cast_temp_high,
                                data %>% select(census_block_group, income_group_pop))
 cast_temp_income <- cast_temp_income %>% filter(!is.na(income_group_pop))
 
-
 pdf(paste0("./visuals/pub_figures/fig9_disof_2021-2020_", td, ".pdf"))
 
 ggplot(data = cast_temp_income, aes(diff_cut, group = income_group_pop, fill = income_group_pop)) +
@@ -263,6 +257,23 @@ ggplot(data = cast_temp_income, aes(diff_cut, group = income_group_pop, fill = i
   labs(x = "Diff in MI 2021-2020", y = "Number of Instances a CBG appears",
        title = "frequency of 2021-2020 MI values \n at least one county has temp >= 34") +
   theme_bw()
+
+dev.off()
+
+
+pdf(paste0("./visuals/pub_figures/supplemental3_", td, ".pdf"))
+
+days_above_34 <- data %>% filter(mean_high_c  >= 34 & year %in% c(2020,2021)) %>% 
+  count(census_block_group)
+days_above_34_cbg <- merge(cbg, days_above_34, by = "census_block_group")
+
+ggplot(data = days_above_34_cbg) +
+  ggtitle("Bay Area Number of Days at or Above 34°C") +
+  geom_sf(data = days_above_34_cbg, size = 0.002, aes(fill = n)) +
+  scale_fill_distiller(palette = "RdPu", direction = 1, na.value = "grey") +
+  labs(colour="Mobility Metric") +
+  theme_bw()
+
 
 dev.off()
 
