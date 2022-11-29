@@ -54,9 +54,9 @@ data <- data %>% filter(!(date %in% smoke_days)) %>%
 data <- data %>% filter(month %in% c(5:9))
 
 ## add in income
-income <- unique(data %>% select(census_block_group, median_income, unweighted_pop))
+income <- unique(data %>% dplyr::select(census_block_group, median_income, unweighted_pop))
 income <- income %>% arrange(median_income) %>% mutate(cum_population = cumsum(unweighted_pop)) %>% 
-  mutate(income_group_pop = ntile(median_income, 5)) %>% select(census_block_group, income_group_pop) %>% 
+  mutate(income_group_pop = ntile(median_income, 5)) %>% dplyr::select(census_block_group, income_group_pop) %>% 
   mutate(income_group_pop = as.factor(income_group_pop)) 
 data <- left_join(data, income, by = "census_block_group")
 data_all <- left_join(data_all, income, by = "census_block_group")
