@@ -1,0 +1,15 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Ly, 
+    given-names: Amina, 
+    orcid: https://orcid.org/0000-0001-6739-7565
+  - family-names: Davenport, 
+    given-names: Frances V., 
+    orcid: https://orcid.org/0000-0002-3061-2062
+  - family-names: Diffenbaugh, 
+    given-names: Noah S., 
+    orcid: https://orcid.org/0000-0002-8856-4964
+title: aminaly/heatwave_covid: v1.0
+version: v1.0
+date-released: 2022-12-13
