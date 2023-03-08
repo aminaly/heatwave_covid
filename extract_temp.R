@@ -16,7 +16,7 @@ args <- commandArgs(trailingOnly = TRUE)
 rep <- as.numeric(args[1])
 
 #get list of all precip data files
-gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*.nc", full.names = T)
+gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*rmax", full.names = T)
 
 #load in census tracts & select only those we want
 included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
@@ -25,7 +25,7 @@ block_group$fips <- paste0(block_group$STATEFP, block_group$COUNTYFP)
 block_group <- block_group %>% filter(fips %in% included_fips)
 st_crs(block_group) <- 4326 #currently NAD83, but virtually the same 
 
-file_name <- paste0("./heatwaves_manual/temps/bg/", rep, "_temperature_data.rds")
+file_name <- paste0("./heatwaves_manual/temps/bg/", rep, "_rh_data.rds")
 
 # Run through temperature brick and extract over the buffers
 all_data <- c()
