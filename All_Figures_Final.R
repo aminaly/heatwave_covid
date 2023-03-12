@@ -516,7 +516,7 @@ weekend <- ggplot(data = plot_data %>% filter(!grepl("weekend",grp)), aes(x = x,
   theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw() 
 
-grid.arrange(weekend, weekday, ncol = 2)
+grid.arrange(weekend, weekday, nrow = 2)
 #### Temperatures above 95th percentile (all, weekend v weekday interacted & subgrouped) ----
 min_num_cbg_over_95th <- length(unique(data$census_block_group)) * 0.05
 data_subgroup <- data %>% filter(n_over_their_95th >= min_num_cbg_over_95th)
@@ -663,7 +663,7 @@ weekend <- ggplot(data = plot_data %>% filter(!grepl("weekend",grp)), aes(x = x,
   theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw() 
 
-grid.arrange(weekend, weekday, ncol = 2)
+grid.arrange(weekend, weekday, nrow = 2)
 
 #### Top and bottom 5% of mobility vs middle 95% (interacted mi and year subgroups) ----
 ## mi group interacted
@@ -742,7 +742,7 @@ ggplot(data = as.data.frame(coef_quants),
        title = "Fixed Effects Slope for all CBGs May-Sept \n 
        felm(visitors_percap_cr ~ mean_high_c:as.factor(mi_group)
        | census_block_group + monthweekyr, data = data") +
-  facet_wrap( ~ year, ncol = 2) +
+  facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 
 #### Influence of Income (interacted and each year)----
@@ -908,9 +908,12 @@ ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
        x = "Temperature C", y = "3√(MI)") +
   theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw()
+
 #### MI v Temp + Precip (SUMMARY ONLY) ----
 m <- felm(visitors_percap_cr ~ mean_high_c + precip  | census_block_group + monthweekyr, data = data)
-txt <- paste("Adding in precip mean_high_c + precip \n", summary(m))
+txt <- paste("Adding in precip mean_high_c + precip \n", m$coefficients, "\n", 
+             summary(m)$r2, "\n",
+             summary(m)$P.r.squared)
 plot.new()
 text(.5, .5, txt, font=2, cex=1.5)
 #### MI v Wetbulb ----
@@ -1010,7 +1013,6 @@ ggplot(data = r2, aes(x=date, y = value, color = name)) +
   geom_boxplot() + 
   geom_vline(xintercept = xints, color = "tomato") +
   labs(x = "Date", y = "Average Temperature") +
-  #facet_wrap( ~ name, nrow = 2) +
   theme_bw()
 
 dev.off()
