@@ -400,7 +400,7 @@ m2 <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, da
 ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
   geom_line(aes(color = grp)) + 
   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
-  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c | \n
   census_block_group + monthweek) \n",
                      "2020 r2:", round(summary(m1)$r2adj, 4), 
                      "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
@@ -493,7 +493,7 @@ m2 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + month
 weekday <- ggplot(data = plot_data %>% filter(!grepl("weekday",grp)), aes(x = x, y = y, group = grp))+
   geom_line(aes(color = grp)) + 
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
-  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:weekday | \n
   census_block_group + monthweek) \n",
                      "2020 r2:", round(summary(m1)$r2adj, 4), 
                      "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
@@ -506,7 +506,7 @@ weekday <- ggplot(data = plot_data %>% filter(!grepl("weekday",grp)), aes(x = x,
 weekend <- ggplot(data = plot_data %>% filter(!grepl("weekend",grp)), aes(x = x, y = y, group = grp))+
   geom_line(aes(color = grp)) + 
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
-  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:weekday | \n
   census_block_group + monthweek) \n",
                      "2020 r2:", round(summary(m1)$r2adj, 4), 
                      "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
@@ -516,7 +516,7 @@ weekend <- ggplot(data = plot_data %>% filter(!grepl("weekend",grp)), aes(x = x,
   theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw() 
 
-grid.arrange(weekend, weekday, nrow = 2)
+grid.arrange(weekend, weekday, ncol = 2)
 #### Temperatures above 95th percentile (all, weekend v weekday interacted & subgrouped) ----
 min_num_cbg_over_95th <- length(unique(data$census_block_group)) * 0.05
 data_subgroup <- data %>% filter(n_over_their_95th >= min_num_cbg_over_95th)
@@ -639,7 +639,7 @@ m2 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + month
 weekday <- ggplot(data = plot_data %>% filter(!grepl("weekday",grp)), aes(x = x, y = y, group = grp))+
   geom_line(aes(color = grp)) + 
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
-  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:weekday | \n
   census_block_group + monthweek) \n",
                      "2020 r2:", round(summary(m1)$r2adj, 4), 
                      "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
@@ -653,7 +653,7 @@ weekend <- ggplot(data = plot_data %>% filter(!grepl("weekend",grp)), aes(x = x,
   geom_line(aes(color = grp)) + 
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
   labs(title = paste("Temperature above 95th percentile \n
-  felm(visitors_percap_cr ~ mean_high_c:year | \n
+  felm(visitors_percap_cr ~ mean_high_c:weekday | \n
   census_block_group + monthweek) \n",
                      "2020 r2:", round(summary(m1)$r2adj, 4), 
                      "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
@@ -848,7 +848,7 @@ m <- felm(visitors_percap_cr ~ z_score_high:year | census_block_group + monthwee
 ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
   geom_line(aes(color = grp)) + 
   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
-  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  labs(title = paste("felm(visitors_percap_cr ~ z_score_high:year | \n
   census_block_group + monthweek) \n",
                      "r2:", round(summary(m)$r2adj, 3),
                      "proj r2:", round(summary(m)$P.r.squared),3), 
@@ -899,7 +899,7 @@ m2 <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, d
 ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
   geom_line(aes(color = grp)) + 
   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
-  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  labs(title = paste("felm(visitors_percap_cr ~ z_score_high:year | \n
   census_block_group + monthweek) \n",
                      "2020 r2:", round(summary(m1)$r2adj, 4), 
                      "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
