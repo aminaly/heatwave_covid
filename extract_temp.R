@@ -16,7 +16,7 @@ args <- commandArgs(trailingOnly = TRUE)
 rep <- as.numeric(args[1])
 
 #get list of all precip data files
-gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*rmax", full.names = T)
+gridMET_files <- list.files("heatwaves_manual/gridMET", pattern = "*pr", full.names = T)
 
 #load in census tracts & select only those we want
 included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
@@ -25,7 +25,7 @@ block_group$fips <- paste0(block_group$STATEFP, block_group$COUNTYFP)
 block_group <- block_group %>% filter(fips %in% included_fips)
 st_crs(block_group) <- 4326 #currently NAD83, but virtually the same 
 
-file_name <- paste0("./heatwaves_manual/temps/bg/", rep, "_rh_data.rds")
+file_name <- paste0("./heatwaves_manual/temps/bg/", rep + 2019, "_pr_data.rds")
 
 # Run through temperature brick and extract over the buffers
 all_data <- c()
@@ -36,27 +36,22 @@ print(i)
 file <- stack(i)
 crs(file) <- CRS("+init=epsg:4326")
 print("I got here")
- 
-for(j in 1:length(names(file))) {
-  temp <- c()
-  nms <- as.numeric(substring(as.character(names(file[[j]])),2))
-  temp$date <- rep(as.Date(nms, origin= "1900-01-01"), nrow(block_group))
-  temp <- as.data.frame(temp)
-  temp$county <- block_group$COUNTYFP
-  temp$census_block_group <- block_group$GEOID
-  temp$fips <- block_group$fips
-  temp$measure <- rep(substring(i, 26, 29), nrow(block_group))
-  temp$year <- year(temp$date)
-  
-  
-  extracted_vals <-  exact_extract(file[[j]], block_group)
 
-  temp$mean_measure <- lapply(extracted_vals, function(x){mean(as.numeric(x$value), na.rm = T)}) %>% unlist()  
-  temp$max_measure <- lapply(extracted_vals, function(x){max(as.numeric(x$value), na.rm = T)}) %>% unlist()
-  
-  all_data <- bind_rows(all_data, temp)
-  
+ev <- exact_extract(file, block_group, c("mean"))
+
+nms <- as.numeric(substring(as.character(names(file)),2))
+days <- as.Date(nms, origin= "1900-01-01")
+all_data <- c()
+
+for(d in 1:length(days)) {
+  day <- days[d]
+  temp <- block_group %>% dplyr::select(COUNTYFP, GEOID, fips) %>% 
+    mutate(date = day, measure = substring(i, 26, 29), year = year(day))
+  temp <- cbind(temp, rh = ev[[d]])
+  all_data <- rbind(all_data, temp)
+  print(day)
 }
+ 
   
 #save this out to make my life easier
 saveRDS(all_data, file_name)

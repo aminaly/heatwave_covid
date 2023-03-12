@@ -21,17 +21,23 @@ library(quantreg)
 library(jtools)
 library(sf)
 library(gridExtra)
+library(HeatStress)
+library(sjPlot)
+library(sjmisc)
  
 ## global vars
 included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
 quantiles <- c(.025, .5, .975)
 ys <- c(2020, 2021)
+td <- format(Sys.Date(), "%m_%d_%Y")
+bootstrap_quantiles <- c(.025, .5, .975)
 
 ## read in data 
 data_all <- readRDS("./heatwaves_manual/data_with_demo_05_2022.RDS")
 data <- data_all #copy of data to be filtered/edited
 cbg <- st_read("./heatwaves_manual/shapefiles/cb_2019_us_bg_500k/cb_2019_us_bg_500k.shp", stringsAsFactors = F) 
-td <- format(Sys.Date(), "%m_%d_%Y")
+precip <- readRDS("./heatwaves_manual/precip20_21.rds")
+rh <- readRDS("./heatwaves_manual/rh20_21.rds")
 
 #### data cleaning ----
 
@@ -40,7 +46,7 @@ data <- data %>% mutate(visitors_percap_cr =  sign(visitors_percap) * (abs(visit
   mutate(visitors_percap_log = log(visitors_percap + 1.00001))
 
 ## remove smoke days
-smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-24"), by = 1),
+smoke_days <- c(seq(as.Date("2020-08-19"), as.Date("2020-08-25"), by = 1),
                 seq(as.Date("2020-09-10"), as.Date("2020-09-14"), by = 1),
                 as.Date("2020-08-31", format = "%Y-%m-%d"))
 
@@ -75,12 +81,13 @@ data <- data %>% mutate(n = ifelse(is.na(n), 0, n)) %>% rename(n_over_total = n)
 m <- data %>% group_by(census_block_group) %>% 
   summarize(median_mi = median(visitors_percap, na.rm = T)) %>% 
   mutate(mi_group = cut(median_mi, 
-                        breaks = c(-Inf, quantile(median_mi, c(.25, .5, .75)), Inf), 
+                        breaks = c(-Inf, quantile(median_mi, c(.05, .95)), Inf), 
                         labels = F))
 data <- left_join(data, m, by = "census_block_group")
-
+data <- data %>% mutate(mi_group = as.factor(mi_group))
+  
 ## create combined categorical variable
-data <- data %>% unite(mi_income_groups, c("mi_group", "income_group_pop"))
+data <- data %>% unite(mi_income_groups, c("mi_group", "income_group_pop"), remove = F)
 
 ## mark days where one or more county is >34 and separate TODO: DELETE if not using
 hotdays <- data %>% group_by(date) %>% 
@@ -93,6 +100,14 @@ data <- data %>% mutate(STATEFP = substr(census_block_group, 1, 2), COUNTYFP = s
                         TRACTCE = substr(census_block_group, 1, 11))
 cbg$census_block_group <- paste0(cbg$STATEFP, cbg$COUNTYFP, cbg$TRACTCE, cbg$BLKGRPCE)
 cbg <- cbg %>% filter(census_block_group %in% data$census_block_group)
+
+
+## add in precip and wet bulb
+data <- left_join(data, precip %>% select(date, census_block_group = GEOID, precip), by = c("date", "census_block_group"))
+data <- left_join(data, rh %>% select(date, census_block_group = GEOID, rh), by = c("date", "census_block_group"))
+
+## add in note of weekend or weekday
+data <- data %>% mutate(weekday = ifelse(wday(date) %in% c(2:6), T, F))
 
 ## create map data
 map_data <- data %>% group_by(year, census_block_group) %>%
@@ -182,9 +197,15 @@ temp <- ggplot(data = data_all, aes(x=date, y = avg_temp)) +
   labs(x = "Date", y = "Average Daily Temperature") +
   theme_bw()
 
+imp_dates <- c(as.Date("2020-03-17"), as.Date("2020-03-22"), # initial restrictions
+               as.Date("2020-05-18"), as.Date("2020-05-20"), # phase 2 (lifts blanket orders)
+               as.Date("2020-06-19"), # beginning of reopening phases
+               as.Date("2020-12-18"), #vaccine introduction
+               as.Date("2021-04-15"), #16 and up eligible for vaccine in CA. Most places open with masking/vaccine restrictions
+               as.Date("2021-06-15")) #CA officially reopens
 mobility <- ggplot(data = data_all %>% filter(!is.na(income_group_pop)), aes(x=date, y = avg_mobility, group = income_group_pop)) +
   geom_smooth(aes(group=income_group_pop, color=as.factor(income_group_pop))) +
-  geom_vline(xintercept = as.Date("2020-03-17"), color = "tomato") +
+  geom_vline(xintercept = imp_dates, color = "tomato") +
   labs(x = "Date", y = "Average Mobility", color = "Income Group") +
   theme_bw()
 
@@ -229,8 +250,24 @@ ggplot(data = data %>% filter(visitors_percap <= 24.2),
        aes(x = visitors_percap, group = as.factor(income_group_pop),
            color = as_factor(income_group_pop), alpha=0.2)) +
   geom_density(size=.75) +
-  geom_vline(xintercept = c(4.4, 6.3)) +
-  ggtitle("Distribution of MI <= 24.2 (99.9th percentile)") +   
+  geom_vline(xintercept = c(-0.3, 4.4)) +
+  ggtitle("Distribution of MI <= 24.2 (99.9th)") +   
+  facet_wrap( ~ year, nrow = 2) +
+  theme_bw()
+
+ggplot(data = data %>% filter(visitors_percap < -0.3), 
+       aes(x = visitors_percap, group = as.factor(income_group_pop),
+           color = as_factor(income_group_pop), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Distribution of MI < -0.3 (5th)") +   
+  facet_wrap( ~ year, nrow = 2) +
+  theme_bw()
+
+ggplot(data = data %>% filter(visitors_percap > -0.3 & visitors_percap < 4.4), 
+       aes(x = visitors_percap, group = as.factor(income_group_pop),
+           color = as_factor(income_group_pop), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Distribution of -0.3 < MI < 4.4 (5th-95th)") +   
   facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 
@@ -242,54 +279,746 @@ ggplot(data = data %>% filter(visitors_percap > 4.4 & visitors_percap < 24.2),
   facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 
-ggplot(data = data %>% filter(visitors_percap > 6.3 & visitors_percap < 24.2), 
-       aes(x = visitors_percap, group = as.factor(income_group_pop),
-           color = as_factor(income_group_pop), alpha=0.2)) +
-  geom_density(size=.75) +
-  ggtitle("Distribution of MI > 6.3 (97.5th percentile) \n & < 24.2 (99.9th percentile)") +   
-  facet_wrap( ~ year, nrow = 2) +
+
+
+#### Fixed Effects MI v Temp (All, Year Interacted, subGroup) ----
+## all
+coefs_orig <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = ds_all)
+  coefs_orig <- cbind(m$coefficients, coefs_orig)
+}
+
+## plot
+coefs_orig <- quantile(coefs_orig, bootstrap_quantiles)
+plot_data <- as.data.frame(x = 0:45)
+colnames(plot_data) <- c("x")
+
+plot_data <- plot_data %>% mutate(y = x * coefs_orig[2], upper = x * coefs_orig[3], lower = x * coefs_orig[1])
+plot_data <- plot_data %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+
+m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
+ggplot(data = plot_data, aes(x, y))+
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
+  geom_line(data = plot_data, aes(x, y))+ 
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c | 
+       census_block_group + monthweekyr, data = data) 
+       \n", "r2:", round(summary(m)$r2adj, 4),
+                     "proj r2:", round(summary(m)$P.r.squared), 4), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw()
 
-ggplot(data = data %>% filter(visitors_percap >= 24.2), 
-       aes(x = visitors_percap, group = as.factor(income_group_pop),
-           color = as_factor(income_group_pop), alpha=0.2)) +
-  geom_density(size=.75) +
-  ggtitle("Distribution of MI >= 24.2 (99.9th percentile)") +   
-  facet_wrap( ~ year, nrow = 2) +
+## year interacted
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c:year | census_block_group + monthweek, data = ds_all)
+  coefs <- cbind(m$coefficients, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m <- felm(visitors_percap_cr ~ mean_high_c:year | census_block_group + monthweek, data = data)
+ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+      "r2:", round(summary(m)$r2adj, 3),
+      "proj r2:", round(summary(m)$P.r.squared),3), 
+      x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
   theme_bw()
 
-#### suplemental distribution ----
-ggplot(data = data, 
-       aes(x = visitors_percap, group = as.factor(year),
-           color = as_factor(year), alpha=0.2)) +
+## years separated
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f & year == 2020)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+    
+    ds <- data %>% filter(fips == f & year == 2021)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m1 <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = ds_all %>% filter(year ==2020))
+  m2 <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
+  c <- rbind(m1$coefficients, m2$coefficients)
+  rownames(c) <- c("yr2020", "yr2021")
+  coefs <- cbind(c, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+coefs_orig_yr <- cbind(t(coefs), group = rep(4, 2), year = c(2020, 2021))
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m1 <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2020))
+m2 <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2021))
+
+ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+                     "2020 r2:", round(summary(m1)$r2adj, 4), 
+                     "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
+                     "2021 r2:", round(summary(m2)$r2adj, 4), 
+                     "proj r2:", round(summary(m2)$P.r.squared, 4)), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+#### Weekend vs Weekday ----
+## weekend/day interacted
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweekyr, data = ds_all)
+  coefs <- cbind(m$coefficients, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweekyr, data = data)
+ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:weekday | \n
+  census_block_group + monthweekyr) \n",
+                     "r2:", round(summary(m)$r2adj, 3),
+                     "proj r2:", round(summary(m)$P.r.squared),3), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+## years separated weekday/end interacted
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f & year == 2020)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+    
+    ds <- data %>% filter(fips == f & year == 2021)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m1 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = ds_all %>% filter(year ==2020))
+  m2 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
+  c <- rbind(m1$coefficients, m2$coefficients)
+  rownames(c) <- c("weekendyr2020", "weekdayyr2020", "weekendyr2021", "weekdayyr2021")
+  coefs <- cbind(c, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m1 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = data %>% filter(year == 2020))
+m2 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = data %>% filter(year == 2021))
+
+weekday <- ggplot(data = plot_data %>% filter(!grepl("weekday",grp)), aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+                     "2020 r2:", round(summary(m1)$r2adj, 4), 
+                     "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
+                     "2021 r2:", round(summary(m2)$r2adj, 4), 
+                     "proj r2:", round(summary(m2)$P.r.squared, 4)), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+weekend <- ggplot(data = plot_data %>% filter(!grepl("weekend",grp)), aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+                     "2020 r2:", round(summary(m1)$r2adj, 4), 
+                     "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
+                     "2021 r2:", round(summary(m2)$r2adj, 4), 
+                     "proj r2:", round(summary(m2)$P.r.squared, 4)), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw() 
+
+grid.arrange(weekend, weekday, nrow = 2)
+#### Temperatures above 95th percentile (all, weekend v weekday interacted & subgrouped) ----
+min_num_cbg_over_95th <- length(unique(data$census_block_group)) * 0.05
+data_subgroup <- data %>% filter(n_over_their_95th >= min_num_cbg_over_95th)
+
+## all
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data_subgroup %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = ds_all)
+  coefs <- cbind(m$coefficients, coefs)
+}
+
+## plot
+coefs <- quantile(coefs, bootstrap_quantiles)
+plot_data <- as.data.frame(x = 0:45)
+colnames(plot_data) <- c("x")
+
+plot_data <- plot_data %>% mutate(y = x * coefs[2], upper = x * coefs[3], lower = x * coefs[1])
+plot_data <- plot_data %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+
+m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data_subgroup)
+ggplot(data = plot_data, aes(x, y))+
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
+  geom_line(data = plot_data, aes(x, y))+ 
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c | 
+       census_block_group + monthweekyr, data = data) 
+       \n", "r2:", round(summary(m)$r2adj, 4),
+                     "proj r2:", round(summary(m)$P.r.squared), 4), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+## weekend/day interacted
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data_subgroup %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweekyr, data = ds_all)
+  coefs <- cbind(m$coefficients, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweekyr, data = data_subgroup)
+ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("Temps over 95th percentile \n 
+  felm(visitors_percap_cr ~ mean_high_c:weekday | \n
+  census_block_group + monthweekyr) \n",
+                     "r2:", round(summary(m)$r2adj, 3),
+                     "proj r2:", round(summary(m)$P.r.squared),3), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+## years separated weekday/end interacted
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data_subgroup %>% filter(fips == f & year == 2020)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+    
+    ds <- data_subgroup %>% filter(fips == f & year == 2021)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m1 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = ds_all %>% filter(year ==2020))
+  m2 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
+  c <- rbind(m1$coefficients, m2$coefficients)
+  rownames(c) <- c("weekendyr2020", "weekdayyr2020", "weekendyr2021", "weekdayyr2021")
+  coefs <- cbind(c, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m1 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = data_subgroup %>% filter(year == 2020))
+m2 <- felm(visitors_percap_cr ~ mean_high_c:weekday | census_block_group + monthweek, data = data_subgroup %>% filter(year == 2021))
+
+weekday <- ggplot(data = plot_data %>% filter(!grepl("weekday",grp)), aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+                     "2020 r2:", round(summary(m1)$r2adj, 4), 
+                     "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
+                     "2021 r2:", round(summary(m2)$r2adj, 4), 
+                     "proj r2:", round(summary(m2)$P.r.squared, 4)), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+weekend <- ggplot(data = plot_data %>% filter(!grepl("weekend",grp)), aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("Temperature above 95th percentile \n
+  felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+                     "2020 r2:", round(summary(m1)$r2adj, 4), 
+                     "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
+                     "2021 r2:", round(summary(m2)$r2adj, 4), 
+                     "proj r2:", round(summary(m2)$P.r.squared, 4)), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw() 
+
+grid.arrange(weekend, weekday, ncol = 2)
+
+#### Top and bottom 5% of mobility vs middle 95% (interacted mi and year subgroups) ----
+## mi group interacted
+m_inter <- felm(visitors_percap_cr ~ mean_high_c:as.factor(mi_group) | census_block_group + monthweekyr, data = data)
+
+coefs_interacted <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c:as.factor(mi_group) | census_block_group + monthweekyr, data = ds_all)
+  coefs_interacted <- cbind(m$coefficients, coefs_interacted)
+}
+
+coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
+coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
+colnames(coef_quants) <- c("low", "mid", "high", "group")
+coef_quants <- rbind(coef_quants, c(coefs_orig, 4))
+
+ggplot(data = as.data.frame(coef_quants), 
+       aes(x = group, y = mid, ymin = low, ymax = high)) +
+  geom_point(position = position_dodge2(1)) +
+  geom_errorbar(width = 1, position = position_dodge2(1)) + 
+  geom_hline(yintercept=coef_quants[4,2],  linetype="dashed", 
+             color = "red", size=.5) +
+  geom_vline(xintercept = 3.5, color = "red") +
+  labs(x = "MI Group", y = "Change in 3√MI per degree increase C",
+       title = paste0("Fixed Effects Slope for all CBGs May-Sept \n",
+                      "r2:", round(summary(m)$r2adj, 3),
+                      "proj r2:", round(summary(m)$P.r.squared,3), 
+                      "felm(visitors_percap_cr ~ mean_high_c:as.factor(mi_group)
+       | census_block_group + monthweekyr, data = data")) +
+  theme_bw()
+
+## mi_group interacted split years
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f & year == 2020)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+    
+    ds <- data %>% filter(fips == f & year == 2021)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m1 <- felm(visitors_percap_cr ~ mean_high_c:mi_group | census_block_group + monthweek, data = ds_all %>% filter(year ==2020))
+  m2 <- felm(visitors_percap_cr ~ mean_high_c:mi_group | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
+  c <- rbind(m1$coefficients, m2$coefficients)
+  rownames(c) <- c("1_2020", "2_2020", "3_2020", "1_2021", "2_2021", "3_2021")
+  coefs <- cbind(c, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+plot_data <- c()
+
+coef_quants <- cbind(t(as.data.frame(coefs)), c(1:3), c(rep(2020, 3), rep(2021, 3)))
+coef_quants <- rbind(coef_quants, coefs_orig_yr)
+colnames(coef_quants) <- c("low", "mid", "high", "group", "year")
+
+ggplot(data = as.data.frame(coef_quants), 
+       aes(x = group, y = mid, ymin = low, ymax = high)) +
+  geom_point(position = position_dodge2(1)) +
+  geom_errorbar(width = 1, position = position_dodge2(1)) + 
+  geom_vline(xintercept = 3.5, color = "red") +
+  labs(x = "MI Group", y = "Change in 3√MI per degree increase C",
+       title = "Fixed Effects Slope for all CBGs May-Sept \n 
+       felm(visitors_percap_cr ~ mean_high_c:as.factor(mi_group)
+       | census_block_group + monthweekyr, data = data") +
+  facet_wrap( ~ year, ncol = 2) +
+  theme_bw()
+
+#### Influence of Income (interacted and each year)----
+m_inter <- felm(visitors_percap_cr ~ mean_high_c:as.factor(income_group_pop) | census_block_group + monthweekyr, data = data)
+
+coefs_interacted <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c:as.factor(income_group_pop) | census_block_group + monthweekyr, data = ds_all)
+  coefs_interacted <- cbind(m$coefficients, coefs_interacted)
+}
+
+coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
+coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
+colnames(coef_quants) <- c("low", "mid", "high", "group")
+coef_quants <- rbind(coef_quants, c(coefs_orig, 6))
+
+ggplot(data = as.data.frame(coef_quants), 
+       aes(x = group, y = mid, ymin = low, ymax = high)) +
+  geom_point(position = position_dodge2(1)) +
+  geom_errorbar(width = 1, position = position_dodge2(1)) + 
+  geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
+             color = "red", size=.5) +
+  geom_vline(xintercept = 5.5, color = "red") +
+  labs(x = "Income Group", y = "Change in 3√MI per degree increase C",
+       title = "Fixed Effects Slope for all CBGs May-Sept \n 
+       felm(visitors_percap_cr ~ mean_high_c:as.factor(income_group_pop)
+       | census_block_group + monthweekyr, data = data") +
+  theme_bw()
+
+#### FE MI v Temp Zscore ----
+## all
+coefs_orig <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = ds_all)
+  coefs_orig <- cbind(m$coefficients, coefs_orig)
+}
+
+## plot
+coefs_orig <- quantile(coefs_orig, bootstrap_quantiles)
+plot_data <- as.data.frame(x = 0:45)
+colnames(plot_data) <- c("x")
+
+plot_data <- plot_data %>% mutate(y = x * coefs_orig[2], upper = x * coefs_orig[3], lower = x * coefs_orig[1])
+plot_data <- plot_data %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+
+m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = data)
+ggplot(data = plot_data, aes(x, y))+
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
+  geom_line(data = plot_data, aes(x, y))+ 
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c | 
+       census_block_group + monthweekyr, data = data) 
+       \n", "r2:", round(summary(m)$r2adj, 4),
+                     "proj r2:", round(summary(m)$P.r.squared), 4), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+## year interacted
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ z_score_high:year | census_block_group + monthweek, data = ds_all)
+  coefs <- cbind(m$coefficients, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m <- felm(visitors_percap_cr ~ z_score_high:year | census_block_group + monthweek, data = data)
+ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+                     "r2:", round(summary(m)$r2adj, 3),
+                     "proj r2:", round(summary(m)$P.r.squared),3), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+
+## years separated
+coefs <- c()
+for(i in 1:5) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f & year == 2020)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+    
+    ds <- data %>% filter(fips == f & year == 2021)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m1 <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = ds_all %>% filter(year ==2020))
+  m2 <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
+  c <- rbind(m1$coefficients, m2$coefficients)
+  rownames(c) <- c("yr2020", "yr2021")
+  coefs <- cbind(c, coefs)
+}
+
+coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
+coefs_orig_yr <- cbind(t(coefs), group = rep(4, 2), year = c(2020, 2021))
+plot_data <- c()
+
+for(int in 1:ncol(coefs)) {
+  pd <- as.data.frame(x = 0:45)
+  colnames(pd) <- c("x") 
+  intvar <- colnames(coefs)[int]
+  pd$grp <- intvar
+  pd <- pd %>% mutate(y = x * coefs[2, int], upper = x * coefs[3, int], lower = x * coefs[1, int])
+  pd <- pd %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+  plot_data <- rbind(plot_data, pd)
+}
+
+m1 <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = data %>% filter(year == 2020))
+m2 <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = data %>% filter(year == 2021))
+
+ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
+  geom_line(aes(color = grp)) + 
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper, fill = grp), linetype=2, alpha = 0.25) +
+  labs(title = paste("felm(visitors_percap_cr ~ mean_high_c:year | \n
+  census_block_group + monthweek) \n",
+                     "2020 r2:", round(summary(m1)$r2adj, 4), 
+                     "proj r2:", round(summary(m1)$P.r.squared,4), "\n",
+                     "2021 r2:", round(summary(m2)$r2adj, 4), 
+                     "proj r2:", round(summary(m2)$P.r.squared, 4)), 
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  theme_bw()
+#### MI v Temp + Precip (SUMMARY ONLY) ----
+m <- felm(visitors_percap_cr ~ mean_high_c + precip  | census_block_group + monthweekyr, data = data)
+txt <- paste("Adding in precip mean_high_c + precip \n", summary(m))
+plot.new()
+text(.5, .5, txt, font=2, cex=1.5)
+#### MI v Wetbulb ----
+data <- data %>% mutate(wb_temp = swbgt(mean_high_c, rh))
+m <- felm(visitors_percap_cr ~ wb_temp  | census_block_group + monthweekyr, data = data)
+txt <- paste("mi vs wb_temp \n", summary(m))
+plot.new()
+text(.5, .5, txt, font=2, cex=1.5)
+
+#### supplemental distribution ----
+orig <- ggplot(data = data, 
+               aes(x = visitors_percap, group = as.factor(year),
+                   color = as_factor(year), alpha=0.2)) +
   geom_density(size=.75) +
   ggtitle("Full Distribution of MI") +  
+  geom_vline(xintercept = quantile(data$visitors_percap, .05)) +
   geom_vline(xintercept = quantile(data$visitors_percap, .95)) +
-  geom_vline(xintercept = quantile(data$visitors_percap, .999)) +
-  #facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 
-ggplot(data = data, 
-       aes(x = visitors_percap_log, group = as.factor(year),
-           color = as_factor(year), alpha=0.2)) +
+orig95 <- ggplot(data = data %>% filter(visitors_percap > quantile(visitors_percap, 0.05) &
+                                          visitors_percap < quantile(visitors_percap, 0.95)), 
+                 aes(x = visitors_percap, group = as.factor(year),
+                     color = as_factor(year), alpha=0.2)) +
   geom_density(size=.75) +
   ggtitle("Full Distribution of MI") +  
-  geom_vline(xintercept = quantile(data$visitors_percap_log, .95)) +
-  geom_vline(xintercept = quantile(data$visitors_percap_log, .999)) +
-  #facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 
-ggplot(data = data, 
-       aes(x = visitors_percap_cr, group = as.factor(year),
-           color = as_factor(year), alpha=0.2)) +
+cube <- ggplot(data = data, 
+               aes(x = visitors_percap_cr, group = as.factor(year),
+                   color = as_factor(year), alpha=0.2)) +
   geom_density(size=.75) +
   ggtitle("Full Distribution of MI") +  
-  geom_vline(xintercept = quantile(data$visitors_percap_cr, .95)) +
-  geom_vline(xintercept = quantile(data$visitors_percap_cr, .999)) +
-  #facet_wrap( ~ year, nrow = 2) +
   theme_bw()
 
-#### quantiles ----
+cube95 <- ggplot(data = data %>% filter(visitors_percap_cr > quantile(visitors_percap_cr, 0.05) &
+                                          visitors_percap_cr < quantile(visitors_percap_cr, 0.95)), 
+                 aes(x = visitors_percap_cr, group = as.factor(year),
+                     color = as_factor(year), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Full Distribution of MI") +  
+  theme_bw()
+
+lg <- ggplot(data = data, 
+             aes(x = visitors_percap_log, group = as.factor(year),
+                 color = as_factor(year), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Full Distribution of MI") +  
+  theme_bw()
+
+lg95 <- ggplot(data = data %>% filter(visitors_percap_log > quantile(visitors_percap_log, 0.05) &
+                                        visitors_percap_log < quantile(visitors_percap_log, 0.95)), 
+               aes(x = visitors_percap_log, group = as.factor(year),
+                   color = as_factor(year), alpha=0.2)) +
+  geom_density(size=.75) +
+  ggtitle("Full Distribution of MI") +  
+  theme_bw()
+
+grid.arrange(temp, mobility, nrow = 2)
+
+#### figures for precipitation & web bulb ----
+
+## precipitation timeline
+p <- precip %>% group_by(date, fips) %>% summarize(precip_mm_mean = mean(precip, na.rm = T),
+                                                   precip_mm_total = sum(precip, na.rm = T)) %>%
+  mutate(fips = as.factor(fips))
+
+average <- ggplot(p, aes(x = date, y = precip_mm_mean, color = fips)) + 
+  geom_line() +
+  geom_vline(xintercept = xints, color = "tomato") +
+  labs(x = "Date", y = "Average Daily Precipitation (mm)",
+       title = "Average Precipitation Trend SF Bay Area ") + 
+  theme_bw()
+
+
+total <- ggplot(p, aes(x = date, y = precip_mm_total, color = fips)) + 
+  geom_line() +
+  geom_vline(xintercept = xints, color = "tomato") +
+  labs(x = "Date", y = "Total Precipitation (mm)",
+       title = "Total Precipitation Trend SF Bay Area ") + 
+  theme_bw()
+
+grid.arrange(average, total, nrow = 2)
+
+## wetbulb temp vs regular temp
+d <- left_join(data_all, rh %>% select(date, census_block_group = GEOID, rh), by = c("date", "census_block_group"))
+r <- d %>% mutate(wb_temp = swbgt(mean_high_c, rh)) %>% filter(year %in% c(2020, 2021))
+
+r <- r %>% group_by(date, year) %>% 
+  summarise(temp = mean(mean_high_c, na.rm = T),
+            wb_temp = mean(wb_temp, na.rm = T)) %>% 
+  filter(!date %in% seq(as.Date("2021-10-28"), by = "day", length.out = 3))
+
+# timeline of wetbulb temperature and regular overlain
+r2 <- rbind(r %>% mutate(name = "temp") %>% select(date, value=temp, name, year), 
+            r %>% mutate(name = "wb_temp") %>% select(date, value = wb_temp, name, year))
+ggplot(data = r2, aes(x=date, y = value, color = name)) +
+  geom_boxplot() + 
+  geom_vline(xintercept = xints, color = "tomato") +
+  labs(x = "Date", y = "Average Temperature") +
+  #facet_wrap( ~ name, nrow = 2) +
+  theme_bw()
+
+#### BREAK 3/11 ----
+#### Supplemental ----
+
+pdf(paste0("./visuals/pub_figures/viewsupp_", td, ".pdf"))
+
+#### quantile regression ----
 quantiles <- c(.25, .5, .75, .95)
 
 results <- c()
@@ -328,86 +1057,6 @@ ggplot(data = results,
   labs(x = "Income Group", y = "Change in MI per degree increase",
        title = "Quantile Regression Slope for all CBGs by Year") +
   theme_bw()
-
-#### Fixed Effects MI v Temp ----
-m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
-quantiles <- c(.025, .5, .975)
-## bootstrap coefficients (resample within each county)
-coefs <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = ds_all)
-  coefs <- cbind(m$coefficients, coefs)
-}
-
-## plot
-coefs <- quantile(coefs, quantiles)
-plot_data <- as.data.frame(x = 0:45)
-colnames(plot_data) <- c("x")
-
-y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=24]
-
-upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=24]
-
-lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=24]
-
-ggplot(data = plot_data, aes(x, y))+
-  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
-  geom_line(data = plot_data, aes(x, y))+ 
-  labs(title = "felm(visitors_percap_cr ~ mean_high_c | 
-       census_block_group + monthweekyr, data = data) 
-       \n May-Sept", x = "Temperature C", y = "3√(MI)") +
-  theme(axis.text.x = element_text(angle = 90)) + 
-  theme_bw()
-
-#### MI v Temp : Income----
-m_inter <- felm(visitors_percap_cr ~ mean_high_c:as.factor(income_group_pop) | census_block_group + monthweekyr, data = data)
-
-coefs_interacted <- c()
-for(i in 1:1000) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ mean_high_c:as.factor(income_group_pop) | census_block_group + monthweekyr, data = ds_all)
-  coefs_interacted <- cbind(m$coefficients, coefs_interacted)
-}
-
-coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
-colnames(coef_quants) <- c("low", "mid", "high", "group")
-coef_quants <- rbind(coef_quants, c(coefs, 6))
-
-ggplot(data = as.data.frame(coef_quants), 
-       aes(x = group, y = mid, ymin = low, ymax = high)) +
-  geom_point(position = position_dodge2(1)) +
-  geom_errorbar(width = 1, position = position_dodge2(1)) + 
-  geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
-             color = "red", size=.5) +
-  geom_vline(xintercept = 5.5, color = "red") +
-  labs(x = "Income Group", y = "Change in 3√MI per degree increase C",
-       title = "Fixed Effects Slope for all CBGs May-Sept \n 
-       felm(visitors_percap_cr ~ mean_high_c:as.factor(income_group_pop)
-       | census_block_group + monthweekyr, data = data") +
-  theme_bw()
-
-dev.off()
-
-#### Supplemental ----
 
 #### interacted income log(MI) + month + week + yr ----
 m_inter <- felm(visitors_percap_log ~ mean_high_c:as.factor(income_group_pop) | census_block_group + monthweekyr, data = data)
@@ -516,8 +1165,14 @@ ggplot(data = as.data.frame(coef_quants),
   theme_bw()
 
 
-#### break ----
-pdf(paste0("./visuals/pub_figures/viewsupp_", td, ".pdf"))
+
+
+
+#### Some of our additional models  ----
+## now run some panel regressions and get their results for table 2
+m <- felm(visitors_percap_cr ~ mean_high_c + year | census_block_group + monthweek, data = data)
+m <- felm(visitors_percap_cr ~ wb_temp | census_block_group + monthweekyr, data = data)
+m <- felm(visitors_percap_cr ~ wb_temp + precip | census_block_group + monthweekyr, data = data)
 
 #### Fixed Effects MI v Temp ----
 m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
@@ -543,13 +1198,13 @@ plot_data <- as.data.frame(x = 0:45)
 colnames(plot_data) <- c("x")
 
 y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=24]
+plot_data$y <- y - y[x=25]
 
 upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=24]
+plot_data$upper <- upper - upper[x=25]
 
 lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=24]
+plot_data$lower <- lower - lower[x=25]
 
 ggplot(data = plot_data, aes(x, y))+
   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
@@ -564,7 +1219,7 @@ ggplot(data = plot_data, aes(x, y))+
 m_inter <- felm(visitors_percap_cr ~ mean_high_c:as.factor(mi_group) | census_block_group + monthweekyr, data = data)
 
 coefs_interacted <- c()
-for(i in 1:100) {
+for(i in 1:20) {
   print(i)
   ds_all <- c()
   for(f in included_fips) {
@@ -578,16 +1233,16 @@ for(i in 1:100) {
 }
 
 coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
+coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:3))
 colnames(coef_quants) <- c("low", "mid", "high", "group")
-coef_quants <- rbind(coef_quants, c(coefs, 6))
+#coef_quants <- rbind(coef_quants, c(coefs, 6))
 
 ggplot(data = as.data.frame(coef_quants), 
        aes(x = group, y = mid, ymin = low, ymax = high)) +
   geom_point(position = position_dodge2(1)) +
   geom_errorbar(width = 1, position = position_dodge2(1)) + 
-  geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
-             color = "red", size=.5) +
+  #geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
+  #           color = "red", size=.5) +
   geom_vline(xintercept = 5.5, color = "red") +
   labs(x = "Mobility Group", y = "Change in 3√MI per degree increase C",
        title = "Fixed Effects Slope for all CBGs May-Sept by MI group \n
@@ -621,13 +1276,13 @@ plot_data <- as.data.frame(x = 0:45)
 colnames(plot_data) <- c("x")
 
 y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=24]
+plot_data$y <- y - y[x=25]
 
 upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=24]
+plot_data$upper <- upper - upper[x=25]
 
 lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=24]
+plot_data$lower <- lower - lower[x=25]
 
 ggplot(data = plot_data, aes(x, y))+
   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
@@ -700,13 +1355,13 @@ plot_data <- as.data.frame(x = 0:45)
 colnames(plot_data) <- c("x")
 
 y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=24]
+plot_data$y <- y - y[x=25]
 
 upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=24]
+plot_data$upper <- upper - upper[x=25]
 
 lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=24]
+plot_data$lower <- lower - lower[x=25]
 
 ggplot(data = plot_data, aes(x, y))+
   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
@@ -847,374 +1502,13 @@ ggplot(data = plot_data, aes(x, y))+
 dev.off()
 
 
-#### same after break but z scores ----
-pdf(paste0("./visuals/pub_figures/viewsupp_z_scores", td, ".pdf"))
-
-#### Fixed Effects MI v Temp ----
-m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = data)
-quantiles <- c(.025, .5, .975)
-## bootstrap coefficients (resample within each county)
-coefs <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = ds_all)
-  coefs <- cbind(m$coefficients, coefs)
-}
-
-## plot
-coefs <- quantile(coefs, quantiles)
-plot_data <- as.data.frame(x = seq(-2, 5, .05))
-colnames(plot_data) <- c("x")
-
-y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=0]
-
-upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=0]
-
-lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=0]
-
-ggplot(data = plot_data, aes(x, y))+
-  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
-  geom_line(data = plot_data, aes(x, y))+ 
-  labs(title = "felm(visitors_percap_cr ~ z_score_high | 
-       census_block_group + monthweekyr, data = data) 
-       \n May-Sept", x = "Temperature C", y = "3√(MI)") +
-  theme(axis.text.x = element_text(angle = 90)) + 
-  theme_bw()
-
-
-#### MI cr vs mean_high_c  interacted with the average mobility----
-m_inter <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group) | census_block_group + monthweekyr, data = data)
-
-coefs_interacted <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group) | census_block_group + monthweekyr, data = ds_all)
-  coefs_interacted <- cbind(m$coefficients, coefs_interacted)
-}
-
-coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
-colnames(coef_quants) <- c("low", "mid", "high", "group")
-coef_quants <- rbind(coef_quants, c(coefs, 6))
-
-ggplot(data = as.data.frame(coef_quants), 
-       aes(x = group, y = mid, ymin = low, ymax = high)) +
-  geom_point(position = position_dodge2(1)) +
-  geom_errorbar(width = 1, position = position_dodge2(1)) + 
-  geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
-             color = "red", size=.5) +
-  geom_vline(xintercept = 5.5, color = "red") +
-  labs(x = "Mobility Group", y = "Change in 3√MI per degree increase C",
-       title = "Fixed Effects Slope for all CBGs May-Sept by MI group \n
-       based on percentile of median MI for each CBG \n 
-       <5%, 5-25%, 25-50%, 75-95%, >95% \n
-       felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group)
-       | census_block_group + monthweekyr, data = data") +
-  theme_bw()
-
-#### Fixed Effects MI v Temp 2020 only ----
-m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = data %>% filter(year ==2020))
-quantiles <- c(.025, .5, .975)
-## bootstrap coefficients (resample within each county)
-coefs <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f & year == 2020)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = ds_all)
-  coefs <- cbind(m$coefficients, coefs)
-}
-
-## plot
-coefs <- quantile(coefs, quantiles)
-plot_data <- as.data.frame(x = seq(-2, 5, .05))
-colnames(plot_data) <- c("x")
-
-y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=0]
-
-upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=0]
-
-lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=0]
-
-ggplot(data = plot_data, aes(x, y))+
-  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
-  geom_line(data = plot_data, aes(x, y))+ 
-  labs(title = "2020 ONLY \n felm(visitors_percap_cr ~ z_score_high | 
-       census_block_group + monthweek, data = data) 
-       \n May-Sept", x = "Temperature C", y = "3√(MI)") +
-  theme(axis.text.x = element_text(angle = 90)) + 
-  theme_bw()
-
-#### MI cr vs mean_high_c  interacted with the average mobility 2020 only----
-m_inter <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group) | census_block_group + monthweek, data = data %>% filter(year == 2020))
-
-coefs_interacted <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f & year == 2020)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group) | census_block_group + monthweek, data = ds_all)
-  coefs_interacted <- cbind(m$coefficients, coefs_interacted)
-}
-
-coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
-colnames(coef_quants) <- c("low", "mid", "high", "group")
-coef_quants <- rbind(coef_quants, c(coefs, 6))
-
-ggplot(data = as.data.frame(coef_quants), 
-       aes(x = group, y = mid, ymin = low, ymax = high)) +
-  geom_point(position = position_dodge2(1)) +
-  geom_errorbar(width = 1, position = position_dodge2(1)) + 
-  geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
-             color = "red", size=.5) +
-  geom_vline(xintercept = 5.5, color = "red") +
-  labs(x = "Mobility Group", y = "Change in 3√MI per degree increase C",
-       title = "Fixed Effects Slope for all CBGs May-Sept by MI group 2020 ONLY \n
-       based on percentile of median MI for each CBG \n
-       <5%, 5-25%, 25-50%, 75-95%, >95% \n
-       felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group)
-       | census_block_group + monthweek, data = data") +
-  theme_bw()
-
-
-#### Fixed Effects MI v Temp 2021 only ----
-m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = data %>% filter(year ==2021))
-quantiles <- c(.025, .5, .975)
-## bootstrap coefficients (resample within each county)
-coefs <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f & year == 2021)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweek, data = ds_all)
-  coefs <- cbind(m$coefficients, coefs)
-}
-
-## plot
-coefs <- quantile(coefs, quantiles)
-plot_data <- as.data.frame(x = seq(-2, 5, .05))
-colnames(plot_data) <- c("x")
-
-y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=0]
-
-upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=0]
-
-lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=0]
-
-ggplot(data = plot_data, aes(x, y))+
-  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
-  geom_line(data = plot_data, aes(x, y))+ 
-  labs(title = "2021 ONLY \n felm(visitors_percap_cr ~ z_score_high | 
-       census_block_group + monthweek, data = data) 
-       \n May-Sept", x = "Temperature C", y = "3√(MI)") +
-  theme(axis.text.x = element_text(angle = 90)) + 
-  theme_bw()
-
-#### MI cr vs mean_high_c  interacted with the average mobility 2021 only----
-m_inter <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group) | census_block_group + monthweek, data = data %>% filter(year == 2021))
-
-coefs_interacted <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f & year == 2021)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group) | census_block_group + monthweek, data = ds_all)
-  coefs_interacted <- cbind(m$coefficients, coefs_interacted)
-}
-
-coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
-colnames(coef_quants) <- c("low", "mid", "high", "group")
-coef_quants <- rbind(coef_quants, c(coefs, 6))
-
-ggplot(data = as.data.frame(coef_quants), 
-       aes(x = group, y = mid, ymin = low, ymax = high)) +
-  geom_point(position = position_dodge2(1)) +
-  geom_errorbar(width = 1, position = position_dodge2(1)) + 
-  geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
-             color = "red", size=.5) +
-  geom_vline(xintercept = 5.5, color = "red") +
-  labs(x = "Mobility Group", y = "Change in 3√MI per degree increase C",
-       title = "Fixed Effects Slope for all CBGs May-Sept by MI group 2021 ONLY \n
-       based on percentile of median MI for each CBG bottom \n
-       <5%, 5-25%, 25-50%, 75-95%, >95% \n 
-       felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group)
-       | census_block_group + monthweek, data = data") +
-  theme_bw()
-
-#### only on days where >5% of CBGs above their own 95th percentile ----
-min_num_cbg_over_95th <- length(unique(data$census_block_group)) * 0.05
-data_subgroup <- data %>% filter(n_over_their_95th >= min_num_cbg_over_95th)
-
-m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = data_subgroup)
-quantiles <- c(.025, .5, .975)
-## bootstrap coefficients (resample within each county)
-coefs <- c()
-for(i in 1:20) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data_subgroup %>% filter(fips == f)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = ds_all)
-  coefs <- cbind(m$coefficients, coefs)
-}
-
-## plot
-coefs <- quantile(coefs, quantiles)
-plot_data <- as.data.frame(x = seq(-1, 5, .05))
-colnames(plot_data) <- c("x")
-
-y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=0]
-
-upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=0]
-
-lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=0]
-
-ggplot(data = plot_data, aes(x, y))+
-  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
-  geom_line(data = plot_data, aes(x, y))+ 
-  labs(title = "felm(visitors_percap_cr ~ z_score_high | 
-       census_block_group + monthweekyr, data = data) 
-       \n May-Sept >5% CBGs above their own 95th percentile ", x = "Temperature C", y = "3√(MI)") +
-  theme(axis.text.x = element_text(angle = 90)) + 
-  theme_bw()
-
-#### only on days where >5% of CBGs above overall 95th percentile ----
-min_num_cbg_over_95th <- length(unique(data$census_block_group)) * 0.05
-data_subgroup <- data %>% filter(n_over_total >= min_num_cbg_over_95th)
-
-m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = data_subgroup)
-quantiles <- c(.025, .5, .975)
-## bootstrap coefficients (resample within each county)
-coefs <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data_subgroup %>% filter(fips == f)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high | census_block_group + monthweekyr, data = ds_all)
-  coefs <- cbind(m$coefficients, coefs)
-}
-
-## plot
-coefs <- quantile(coefs, quantiles)
-plot_data <- as.data.frame(x = seq(-1, 5, .05))
-colnames(plot_data) <- c("x")
-
-y <- plot_data$x * coefs[2]
-plot_data$y <- y - y[x=0]
-
-upper <- plot_data$x * coefs[3]
-plot_data$upper <- upper - upper[x=0]
-
-lower <- plot_data$x * coefs[1]
-plot_data$lower <- lower - lower[x=0]
-
-ggplot(data = plot_data, aes(x, y))+
-  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
-  geom_line(data = plot_data, aes(x, y))+ 
-  labs(title = "felm(visitors_percap_cr ~ z_score_high | 
-       census_block_group + monthweekyr, data = data) 
-       \n May-Sept >5% CBGs above Bay Area 95th percentile", x = "Temperature C", y = "3√(MI)") +
-  theme(axis.text.x = element_text(angle = 90)) + 
-  theme_bw()
-
-
-
-dev.off()
-
-
-#### doubled interaction term (MI group AND income group)
-m_inter <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_income_groups) | census_block_group + monthweekyr, data = data)
-
-coefs_interacted <- c()
-for(i in 1:100) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group) | census_block_group + monthweekyr, data = ds_all)
-  coefs_interacted <- cbind(m$coefficients, coefs_interacted)
-}
-
-coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
-colnames(coef_quants) <- c("low", "mid", "high", "group")
-coef_quants <- rbind(coef_quants, c(coefs, 6))
-
-ggplot(data = as.data.frame(coef_quants), 
-       aes(x = group, y = mid, ymin = low, ymax = high)) +
-  geom_point(position = position_dodge2(1)) +
-  geom_errorbar(width = 1, position = position_dodge2(1)) + 
-  geom_hline(yintercept=coef_quants[6,2],  linetype="dashed", 
-             color = "red", size=.5) +
-  geom_vline(xintercept = 5.5, color = "red") +
-  labs(x = "Mobility Group", y = "Change in 3√MI per degree increase C",
-       title = "Fixed Effects Slope for all CBGs May-Sept by MI group \n
-       based on percentile of median MI for each CBG \n 
-       <5%, 5-25%, 25-50%, 75-95%, >95% \n
-       felm(visitors_percap_cr ~ z_score_high:as.factor(mi_group)
-       | census_block_group + monthweekyr, data = data") +
-  theme_bw()
+#### proof you don't need to go over 5% ----
+data <- data %>% mutate(n_group = cut(n_over_their_95th, 20))
+m <- felm(visitors_percap_cr ~ mean_high_c:n_group | 
+            census_block_group + monthweekyr, data = data)
+plot(x = 1:19, y = m$coefficients, 
+     xlab = "Binned Number of Block Groups Above 95th Percentile", 
+     ylab = "Coefficients", main = "Coefficient of MI and Temperature Relationship")
 
 #### final ----
 
