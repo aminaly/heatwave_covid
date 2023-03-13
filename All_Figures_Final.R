@@ -22,8 +22,8 @@ library(jtools)
 library(sf)
 library(gridExtra)
 library(HeatStress)
-library(sjPlot)
-library(sjmisc)
+#library(sjPlot)
+#library(sjmisc)
  
 ## global vars
 included_fips <- c("06081", "06085", "06001", "06013","06075", "06087", "06041", "06097", "06055", "06095") #bay area 
