@@ -302,39 +302,39 @@ ggplot(map_data, aes(geometry = geometry)) +
 # 
 # 
 # #### Fixed Effects MI v Temp (All, Year Interacted, subGroup) ----
-# ## all
-# coefs_orig <- c()
-# for(i in 1:1000) {
-#   print(i)
-#   ds_all <- c()
-#   for(f in included_fips) {
-#     ds <- data %>% filter(fips == f)
-#     samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-#     ds <- ds[samp,]
-#     ds_all <- rbind(ds_all, ds)
-#   }
-#   m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = ds_all)
-#   coefs_orig <- cbind(m$coefficients, coefs_orig)
-# }
-# 
-# ## plot
-# coefs_orig <- quantile(coefs_orig, bootstrap_quantiles)
-# plot_data <- as.data.frame(x = 0:45)
-# colnames(plot_data) <- c("x")
-# 
-# plot_data <- plot_data %>% mutate(y = x * coefs_orig[2], upper = x * coefs_orig[3], lower = x * coefs_orig[1])
-# plot_data <- plot_data %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
-# 
-# m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
-# ggplot(data = plot_data, aes(x, y))+
-#   geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
-#   geom_line(data = plot_data, aes(x, y))+
-#   labs(title = paste("MI v Temp
-#        \n", "r2:", round(summary(m)$r2adj, 4),
-#                      "proj r2:", round(summary(m)$P.r.squared, 4)),
-#        x = "Temperature C", y = "3√(MI)") +
-#   theme(axis.text.x = element_text(angle = 90)) +
-#   theme_bw() + ylim(-.15, .15)
+## all
+coefs_orig <- c()
+for(i in 1:1000) {
+  print(i)
+  ds_all <- c()
+  for(f in included_fips) {
+    ds <- data %>% filter(fips == f)
+    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+    ds <- ds[samp,]
+    ds_all <- rbind(ds_all, ds)
+  }
+  m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = ds_all)
+  coefs_orig <- cbind(m$coefficients, coefs_orig)
+}
+
+## plot
+coefs_orig <- quantile(coefs_orig, bootstrap_quantiles)
+plot_data <- as.data.frame(x = 0:45)
+colnames(plot_data) <- c("x")
+
+plot_data <- plot_data %>% mutate(y = x * coefs_orig[2], upper = x * coefs_orig[3], lower = x * coefs_orig[1])
+plot_data <- plot_data %>% mutate(y = y - nth(y, 25), upper = upper - nth(upper, 25), lower = lower - nth(lower, 25))
+
+m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
+ggplot(data = plot_data, aes(x, y))+
+  geom_ribbon(data = plot_data, aes(ymin = lower, ymax = upper), linetype=2, alpha = 0.25, fill = "purple") +
+  geom_line(data = plot_data, aes(x, y))+
+  labs(title = paste("MI v Temp
+       \n", "r2:", round(summary(m)$r2adj, 4),
+                     "proj r2:", round(summary(m)$P.r.squared, 4)),
+       x = "Temperature C", y = "3√(MI)") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  theme_bw() + ylim(-.15, .15)
 # 
 # ## year interacted
 # coefs <- c()
@@ -1040,56 +1040,6 @@ ggplot(data = plot_data, aes(x = x, y = y, group = grp))+
 # plot.new()
 # text(.5, .5, txt, font=2, cex=1.5)
 # 
-# #### supplemental distribution ----
-# orig <- ggplot(data = data,
-#                aes(x = visitors_percap, group = as.factor(year),
-#                    color = as_factor(year), alpha=0.2)) +
-#   geom_density(size=.75) +
-#   ggtitle("Full Distribution of MI") +
-#   geom_vline(xintercept = quantile(data$visitors_percap, .05)) +
-#   geom_vline(xintercept = quantile(data$visitors_percap, .95)) +
-#   theme_bw()
-# 
-# orig95 <- ggplot(data = data %>% filter(visitors_percap > quantile(visitors_percap, 0.05) &
-#                                           visitors_percap < quantile(visitors_percap, 0.95)),
-#                  aes(x = visitors_percap, group = as.factor(year),
-#                      color = as_factor(year), alpha=0.2)) +
-#   geom_density(size=.75) +
-#   ggtitle("Full Distribution of MI") +
-#   theme_bw()
-# 
-# cube <- ggplot(data = data,
-#                aes(x = visitors_percap_cr, group = as.factor(year),
-#                    color = as_factor(year), alpha=0.2)) +
-#   geom_density(size=.75) +
-#   ggtitle("Full Distribution of MI") +
-#   theme_bw()
-# 
-# cube95 <- ggplot(data = data %>% filter(visitors_percap_cr > quantile(visitors_percap_cr, 0.05) &
-#                                           visitors_percap_cr < quantile(visitors_percap_cr, 0.95)),
-#                  aes(x = visitors_percap_cr, group = as.factor(year),
-#                      color = as_factor(year), alpha=0.2)) +
-#   geom_density(size=.75) +
-#   ggtitle("Full Distribution of MI") +
-#   theme_bw()
-# 
-# lg <- ggplot(data = data,
-#              aes(x = visitors_percap_log, group = as.factor(year),
-#                  color = as_factor(year), alpha=0.2)) +
-#   geom_density(size=.75) +
-#   ggtitle("Full Distribution of MI") +
-#   theme_bw()
-# 
-# lg95 <- ggplot(data = data %>% filter(visitors_percap_log > quantile(visitors_percap_log, 0.05) &
-#                                         visitors_percap_log < quantile(visitors_percap_log, 0.95)),
-#                aes(x = visitors_percap_log, group = as.factor(year),
-#                    color = as_factor(year), alpha=0.2)) +
-#   geom_density(size=.75) +
-#   ggtitle("Full Distribution of MI") +
-#   theme_bw()
-# 
-# grid.arrange(temp, mobility, nrow = 2)
-# 
 # #### figures for precipitation & web bulb ----
 # 
 # ## precipitation timeline
@@ -1225,10 +1175,64 @@ ggplot(data = as.data.frame(coef_quants),
                       "proj r2:", round(summary(m)$P.r.squared,3))) +
   theme_bw()
 
-# # #### Additional Supplemental ----
-# # 
-# # pdf(paste0("./visuals/pub_figures/viewsupp_", td, ".pdf"))
-# # 
+#### Additional Supplemental ----
+
+pdf(paste0("./visuals/pub_figures/viewsupp_", td, ".pdf"))
+
+# #### supplemental distribution ----
+# orig <- ggplot(data = data,
+#                aes(x = visitors_percap, group = as.factor(year),
+#                    color = as_factor(year), alpha=0.2)) +
+#   geom_density(size=.75) +
+#   ggtitle("Full Distribution of MI") +
+#   geom_vline(xintercept = quantile(data$visitors_percap, .05)) +
+#   geom_vline(xintercept = quantile(data$visitors_percap, .95)) +
+#   theme_bw()
+# 
+# orig95 <- ggplot(data = data %>% filter(visitors_percap > quantile(visitors_percap, 0.05) &
+#                                           visitors_percap < quantile(visitors_percap, 0.95)),
+#                  aes(x = visitors_percap, group = as.factor(year),
+#                      color = as_factor(year), alpha=0.2)) +
+#   geom_density(size=.75) +
+#   ggtitle("Full Distribution of MI") +
+#   theme_bw()
+# 
+# cube <- ggplot(data = data,
+#                aes(x = visitors_percap_cr, group = as.factor(year),
+#                    color = as_factor(year), alpha=0.2)) +
+#   geom_vline(xintercept = quantile(data$visitors_percap_cr, .05)) +
+#   geom_vline(xintercept = quantile(data$visitors_percap_cr, .95)) +
+#   geom_density(size=.75) +
+#   ggtitle("Full Distribution of MI") +
+#   theme_bw()
+# 
+# cube95 <- ggplot(data = data %>% filter(visitors_percap_cr > quantile(visitors_percap_cr, 0.05) &
+#                                           visitors_percap_cr < quantile(visitors_percap_cr, 0.95)),
+#                  aes(x = visitors_percap_cr, group = as.factor(year),
+#                      color = as_factor(year), alpha=0.2)) +
+#   geom_density(size=.75) +
+#   ggtitle("Full Distribution of MI") +
+#   theme_bw()
+# 
+# lg <- ggplot(data = data,
+#              aes(x = visitors_percap_log, group = as.factor(year),
+#                  color = as_factor(year), alpha=0.2)) +
+#   geom_vline(xintercept = quantile(data$visitors_percap_log, .05)) +
+#   geom_vline(xintercept = quantile(data$visitors_percap_log, .95)) +
+#   geom_density(size=.75) +
+#   ggtitle("Full Distribution of MI") +
+#   theme_bw()
+# 
+# lg95 <- ggplot(data = data %>% filter(visitors_percap_log > quantile(visitors_percap_log, 0.05) &
+#                                         visitors_percap_log < quantile(visitors_percap_log, 0.95)),
+#                aes(x = visitors_percap_log, group = as.factor(year),
+#                    color = as_factor(year), alpha=0.2)) +
+#   geom_density(size=.75) +
+#   ggtitle("Full Distribution of MI") +
+#   theme_bw()
+# 
+# grid.arrange(orig95,cube95,lg95, ncol = 1)
+# grid.arrange(orig,cube,lg, ncol = 1)
 # # #### interacted income log(MI) + month + week + yr ----
 # # m_inter <- felm(visitors_percap_log ~ mean_high_c:as.factor(income_group_pop) | census_block_group + monthweekyr, data = data)
 # # 
