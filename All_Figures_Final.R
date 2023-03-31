@@ -537,20 +537,18 @@ ggplot(map_data, aes(geometry = geometry)) +
 min_num_cbg_over_95th <- length(unique(data$census_block_group)) * 0.05
 data_subgroup <- data %>% filter(n_over_their_95th >= min_num_cbg_over_95th)
 
-w <- c()
-for(i in c(seq(0.0, 1, by = 0.05))) {
-  min_num_cbg_over_95th <- length(unique(data$census_block_group)) * i
-  data_subgroup <- data %>% filter(n_over_their_95th >= min_num_cbg_over_95th)
-  m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data_subgroup)
-  w <- rbind(w, cbind(percent = i, coef = m$coefficients,
-                      pval = summary(m)$pval,r2 = summary(m)$r.squared,
-                      days = length(unique(data_subgroup$date))))
-
-  }
-
-w <- as.data.frame(w)
-w
-plot(w$percent, w$visitors_percap_cr)
+# w <- c()
+# for(i in c(seq(0.0, 1, by = 0.05))) {
+#   min_num_cbg_over_95th <- length(unique(data$census_block_group)) * i
+#   data_subgroup <- data %>% filter(n_over_their_95th >= min_num_cbg_over_95th)
+#   m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data_subgroup)
+#   w <- rbind(w, cbind(percent = i, coef = m$coefficients,
+#                       pval = summary(m)$pval,r2 = summary(m)$r.squared,
+#                       days = length(unique(data_subgroup$date))))
+# 
+#   }
+# w <- as.data.frame(w)
+# plot(w$percent, w$visitors_percap_cr)
 
 ## all
 coefs <- c()
