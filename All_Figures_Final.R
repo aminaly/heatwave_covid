@@ -158,7 +158,7 @@ ggplot(map_data, aes(geometry = geometry)) +
 ## Race
 ggplot(map_data, aes(geometry = geometry)) +
   ggtitle("Race Distribution in San Francisco Bay Area by CBG") +
-  geom_sf(data = map_data, size = 0.002, aes(fill = as.factor(income))) +
+  geom_sf(data = map_data, size = 0.002, aes(fill = as.factor(demo))) +
   scale_fill_discrete(na.value = "grey") +
   labs(colour="Majority Racial Group") +
   theme_bw()
