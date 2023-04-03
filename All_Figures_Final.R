@@ -1084,72 +1084,72 @@ ggplot(data = plot_data, aes(x, y))+
 # 
 # dev.off()
 #### Shuffle Variables ----
-## within county
-coefsd <- c()
-coefsdy1 <- c()
-coefsdy2 <- c()
-for(i in 1:1000) {
-  print(i)
-  ds_all <- c()
-  for(f in included_fips) {
-    ds <- data %>% filter(fips == f) %>%
-      mutate(temps_s = sample(mean_high_c), replace = F)
-    samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-    ds <- ds[samp,]
-    ds_all <- rbind(ds_all, ds)
-  }
-  m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweekyr, data = ds_all)
-  coefsd <- cbind(m$coefficients, coefsd)
-  m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2020))
-  coefsdy1 <- cbind(m$coefficients, coefsdy1)
-  m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
-  coefsdy2 <- cbind(m$coefficients, coefsdy2)
-}
-m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
-hist(coefsd, main = "within county temperature shuffle")
-abline(v=m$coefficients, col = "red")
-m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2020))
-hist(coefsdy1, main = "within county temperature shuffle 2020")
-abline(v=m$coefficients, col = "red")
-m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2021))
-hist(coefsdy2, main = "within county temperature shuffle 2021")
-abline(v=m$coefficients, col = "red")
-
-## between county
-coefsd <- c()
-coefsdy1 <- c()
-coefsdy2 <- c()
-for(i in 1:1000) {
-  print(i)
-  ds_all <- c()
-
-  ds <- data %>% mutate(temps_s = sample(fips), replace = F)
-  samp <- sample(1:nrow(ds), nrow(ds), replace = T)
-  ds <- ds[samp,]
-  ds_all <- rbind(ds_all, ds)
-
-  m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweekyr, data = ds_all)
-  coefsd <- cbind(m$coefficients, coefsd)
-  m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2020))
-  coefsdy1 <- cbind(m$coefficients, coefsdy1)
-  m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
-  coefsdy2 <- cbind(m$coefficients, coefsdy2)
-}
-m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
-hist(coefsd, main = "between county shuffle shuffle")
-abline(v=m$coefficients, col = "red")
-m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2020))
-hist(coefsdy1, main = "between county shuffle 2020")
-abline(v=m$coefficients, col = "red")
-m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2021))
-hist(coefsdy2, main = "between county shuffle 2021")
-abline(v=m$coefficients, col = "red")
+# ## within county
+# coefsd <- c()
+# coefsdy1 <- c()
+# coefsdy2 <- c()
+# for(i in 1:1000) {
+#   print(i)
+#   ds_all <- c()
+#   for(f in included_fips) {
+#     ds <- data %>% filter(fips == f) %>%
+#       mutate(temps_s = sample(mean_high_c), replace = F)
+#     samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+#     ds <- ds[samp,]
+#     ds_all <- rbind(ds_all, ds)
+#   }
+#   m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweekyr, data = ds_all)
+#   coefsd <- cbind(m$coefficients, coefsd)
+#   m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2020))
+#   coefsdy1 <- cbind(m$coefficients, coefsdy1)
+#   m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
+#   coefsdy2 <- cbind(m$coefficients, coefsdy2)
+# }
+# m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
+# hist(coefsd, main = "within county temperature shuffle")
+# abline(v=m$coefficients, col = "red")
+# m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2020))
+# hist(coefsdy1, main = "within county temperature shuffle 2020")
+# abline(v=m$coefficients, col = "red")
+# m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2021))
+# hist(coefsdy2, main = "within county temperature shuffle 2021")
+# abline(v=m$coefficients, col = "red")
+# 
+# ## between county
+# coefsd <- c()
+# coefsdy1 <- c()
+# coefsdy2 <- c()
+# for(i in 1:1000) {
+#   print(i)
+#   ds_all <- c()
+# 
+#   ds <- data %>% mutate(temps_s = sample(fips), replace = F)
+#   samp <- sample(1:nrow(ds), nrow(ds), replace = T)
+#   ds <- ds[samp,]
+#   ds_all <- rbind(ds_all, ds)
+# 
+#   m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweekyr, data = ds_all)
+#   coefsd <- cbind(m$coefficients, coefsd)
+#   m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2020))
+#   coefsdy1 <- cbind(m$coefficients, coefsdy1)
+#   m <- felm(visitors_percap_cr ~ temps_s | census_block_group + monthweek, data = ds_all %>% filter(year == 2021))
+#   coefsdy2 <- cbind(m$coefficients, coefsdy2)
+# }
+# m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweekyr, data = data)
+# hist(coefsd, main = "between county shuffle shuffle")
+# abline(v=m$coefficients, col = "red")
+# m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2020))
+# hist(coefsdy1, main = "between county shuffle 2020")
+# abline(v=m$coefficients, col = "red")
+# m <- felm(visitors_percap_cr ~ mean_high_c | census_block_group + monthweek, data = data %>% filter(year == 2021))
+# hist(coefsdy2, main = "between county shuffle 2021")
+# abline(v=m$coefficients, col = "red")
 
 ## all bay area county shuffle
 coefsd <- c()
 coefsdy1 <- c()
 coefsdy2 <- c()
-for(i in 1:10) {
+for(i in 1:1000) {
   print(i)
   ds_all <- c()
 
