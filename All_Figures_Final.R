@@ -319,7 +319,7 @@ for(i in 1:1000) {
 
 ## plot
 coefs_orig <- quantile(coefs_orig, bootstrap_quantiles)
-write.csv(coefs_orig, "./results/all_summer.csv")
+write.csv(coefs_orig, "./visuals/all_summer.csv")
 
 plot_data <- as.data.frame(x = 0:45)
 colnames(plot_data) <- c("x")
@@ -354,7 +354,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/year_interacted.csv")
+write.csv(coefs, "./visuals/year_interacted.csv")
 
 plot_data <- c()
 
@@ -403,7 +403,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/years_sep.csv")
+write.csv(coefs, "./visuals/years_sep.csv")
 coefs_orig_yr_mi <- cbind(t(coefs), group = rep(4, 2), year = c(2020, 2021))
 coefs_orig_yr_inc <- cbind(t(coefs), group = rep(6, 2), year = c(2020, 2021))
 
@@ -451,7 +451,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/weekend_inter.csv")
+write.csv(coefs, "./visuals/weekend_inter.csv")
 plot_data <- c()
 
 for(int in 1:ncol(coefs)) {
@@ -499,7 +499,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/weekend_inter_years_sep.csv")
+write.csv(coefs, "./visuals/weekend_inter_years_sep.csv")
 plot_data <- c()
 
 for(int in 1:ncol(coefs)) {
@@ -574,7 +574,7 @@ for(i in 1:1000) {
 
 ## plot
 coefs <- quantile(coefs, bootstrap_quantiles)
-write.csv(coefs, "./results/hotdays.csv")
+write.csv(coefs, "./visuals/hotdays.csv")
 plot_data <- as.data.frame(x = 11:45)
 colnames(plot_data) <- c("x")
 
@@ -616,7 +616,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/hotdays_years_sep.csv")
+write.csv(coefs, "./visuals/hotdays_years_sep.csv")
 
 plot_data <- c()
 
@@ -661,7 +661,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/hotdays_weekend_inter.csv")
+write.csv(coefs, "./visuals/hotdays_weekend_inter.csv")
 
 plot_data <- c()
 
@@ -710,7 +710,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/hotdays_weekend_inter_hotdays.csv")
+write.csv(coefs, "./visuals/hotdays_weekend_inter_hotdays.csv")
 plot_data <- c()
 
 for(int in 1:ncol(coefs)) {
@@ -772,7 +772,7 @@ for(i in 1:1000) {
 }
 
 coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-write.csv(coefs, "./results/migroup_inter.csv")
+write.csv(coefs, "./visuals/migroup_inter.csv")
 
 coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:3))
 colnames(coef_quants) <- c("low", "mid", "high", "group")
@@ -815,7 +815,7 @@ for(i in 1:1000) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/migroup_inter_yearssep.csv")
+write.csv(coefs, "./visuals/migroup_inter_yearssep.csv")
 plot_data <- c()
 
 coef_quants <- cbind(t(as.data.frame(coefs)), c(1:3), c(rep(2020, 3), rep(2021, 3)))
@@ -851,7 +851,7 @@ for(i in 1:1000) {
 }
 
 coef_quants <- apply(coefs_interacted, 1, function(x) quantile(x, quantiles))
-write.csv(coefs, "./results/income_inter.csv")
+write.csv(coefs, "./visuals/income_inter.csv")
 
 coef_quants <- cbind(t(as.data.frame(coef_quants)), c(1:5))
 colnames(coef_quants) <- c("low", "mid", "high", "group")
@@ -894,7 +894,7 @@ for(i in 1:3) {
 }
 
 coefs <- apply(coefs, 1, quantile, bootstrap_quantiles)
-write.csv(coefs, "./results/income_inter_yearssep.csv")
+write.csv(coefs, "./visuals/income_inter_yearssep.csv")
 
 plot_data <- c()
 
